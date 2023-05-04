@@ -42,7 +42,44 @@
 			</button>
 
 			<button type="button" class="btn bg-navy btn-default @if(!$is_mobile) @endif btn-flat no-print @if($pos_settings['disable_pay_checkout'] != 0) hide @endif @if($is_mobile) col-xs-6 @endif" id="pos-finalize" title="@lang('lang_v1.tooltip_checkout_multi_pay')"><i class="fas fa-money-check-alt" aria-hidden="true"></i> @lang('lang_v1.checkout_multi_pay') </button>
+			@if(($pos_settings['pay_safe_key_id']))
+			<script src="{{ asset('ingenico/dist/connectsdk.min.js') }}"></script>
+			<script>
+					var session = new connectsdk.Session({
+						clientSessionId : "47e9dc332ca24273818be2a46072e006",
+						customerId : "9991-0d93d6a0e18443bd871c89ec6d38a873",
+						clientApiUrl : "https://clientapi.com",
+						assetUrl : "https://asset.com"
+					});
+									var paymentDetails = { "totalAmount" : 16195, // in cents
+						"countryCode" : "NL",
+						"locale" : "nl_NL", // as specified in the config center
+						"isRecurring" : false, // set if recurring
+						"currency" : "EUR" // set currency, see dropdown
+						};
 
+					session.getBasicPaymentItems(paymentDetails, true).then(function (basicPaymentItems) {
+						// The promise has fulfilled, basicPaymentItems is an instance of BasicPaymentItems
+
+						// this is an array of BasicPaymentproduct objects
+						basicPaymentItems.basicPaymentItems;
+
+						// this is an array of AccountOnFile objects
+						basicPaymentItems.accountsOnFile;
+
+						// This returns the Visa BasicPaymentProduct object in this PaymentProducts object if it exists.
+						var paymentProduct = basicPaymentItems.paymentProductById["1"];
+
+						// The raw JSON that the server returned and that was used to fill this object
+						basicPaymentItems.json;
+
+					}, function() {
+						// The promise failed, inform the user what happened.
+						
+					});
+			</script>
+			<button type="button" class="btn btn-default">PaySafe</button>
+			@endif
 			<button type="button" class="btn btn-success @if(!$is_mobile) @endif btn-flat no-print @if($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize @if($is_mobile) col-xs-6 @endif" data-pay_method="cash" title="@lang('tooltip.express_checkout')"> <i class="fas fa-money-bill-alt" aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
 
 			@if(empty($edit))
