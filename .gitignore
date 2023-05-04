@@ -1,6 +1,8 @@
 /node_modules
 /public/hot
 /public/storage
+/public/uploads/csv
+/public/uploads/post_count
 /storage/*.key
 /storage/
 /vendor

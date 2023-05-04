@@ -101,12 +101,17 @@
 			@forelse($stock_history as $history)
 				<tr>
 					<td>{{$history['type_label']}}</td>
-					@if($history['quantity_change'] > 0 )
-						<td class="text-success"> +<span class="display_currency" data-is_quantity="true">{{$history['quantity_change']}}</span>
+					@if($history['type'] == 'physical_count_adjustment')
+						<td class="text-primary"><span class="display_currency" data-is_quantity="true">{{$history['quantity_change']}}</span>
 						</td>
 					@else
-						<td class="text-danger"><span class="display_currency text-danger" data-is_quantity="true">{{$history['quantity_change']}}</span>
-						</td>
+						@if($history['quantity_change'] > 0 )
+							<td class="text-success"> +<span class="display_currency" data-is_quantity="true">{{$history['quantity_change']}}</span>
+							</td>
+						@else
+							<td class="text-danger"><span class="display_currency text-danger" data-is_quantity="true">{{$history['quantity_change']}}</span>
+							</td>
+						@endif
 					@endif
 
 					@if(!empty($common_settings['enable_secondary_unit']))

@@ -73,7 +73,7 @@ class AdminlteCustomPresenter extends Presenter
     {
         return '<li class="treeview'.$this->getActiveStateOnChild($item, ' active').'" '.$item->getAttributes().'>
 		          <a href="#">
-					'.$item->getIcon().' <span>'.$item->title.'</span>
+					'.$item->getIcon().' <span title="'.$item->title.'">'.$item->title.'</span>
                     <span class="pull-right-container">
                       <i class="fa fa-angle-left pull-right"></i>
                     </span>

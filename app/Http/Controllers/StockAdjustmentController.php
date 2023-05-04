@@ -146,6 +146,7 @@ class StockAdjustmentController extends Controller
                 ->with(compact('business_locations'));
     }
 
+
     /**
      * Store a newly created resource in storage.
      *

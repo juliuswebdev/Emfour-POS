@@ -160,6 +160,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-12">
             <h4>Razorpay: <small>(For INR India)</small></h4>
         </div>

@@ -49,6 +49,7 @@ use App\Http\Controllers\SellController;
 use App\Http\Controllers\SellingPriceGroupController;
 use App\Http\Controllers\SellPosController;
 use App\Http\Controllers\SellReturnController;
+use App\Http\Controllers\InventoryCountController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\TaxonomyController;
@@ -333,6 +334,15 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/stock-adjustments/remove-expired-stock/{purchase_line_id}', [StockAdjustmentController::class, 'removeExpiredStock']);
     Route::post('/stock-adjustments/get_product_row', [StockAdjustmentController::class, 'getProductRow']);
     Route::resource('stock-adjustments', StockAdjustmentController::class);
+
+    Route::get('/inventory-count', [InventoryCountController::class, 'inventory_count'])->name('inventory_count');
+    Route::post('/inventory-count/store', [InventoryCountController::class, 'store']);
+    Route::get('/inventory-count/{id}/qty-adjustment', [InventoryCountController::class, 'qty_adjustment']);
+    Route::get('/inventory-count/download-initial-file/{id}', [InventoryCountController::class, 'download_initial_file']);
+    Route::post('/inventory-count/upload-final-file/{id}', [InventoryCountController::class, 'upload_final_file']);
+    Route::post('/inventory-count/freeze-count/{id}', [InventoryCountController::class, 'freeze_count']);
+    Route::get('/inventory-count/{id}', [InventoryCountController::class, 'view_inventory_count']);
+    Route::post('/inventory-count/post-count/{id}', [InventoryCountController::class, 'post_count']);
 
     Route::get('/cash-register/register-details', [CashRegisterController::class, 'getRegisterDetails']);
     Route::get('/cash-register/close-register/{id?}', [CashRegisterController::class, 'getCloseRegister']);

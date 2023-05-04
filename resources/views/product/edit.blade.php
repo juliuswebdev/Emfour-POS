@@ -116,6 +116,15 @@
               </div>
             </div>
 
+            <div class="col-sm-4">
+              <div class="form-group">
+              {!! Form::label('upc', __('inventory_count.upc_code') . ':') !!}
+                {!! Form::text('upc', $product->upc, ['class' => 'form-control',
+                  'placeholder' => __('inventory_count.upc_code')]); !!}
+              </div>
+            </div>
+        
+
             <div class="clearfix"></div>
             
             <div class="col-sm-4">

@@ -29,6 +29,7 @@ class AdminSidebarMenu
 
             $is_admin = auth()->user()->hasRole('Admin#'.session('business.id')) ? true : false;
             //Home
+           
             $menu->url(action([\App\Http\Controllers\HomeController::class, 'index']), __('home.home'), ['icon' => 'fa fas fa-tachometer-alt', 'active' => request()->segment(1) == 'home'])->order(5);
 
             //User management dropdown
@@ -355,8 +356,9 @@ class AdminSidebarMenu
                 )->order(30);
             }
 
+
             //Stock transfer dropdown
-            if (in_array('stock_transfers', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create'))) {
+            if ( in_array('stock_transfers', $enabled_modules)  && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create'))) {
                 $menu->dropdown(
                     __('lang_v1.stock_transfers'),
                     function ($sub) {
@@ -380,7 +382,7 @@ class AdminSidebarMenu
             }
 
             //stock adjustment dropdown
-            if (in_array('stock_adjustment', $enabled_modules) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create'))) {
+            if ( (in_array('stock_adjustment', $enabled_modules)  || in_array('qty_adjustment', $enabled_modules)) && (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create'))) {
                 $menu->dropdown(
                     __('stock_adjustment.stock_adjustment'),
                     function ($sub) {
@@ -396,6 +398,13 @@ class AdminSidebarMenu
                                 action([\App\Http\Controllers\StockAdjustmentController::class, 'create']),
                                 __('stock_adjustment.add'),
                                 ['icon' => 'fa fas fa-plus-circle', 'active' => request()->segment(1) == 'stock-adjustments' && request()->segment(2) == 'create']
+                            );
+                        }
+                        if (auth()->user()->can('purchase.create')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\InventoryCountController::class, 'inventory_count']),
+                                __('inventory_count.inventory_count'),
+                                ['icon' => 'fa fas fa-plus-circle', 'active' => request()->segment(1) == 'inventory-count']
                             );
                         }
                     },
