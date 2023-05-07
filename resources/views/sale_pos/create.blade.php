@@ -76,6 +76,29 @@
 <div class="modal fade" id="expense_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
 </div>
 
+<div class="modal fade" id="weighing_sale_2" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+				<h4 class="modal-title">Weighing Scale</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="form-group col-sm-12">
+					<label for="actual_name">Weight:*</label>
+						<input class="form-control" placeholder="Weight" name="weight" type="number" id="weight" autoComplete="off">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary weight_save">Save</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div>
+</div>
+
+
 @include('sale_pos.partials.configure_search_modal')
 
 @include('sale_pos.partials.recent_transactions_modal')

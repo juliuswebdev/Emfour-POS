@@ -714,6 +714,12 @@ class ProductController extends Controller
                 $product->enable_stock = 0;
             }
 
+            if (! empty($request->input('weighing_sale')) && $request->input('weighing_sale') == 1) {
+                $product->weighing_sale = 1;
+            } else {
+                $product->weighing_sale = 0;
+            }
+
             $product->not_for_selling = (! empty($request->input('not_for_selling')) && $request->input('not_for_selling') == 1) ? 1 : 0;
 
             if (! empty($request->input('sub_category_id'))) {

@@ -27,6 +27,7 @@ return [
     'product_name' => 'Product Name',
     'auto_generate' => 'Auto generate',
     'manage_stock' => 'Manage Stock?',
+    'weighing_sale' => 'Weighing Scale?',
     'enable_stock_help' => 'Enable stock management at product level',
     'barcode_type' => 'Barcode Type',
     'applicable_tax' => 'Applicable Tax',

@@ -278,13 +278,31 @@ $(document).ready(function() {
                     string += ' - ' + qty_available + item.unit;
                 }
                 string += '</div>';
-
-                return $('<li>')
+                var weighing_sale_class = (item.weighing_sale) ? 'weighing_sale' : '';
+                return $('<li class="'+weighing_sale_class+'" data-product-id="'+item.product_id+'">')
                     .append(string)
                     .appendTo(ul);
             }
         };
     }
+
+
+    $(document).on('click', '.weighing_sale', function() {
+        var product_id = $(this).attr('data-product-id');
+        $('#weighing_sale_2 button').attr('data-product-id', product_id);
+        $('#weighing_sale_2').modal('show');
+        setTimeout(function(){
+            $('#weighing_sale_2 input').focus();
+        },500);
+    });
+
+    $(document).on('click', '.weight_save', function() {
+        var product_id = $(this).attr('data-product-id');
+        var val = $('#weighing_sale_2 input').val();
+        $('#pos_table .product_row_'+product_id).find('.pos_quantity').val(val).trigger('change');
+        $('#weighing_sale_2').modal('hide');
+       
+    });
 
     //Update line total and check for quantity not greater than max quantity
     $('table#pos_table tbody').on('change', 'input.pos_quantity', function() {
@@ -2064,6 +2082,7 @@ function initialize_printer() {
 }
 
 $('body').on('click', 'label', function(e) {
+    alert('test');
     var field_id = $(this).attr('for');
     if (field_id) {
         if ($('#' + field_id).hasClass('select2')) {

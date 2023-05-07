@@ -13,7 +13,7 @@
 	@endif
 @endforeach
 
-<tr class="product_row" data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif>
+<tr class="product_row product_row_{{$product->product_id}}"  data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif>
 	<td>
 		@if(!empty($so_line))
 			<input type="hidden" 
@@ -248,6 +248,9 @@
 		</div>
 		
 		<input type="hidden" name="products[{{$row_count}}][product_unit_id]" value="{{$product->unit_id}}">
+		@if($product->weighing_sale)
+			<a class="weighing_sale" style="cursor:pointer" data-product-id="{{ $product->product_id }}"><i class="fa fa-digital-tachograph text-primary fa-lg"></i></a>
+		@endif
 		@if(count($sub_units) > 0)
 			<br>
 			<select name="products[{{$row_count}}][sub_unit_id]" class="form-control input-sm sub_unit">
