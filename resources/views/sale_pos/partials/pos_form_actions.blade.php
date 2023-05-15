@@ -1,5 +1,6 @@
 @php
 	$is_mobile = isMobile();
+	$enabled_modules = ! empty(session('business.enabled_modules')) ? session('business.enabled_modules') : [];
 @endphp
 <div class="row">
 	<div class="pos-form-actions">
@@ -11,6 +12,9 @@
 												id="final_total_input" value=0>
 					<span id="total_payable" class="text-success lead text-bold text-right">0</span>
 				</div>
+			@endif
+            @if(in_array('booking', $enabled_modules) && (auth()->user()->can('crud_all_bookings') || auth()->user()->can('crud_own_bookings')))
+				<button type="button" data-toggle="modal" data-target="#booking-checkout" class="btn bg-primary">Checkout</button>
 			@endif
 			<button type="button" class="@if($is_mobile) col-xs-6 @endif btn bg-info text-white btn-default btn-flat @if($pos_settings['disable_draft'] != 0) hide @endif" id="pos-draft" @if(!empty($only_payment)) disabled @endif><i class="fas fa-edit"></i> @lang('sale.draft')</button>
 			<button type="button" class="btn btn-default bg-yellow btn-flat @if($is_mobile) col-xs-6 @endif" id="pos-quotation" @if(!empty($only_payment)) disabled @endif><i class="fas fa-edit"></i> @lang('lang_v1.quotation')</button>
@@ -42,7 +46,7 @@
 			</button>
 
 			<button type="button" class="btn bg-navy btn-default @if(!$is_mobile) @endif btn-flat no-print @if($pos_settings['disable_pay_checkout'] != 0) hide @endif @if($is_mobile) col-xs-6 @endif" id="pos-finalize" title="@lang('lang_v1.tooltip_checkout_multi_pay')"><i class="fas fa-money-check-alt" aria-hidden="true"></i> @lang('lang_v1.checkout_multi_pay') </button>
-			@if(($pos_settings['pay_safe_key_id']))
+			@if(isset($pos_settings['pay_safe_key_id']))
 			<script src="{{ asset('ingenico/dist/connectsdk.min.js') }}"></script>
 			<script>
 					var session = new connectsdk.Session({

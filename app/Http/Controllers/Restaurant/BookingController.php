@@ -3,15 +3,23 @@
 namespace App\Http\Controllers\Restaurant;
 
 use App\BusinessLocation;
+use App\Business;
 use App\Contact;
 use App\CustomerGroup;
+use App\Product;
+use App\Variation;
 use App\Restaurant\Booking;
+use App\Restaurant\BookingDetail;
 use App\User;
 use App\Utils\RestaurantUtil;
+use App\Utils\ContactUtil;
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Yajra\DataTables\Facades\DataTables;
+use Str;
+use Mail;
+use Crypt;
 
 class BookingController extends Controller
 {
@@ -22,10 +30,13 @@ class BookingController extends Controller
 
     protected $restUtil;
 
-    public function __construct(Util $commonUtil, RestaurantUtil $restUtil)
+    protected $contactUtil;
+
+    public function __construct(Util $commonUtil, RestaurantUtil $restUtil, ContactUtil $contactUtil)
     {
         $this->commonUtil = $commonUtil;
         $this->restUtil = $restUtil;
+        $this->contactUtil = $contactUtil;
     }
 
     /**
@@ -67,7 +78,10 @@ class BookingController extends Controller
         $types = Contact::getContactTypes();
         $customer_groups = CustomerGroup::forDropdown($business_id);
 
-        return view('restaurant.booking.index', compact('business_locations', 'customers', 'correspondents', 'types', 'customer_groups'));
+        $business = Business::find($business_id);
+      
+
+        return view('restaurant.booking.index', compact('business', 'business_locations', 'customers', 'correspondents', 'types', 'customer_groups'));
     }
 
     /**
@@ -122,6 +136,20 @@ class BookingController extends Controller
                     $input['booking_end'] = $booking_end;
                     $booking = Booking::createBooking($input);
 
+                    $business_location = BusinessLocation::find($input['location_id']);
+                    $business_location_id = $business_location->location_id ?? 'NA';
+
+                    $booking_detail_input['booking_id'] = $booking->id;
+                    $booking_detail_input['product_id'] = '';
+                    $booking_detail_input['ref_no'] = $business_location_id .'-'. $booking->id;
+                    $booking_detail_input['time'] = date('h:m a');
+                    $booking_detail_input['full_name'] = '';
+                    $booking_detail_input['phone'] = '';
+                    $booking_details = BookingDetail::create($booking_detail_input);
+
+                    // $contact = [];
+                    // $contact['']
+
                     $output = ['success' => 1,
                         'msg' => trans('lang_v1.added_success'),
                     ];
@@ -168,20 +196,34 @@ class BookingController extends Controller
             $business_id = request()->session()->get('user.business_id');
             $booking = Booking::where('business_id', $business_id)
                                 ->where('id', $id)
-                                ->with(['table', 'customer', 'correspondent', 'waiter', 'location'])
+                                ->with(['table', 'customer', 'correspondent', 'waiter', 'location', 'booking_details'])
                                 ->first();
+           
+            $services = Product::whereIn('id', explode(',', $booking->booking_details->product_id))->select('name')->get();
             if (! empty($booking)) {
                 $booking_start = $this->commonUtil->format_date($booking->booking_start, true);
                 $booking_end = $this->commonUtil->format_date($booking->booking_end, true);
 
+                $services = Variation::whereIn('id', explode(',', $booking->booking_details->product_id))->with(['product'])->get();
+                $services_text = '';
+                foreach($services as $service) {$
+                    $variation_name = '';
+                    if($service->name != 'DUMMY') {
+                        $variation_name = '['.$service->name.']';
+                    }
+                    $services_text .= $service->product->name.' '.$variation_name.',';  
+                }
+                $services = substr($services_text, 0, -2);
                 $booking_statuses = [
                     'waiting' => __('lang_v1.waiting'),
                     'booked' => __('restaurant.booked'),
+                    'checkin' => __('restaurant.checkin'),
+                    'checkout' => __('restaurant.checkout'),
                     'completed' => __('restaurant.completed'),
                     'cancelled' => __('restaurant.cancelled'),
                 ];
 
-                return view('restaurant.booking.show', compact('booking', 'booking_start', 'booking_end', 'booking_statuses'));
+                return view('restaurant.booking.show', compact('services', 'booking', 'booking_start', 'booking_end', 'booking_statuses'));
             }
         }
     }
@@ -212,14 +254,16 @@ class BookingController extends Controller
         try {
             $business_id = $request->session()->get('user.business_id');
             $booking = Booking::where('business_id', $business_id)
+                                ->with(['booking_details', 'customer'])
                                 ->find($id);
             if (! empty($booking)) {
                 $booking->booking_status = $request->booking_status;
-                $booking->save();
+               $booking->save();
             }
 
             $output = ['success' => 1,
                 'msg' => trans('lang_v1.updated_success'),
+                'booking' => $booking
             ];
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
@@ -247,6 +291,8 @@ class BookingController extends Controller
             $booking = Booking::where('business_id', $business_id)
                                 ->where('id', $id)
                                 ->delete();
+            $booking_details = BookingDetail::where('booking_id', $id)
+                ->delete();
             $output = ['success' => 1,
                 'msg' => trans('lang_v1.deleted_success'),
             ];
@@ -277,9 +323,10 @@ class BookingController extends Controller
             $user_id = request()->session()->get('user.id');
             $today = \Carbon::now()->format('Y-m-d');
             $query = Booking::where('business_id', $business_id)
-                        ->where('booking_status', 'booked')
+                        //->where('booking_status', 'booked')
                         ->whereDate('booking_start', $today)
-                        ->with(['table', 'customer', 'correspondent', 'waiter', 'location']);
+                        ->whereIn('booking_status', ['waiting', 'booked', 'checkin', 'checkout', 'cancelled', 'completed'])
+                        ->with(['table', 'customer', 'correspondent', 'waiter', 'location', 'booking_details']);
 
             if (! empty(request()->location_id)) {
                 $query->where('location_id', request()->location_id);
@@ -294,6 +341,8 @@ class BookingController extends Controller
 
                 //$query->where('created_by', $user_id);
             }
+
+            $query->orderBy('created_at', 'desc');
 
             return Datatables::of($query)
                 ->editColumn('table', function ($row) {
@@ -317,8 +366,272 @@ class BookingController extends Controller
                 ->editColumn('booking_end', function ($row) {
                     return $this->commonUtil->format_date($row->booking_end, true);
                 })
-               ->removeColumn('id')
+                ->addColumn('ref_no', function($row) {
+                    return $row->booking_details->ref_no;
+                })
+                ->addColumn('time', function ($row) {
+                    return $row->booking_details->time ?? 'N/A';
+                })
+                ->addColumn('status', function ($row) {
+                    if($row->booking_status  == 'waiting') {
+                        $type = 'bg-light-blue';
+                        $text = __("lang_v1.waiting");
+                    } else if ($row->booking_status  == 'booked') {
+                        $type = 'bg-blue';
+                        $text = __('restaurant.booked');
+                    } else if ($row->booking_status  == 'checkin') {
+                        $type = 'bg-yellow';
+                        $text = __('restaurant.checkin');
+                    } else if ($row->booking_status  == 'checkout') {
+                        $type = 'bg-gray';
+                        $text = __('restaurant.checkout');
+                    }  else if ($row->booking_status  == 'completed') {
+                        $type = 'bg-green';
+                        $text = __('restaurant.cancelled');
+                    } else if ($row->booking_status  == 'cancelled') {
+                        $type = 'bg-black';
+                        $text = __('restaurant.cancelled');
+                    } else {
+                        $type = 'bg-default';
+                        $text = 'N/A';
+                    }
+                    return '
+                        <div class="external-event '.$type.' text-center" style="position: relative;">
+                        <small>'.$text.'</small>
+                        </div>
+                    ';
+                })
+                ->addColumn('actions', function ($row) {
+                    return '
+                        <a href="'.action([\App\Http\Controllers\Restaurant\BookingController::class, 'show'], [$row->id]).'" data-href="'.action([\App\Http\Controllers\Restaurant\BookingController::class, 'show'], [$row->id]).'" class="text-center btn-modal" style="position: relative;" data-container=".view_modal">
+                        <i class="fa fas fa-edit"></i>
+                        </a>
+                    '; 
+                })
+                ->rawColumns(['status', 'actions'])
+                ->removeColumn('id')
                 ->make(true);
         }
     }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getBookings($slug)
+    {
+        if (! auth()->user()->can('crud_all_bookings') && ! auth()->user()->can('crud_own_bookings')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (request()->ajax()) {
+            //$business_id = request()->session()->get('user.business_id');
+            $business = Business::where('slug', $slug)->first();
+
+            $from = request()->from;
+            $booking = Booking::where('bookings.business_id', $business->id)
+                    ->leftJoin('bookings_details', 'bookings_details.booking_id', '=', 'bookings.id')
+                    ->whereIn('bookings.booking_status', explode(',',$from))
+                    ->where('bookings_details.ref_no', request()->search_query)
+                    ->orWhere('bookings_details.phone', request()->search_query)
+                    ->with(['table', 'customer', 'correspondent', 'waiter', 'location', 'booking_details'])
+                    ->first();
+
+            if($booking) {
+                $services = Variation::whereIn('id', explode(',', $booking->booking_details->product_id))->with(['product'])->get();
+                $services_text = '';
+                foreach($services as $service) {
+                    $variation_name = '';
+                    if($service->name != 'DUMMY') {
+                        $variation_name = '['.$service->name.']';
+                    }
+                    $services_text .= $service->product->name.' '.$variation_name.',';  
+                }
+                $services = substr($services_text, 0, -2);
+                if($from == 'booked' || $from == 'booked,waiting') {
+                    return view('restaurant.booking.checkin-result', compact('booking', 'services'));
+                } else if( $from == 'checkin') {
+                    return view('restaurant.booking.checkout-result', compact('booking', 'services'));
+                } else {
+                    return 'No Result Found!';
+                }
+            } else {
+                return 'No Result Found!';
+            }
+            
+        }
+    }
+
+    
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getPublicBooking($slug)
+    {
+     
+        $business = Business::where('slug', $slug)->with(['currency'])->first();
+        if (!$business) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_info = BusinessLocation::where('business_id', $business->id)->first();
+
+        $business_locations = BusinessLocation::where('business_id', $business->id)->get();
+
+        $correspondents = User::forDropdown($business->id, false);
+
+        $services = Product::where('business_id', $business->id)->where('enable_stock', 0)->with(['variations'])->get();
+
+        return view('restaurant.booking.public', compact('business', 'business_info', 'business_locations', 'correspondents', 'services'));
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function postPublicBooking(Request $request)
+    {
+        try {
+            $input = $request->input();
+            $business_location = BusinessLocation::find($input['location_id']);
+            $business_id = $business_location->business_id ?? 0;
+            $business = Business::find($business_id);
+
+            $business_location_id = $business_location->location_id ?? 'NA';
+
+            $user = User::where('business_id', $business_id)->first();
+            $user_id = $user->id ?? 0;
+
+            $booking_start = $this->commonUtil->uf_date($input['booking_start'], true);
+            $booking_end = $this->commonUtil->uf_date($input['booking_end'], true);
+            $time = $input['time'];
+            $time_details = 'Start: '. $booking_start. ' , End: ' .$booking_end. ', @ '.$time;
+            $full_name = $input['first_name']. ' ' .$input['last_name'];
+
+            $contact = Contact::where('email', $input['email'])->first();
+            if(!$contact) {
+                $contact_input['business_id'] = $business_id;
+                $contact_input['type'] = 'customer';
+                $contact_input['name'] = $full_name;
+                $contact_input['first_name'] = $input['first_name'];
+                $contact_input['last_name'] = $input['last_name'];
+                $contact_input['email'] = $input['email'];
+                $contact_input['mobile'] = $input['phone'];
+                $contact_input['created_by'] = $user_id;   
+                $contact = $this->contactUtil->createNewContact($contact_input);             
+            }
+
+            $input['contact_id'] = $contact->id;
+            $input['business_id'] = $business_id;
+            $input['created_by'] = $user_id;
+            $input['booking_start'] = $booking_start;
+            $input['booking_end'] = $booking_end;
+            $input['correspondent'] = $input['staff'];
+            $input['booking_note'] = $input['booking_note'];
+            $input['booking_status'] = 'waiting';
+            $booking = Booking::createBooking($input);
+
+            $ref_no = $business_location_id .'-'. $booking->id;
+            $slug = $business->slug;
+
+            $booking_detail_input['booking_id'] = $booking->id;
+            $booking_detail_input['product_id'] = implode(",", $input['services']);
+            $booking_detail_input['ref_no'] = $ref_no;
+            $booking_detail_input['time'] = $time;
+            $booking_detail_input['full_name'] = $full_name;
+            $booking_detail_input['phone'] = $input['phone'];
+            $booking_detail_input['email'] = $input['email'];
+            $booking_details = BookingDetail::create($booking_detail_input);
+
+
+            $services = Variation::whereIn('id', explode(',', $booking_details->product_id))->with(['product'])->get();
+            $services_text = '';
+            foreach($services as $service) {
+                $variation_name = '';
+                if($service->name != 'DUMMY') {
+                    $variation_name = '['.$service->name.']';
+                }
+                $services_text .= $service->product->name.' '.$variation_name.',';  
+            }
+
+            $booking_id = Crypt::encrypt($booking->id);
+
+            $business_name = $business->name;
+            
+            $from = $business->email_settings['mail_from_address'];
+            $to = $input['email'];
+            $subject = $ref_no." - ".$business_name." - Booking";
+            $content = '<p>Dear '.$full_name.',</p>
+            <p>Your booking is confirmed</p>
+            <p>Ref No: '.$ref_no.'</p>
+            <p>Date: '.$booking_start.' to '.$booking_end.' @ '. $time .'</p>
+            <p>Location: '.$business_location->name.'</p>
+            <p>Services: '.substr($services_text, 0, -1).'</p>';
+            $data = [ 
+                'name' => $full_name,
+                'to' => $to,
+                'from' => $from,
+                'subject' => $subject,
+                'business_name' => $business_name,
+                'content' => $content
+            ];
+            Mail::send('restaurant.booking.mail', $data, function($message) use ($data) {
+                $message->to($data['to'], $data['subject']);
+                $message->subject($data['subject']);
+                $message->from('information@emfoursystem.com',$data['business_name']);
+            });
+            
+            return redirect()->back()->with(
+                [
+                    'status' => true,
+                    'booking' => $booking,
+                    'booking_details' => $booking_details,
+                    'time_details' => $time_details,
+                    'services' => substr($services_text, 0, -1)
+                ]
+            );
+        } catch (\Exception $e) {
+            return redirect()->back()->with(
+                [
+                    'status' => false
+                ]
+            );
+        }
+
+    }
+
+
+    public function getPublicBookingCheckin(Request $request, $slug)
+    {
+
+        $business = Business::where('slug', $slug)->with(['currency'])->first();
+
+        if (!$business) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('restaurant.booking.public-checkin', compact('slug', 'business'));
+    }
+
+    public function getPublicBookingCheckinUpdate(Request $request, $slug, $booking_id)
+    {
+        $booking_id = Crypt::decrypt($booking_id);
+        $booking = Booking::find($booking_id);      
+        if (!$booking) {
+            abort(403, 'Unauthorized action.');
+        }
+        $booking->booking_status = 'checkin';
+        $booking->save();
+        return redirect()->back()->with(
+            [
+                'status' => 'Success Checkin!',
+            ]
+        );
+    }
+
+
 }

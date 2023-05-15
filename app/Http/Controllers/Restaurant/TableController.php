@@ -28,18 +28,18 @@ class TableController extends Controller
             $tables = ResTable::where('res_tables.business_id', $business_id)
                         ->join('business_locations AS BL', 'res_tables.location_id', '=', 'BL.id')
                         ->select(['res_tables.name as name', 'BL.name as location',
-                            'res_tables.description', 'res_tables.id', ]);
-
+                            'res_tables.description', 'res_tables.id as id', ]);
+       
             return Datatables::of($tables)
                 ->addColumn(
                     'action',
-                    '@role("Admin#'.$business_id.'")
-                    <button data-href="{{action(\'Restaurant\TableController@edit\', [$id])}}" class="btn btn-xs btn-primary edit_table_button"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
-                        &nbsp;
-                    @endrole
-                    @role("Admin#'.$business_id.'")
-                        <button data-href="{{action(\'Restaurant\TableController@destroy\', [$id])}}" class="btn btn-xs btn-danger delete_table_button"><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
-                    @endrole'
+                    function($row) use ($business_id) {
+                        return '
+                        <button data-href="'.action('\App\Http\Controllers\Restaurant\TableController@edit', [$row->id]).'" class="btn btn-xs btn-primary edit_table_button"><i class="glyphicon glyphicon-edit"></i> '.__("messages.edit").'</button>
+                            &nbsp;
+                        <button data-href="'.action('\App\Http\Controllers\Restaurant\TableController@destroy', [$row->id]).'" class="btn btn-xs btn-danger delete_table_button"><i class="glyphicon glyphicon-trash"></i> '.__("messages.delete").'</button>
+                        ';
+                    }
                 )
                 ->removeColumn('id')
                 ->escapeColumns(['action'])

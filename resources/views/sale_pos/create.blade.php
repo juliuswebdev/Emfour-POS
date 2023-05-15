@@ -105,6 +105,45 @@
 
 @include('sale_pos.partials.weighing_scale_modal')
 
+
+
+@if(in_array('booking', $enabled_modules) && (auth()->user()->can('crud_all_bookings') || auth()->user()->can('crud_own_bookings')))
+	@php
+		$business_id = request()->session()->get('user.business_id');
+		$business = App\Business::find($business_id);
+	@endphp				
+	<div class="modal fade in" tabindex="-1" role="dialog" id="booking-checkout">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+					<h4 class="modal-title">Checkout Details</h4>
+				</div>
+				<div class="modal-body">
+					<!-- /.box-header -->
+					<div class="box-body">
+						<form action="{{ action('\App\Http\Controllers\Restaurant\BookingController@getBookings', $business->slug) }}" class="form search-check" method="post">
+							<label>Search: </label>
+							<div class="row">
+								<div class="col-md-10">
+									<input type="hidden" name="from" value="checkin">
+									<input type="text" placeholder="Search by Reference No, Phone..." name="search_query" class="form-control">
+								</div>
+								<div class="col-md-2">
+									<button type="submit" class="btn btn-primary btn-search">Search</button>
+								</div>
+							</div>
+						</form>
+						<div id="checkout_result"></div>
+					</div>
+					<!-- /.box-body --> 
+				</div>
+			</div>
+		</div>
+	</div>
+@endif
+
+
 @stop
 @section('css')
 	<!-- include module css -->

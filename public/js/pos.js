@@ -1,4 +1,64 @@
 $(document).ready(function() {
+
+    const urlParams = new URL(window.location.href).searchParams;
+    const products_id = urlParams.get('booking_product_ids');
+    console.log(products_id);
+    if(products_id) {
+        products_id.split(',').forEach(function(item) {
+            pos_product_row(item);
+        });
+    }
+
+    $('.search-check').submit(function(e){
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            context: this,
+            method: "POST",
+            url: $(this).attr("action"),
+            data: data,
+            success: function(result) {
+                $('#checkout_result').html(result);
+                $('.btn-search').removeAttr('disabled');
+            }
+        });
+    });
+
+
+    $(document).on('submit', 'form.check_booking_form', function(e){
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            context: this,
+            method: "PUT",
+            url: $(this).attr("action"),
+            dataType: "json",
+            data: data,
+            beforeSend: function(xhr) {
+                __disable_submit_button($(this).find('button[type="submit"]'));
+            },
+            success: function(result){
+                if(result.success == true) {
+                    console.log(result);
+                    $('#checkout_result').html('');
+                    $('input[name="search_query"]').val('');
+                    $(this).find('button[type="submit"]').attr('disabled', false);
+                    var booking_product_ids = $(this).find('input[name="booking_product_ids"]').val();
+                    var booking_correspondent_id = $(this).find('input[name="booking_correspondent_id"]').val();
+                    var booking_customer = $(this).find('input[name="booking_customer"]').val();
+                    booking_product_ids.split(',').forEach(function(item) {
+                        pos_product_row(item);
+                    });
+                    $('#correspondent_id').select2('val', booking_correspondent_id);
+                    $('#customer_id').append('<option value="'+result.booking.contact_id+'">'+result.booking.booking_details.full_name+' ('+result.booking.customer.contact_id+')</option>');
+                    $('#customer_id').val(booking_customer);
+                } else {
+                    toastr.error(result.msg);
+                }
+            }
+        });
+    });
+
     customer_set = false;
     //Prevent enter key function except texarea
     $('form').on('keyup keypress', function(e) {
@@ -2082,7 +2142,6 @@ function initialize_printer() {
 }
 
 $('body').on('click', 'label', function(e) {
-    alert('test');
     var field_id = $(this).attr('for');
     if (field_id) {
         if ($('#' + field_id).hasClass('select2')) {

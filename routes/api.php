@@ -16,3 +16,10 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/pos/amount', function() {
+    $data = array('amount' => 1);
+    return response($data, 200);
+});
+
+Route::post('/authorize', [App\Http\Controllers\AuthorizeNetController::class, 'store']);

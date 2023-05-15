@@ -3,6 +3,7 @@
 
 @section('content')
     <div class="login-form col-md-12 col-xs-12 right-col-content">
+        <p class="text-center"><img src="/img/hero-img.png" alt="main" class="main-logo"></p>
         <p class="form-header text-white">@lang('lang_v1.login')</p>
         <form method="POST" action="{{ route('login') }}" id="login-form">
             {{ csrf_field() }}
@@ -57,7 +58,7 @@
                     </label>
                 </div>
             </div>
-            <br>
+            <!-- <br> -->
             <div class="form-group">
                 <button type="submit" class="btn btn-primary btn-flat btn-login">@lang('lang_v1.login')</button>
                 @if(config('app.env') != 'demo')
@@ -68,6 +69,32 @@
             </div>
         </form>
     </div>
+
+    <!-- start here custom features -->
+
+    <div class="col-md-12 col-xs-12 rm">
+        @component('components.widget', ['class' => 'box-primary text-center', 'header' => ''])
+        <h4 class="text-left"><i class="fas fa-clipboard-list"></i> Key Features</h4>
+        <ul class="features-class">
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-store"></i>Convenience Store <br> Supermarket</a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-utensils"></i>Restaurant</a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-cut"></i>Salon/Barber Shop</a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-tools"></i>Repair Shops</a>
+        </ul>
+        <hr>
+        <h4 class="text-left"><i class="fas fa-cogs"></i> Key Modules</h4>
+        <ul class="features-class">
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-store-alt"></i>Merchandising</a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-desktop"></i>Retail / POS</a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-warehouse"></i>Inventory</a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-calendar-check"></i>Online Booking</a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-shopping-bag"></i>CheckIn / Checkout</a>
+        </ul>
+        @endcomponent  
+    </div>
+    
+    <!-- end here custom features -->
+
     @if(config('app.env') == 'demo')
     <div class="col-md-12 col-xs-12" style="padding-bottom: 30px;">
         @component('components.widget', ['class' => 'box-primary', 'header' => '<h4 class="text-center">Demo Shops <small><i> Demos are for example purpose only, this application <u>can be used in many other similar businesses.</u></i></small></h4>'])

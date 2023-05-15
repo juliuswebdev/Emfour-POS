@@ -244,15 +244,24 @@ class RestaurantUtil extends Util
 
             $backgroundColor = '#3c8dbc';
             $borderColor = '#3c8dbc';
-            if ($booking->booking_status == 'completed') {
-                $backgroundColor = '#00a65a';
-                $borderColor = '#00a65a';
+            if ($booking->booking_status == 'waiting') {
+                $backgroundColor = '#1572e8';
+                $borderColor = '#1572e8';
+            } elseif ($booking->booking_status == 'booked') {
+                $backgroundColor = '#0073b7';
+                $borderColor = '#0073b7';
+            } elseif ($booking->booking_status == 'checkin') {
+                $backgroundColor = '#ffad46';
+                $borderColor = '#ffad46';
+            } elseif ($booking->booking_status == 'checkout') {
+                $backgroundColor = '#d2d6de';
+                $borderColor = '#d2d6de';
+            } elseif ($booking->booking_status == 'completed') {
+                $backgroundColor = '#2dce89';
+                $borderColor = '#2dce89';
             } elseif ($booking->booking_status == 'cancelled') {
-                $backgroundColor = '#f56954';
-                $borderColor = '#f56954';
-            } elseif ($booking->booking_status == 'waiting') {
-                $backgroundColor = '#FFAD46';
-                $borderColor = '#FFAD46';
+                $backgroundColor = '#f5365c';
+                $borderColor = '#f5365c';
             }
             if (! empty($filters['color'])) {
                 $backgroundColor = $filters['color'];

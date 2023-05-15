@@ -15,6 +15,7 @@ use App\Unit;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use Str;
 
 class BusinessUtil extends Util
 {
@@ -224,6 +225,22 @@ class BusinessUtil extends Util
         $business_details['enable_inline_tax'] = 0;
 
         $business = Business::create_business($business_details);
+
+        // Add Slug
+        $slug_check = Business::find($business->id);
+        if($slug_check) {
+
+            $slug = Str::slug($business->name);
+            
+            $has_slug = Business::where('slug', $slug)->first();
+            if($has_slug) {
+                $slug_check->slug = $slug.'-'.$business->id;
+            } else {
+                $slug_check->slug = $slug;
+            }
+            $slug_check->save();
+
+        }
 
         return $business;
     }

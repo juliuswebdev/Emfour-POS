@@ -82,6 +82,13 @@ Route::middleware(['setData'])->group(function () {
 
     Auth::routes();
 
+    Route::get('/booking/public/{slug}', [Restaurant\BookingController::class, 'getPublicBooking'])->name('booking.getPublicBooking');
+    //Route::get('/booking/public/{slug}/{booking_id}/', [Restaurant\BookingController::class, 'getPublicBookingCheckin'])->name('booking.getPublicBookingCheckin');
+    Route::put('/booking/public/{slug}/{booking_id}/update', [Restaurant\BookingController::class, 'getPublicBookingCheckinUpdate'])->name('booking.getPublicBookingCheckinUpdate');
+    Route::get('/booking/public/{slug}/checkin', [Restaurant\BookingController::class, 'getPublicBookingCheckin'])->name('booking.getPublicBookingCheckin');
+    Route::post('/booking/public/store', [Restaurant\BookingController::class, 'postPublicBooking'])->name('booking.postPublicBooking');
+    Route::post('bookings/get-bookings/{slug}', [Restaurant\BookingController::class, 'getBookings']);
+
     Route::get('/business/register', [BusinessController::class, 'getRegister'])->name('business.getRegister');
     Route::post('/business/register', [BusinessController::class, 'postRegister'])->name('business.postRegister');
     Route::post('/business/register/check-username', [BusinessController::class, 'postCheckUsername'])->name('business.postCheckUsername');
@@ -453,6 +460,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::get('bookings/get-todays-bookings', [Restaurant\BookingController::class, 'getTodaysBookings']);
     Route::resource('bookings', Restaurant\BookingController::class);
+
+    
 
     Route::resource('types-of-service', TypesOfServiceController::class);
     Route::get('sells/edit-shipping/{id}', [SellController::class, 'editShipping']);
