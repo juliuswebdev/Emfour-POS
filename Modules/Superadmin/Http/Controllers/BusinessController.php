@@ -240,9 +240,12 @@ class BusinessController extends BaseController
 
         $packages = Package::active()->orderby('sort_order')->pluck('name', 'id');
         $gateways = $this->_payment_gateways();
+        $countries = $this->businessUtil->allCountries();
+
 
         return view('superadmin::business.create')
             ->with(compact(
+                'countries',
                 'currencies',
                 'timezone_list',
                 'accounting_methods',
