@@ -22,4 +22,9 @@ Route::get('/pos/amount', function() {
     return response($data, 200);
 });
 
-Route::post('/authorize', [App\Http\Controllers\AuthorizeNetController::class, 'store']);
+Route::post('/authorize-net', [App\Http\Controllers\AuthorizeNetController::class, 'store'])->name('api.authorize-net');
+
+Route::get('/get-locations/{id}', function($id) {
+    $locations = App\BusinessLocation::where('business_id', $id)->get();
+    return response($locations, 200);
+});

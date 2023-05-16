@@ -98,6 +98,7 @@ class BusinessController extends Controller
         }
 
         $accounting_methods = $this->businessUtil->allAccountingMethods();
+        $countries = $this->businessUtil->allCountries();
         $package_id = request()->package;
 
         $system_settings = System::getProperties(['superadmin_enable_register_tc', 'superadmin_register_tc'], true);
@@ -105,6 +106,7 @@ class BusinessController extends Controller
         return view('business.register', compact(
             'currencies',
             'timezone_list',
+            'countries',
             'months',
             'accounting_methods',
             'package_id',

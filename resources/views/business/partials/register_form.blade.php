@@ -91,7 +91,8 @@
         <span class="input-group-addon">
             <i class="fa fa-globe"></i>
         </span>
-        {!! Form::text('country', null, ['class' => 'form-control','placeholder' => __('business.country'), 'required']); !!}
+        <!-- {!! Form::text('country', null, ['class' => 'form-control','placeholder' => __('business.country'), 'required']); !!} -->
+        {!! Form::select('country', $countries, '', ['class' => 'form-control select2_register','placeholder' => __('business.country'), 'required']); !!}
     </div>
     </div>
 </div>

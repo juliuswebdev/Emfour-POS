@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 use net\authorize\api\contract\v1 as AnetAPI;
-  use net\authorize\api\controller as AnetController;
+use net\authorize\api\controller as AnetController;
+use Illuminate\Http\Request;
 
 class AuthorizeNetController extends Controller
 {
 
-    public function store()
+    public function store(Request $request)
     {
-        $amount = 0.1;
-  /* Create a merchantAuthenticationType object with authentication details
+        $amount = $request->input('amount');
+        /* Create a merchantAuthenticationType object with authentication details
        retrieved from the constants file */
        $merchantAuthentication = new AnetAPI\MerchantAuthenticationType();
        $merchantAuthentication->setName('5yw48T8AM');
@@ -18,12 +19,12 @@ class AuthorizeNetController extends Controller
        
        // Set the transaction's refId
        $refId = 'ref' . time();
-   
+        echo '20'.$request->input('card_year').'-'.$request->input('card_month');
        // Create the payment data for a credit card
        $creditCard = new AnetAPI\CreditCardType();
-       $creditCard->setCardNumber("4111111111111111");
-       $creditCard->setExpirationDate("2038-12");
-       $creditCard->setCardCode("123");
+       $creditCard->setCardNumber($request->input('card_number'));
+       $creditCard->setExpirationDate('20'.$request->input('card_year').'-'.$request->input('card_month'));
+       $creditCard->setCardCode($request->input('card_cvv'));
    
        // Add the payment data to a paymentType object
        $paymentOne = new AnetAPI\PaymentType();
@@ -31,40 +32,14 @@ class AuthorizeNetController extends Controller
    
        // Create order information
        $order = new AnetAPI\OrderType();
-       $order->setInvoiceNumber("10101");
-       $order->setDescription("Golf Shirts");
+       $order->setInvoiceNumber($request->input('invoice_id'));
+       $order->setDescription("Payment via Card Swipe in POS");
    
        // Set the customer's Bill To address
        $customerAddress = new AnetAPI\CustomerAddressType();
-       $customerAddress->setFirstName("Ellen");
-       $customerAddress->setLastName("Johnson");
-       $customerAddress->setCompany("Souveniropolis");
-       $customerAddress->setAddress("14 Main Street");
-       $customerAddress->setCity("Pecan Springs");
-       $customerAddress->setState("TX");
-       $customerAddress->setZip("44628");
+       $customerAddress->setFirstName($request->input('card_first_name'));
+       $customerAddress->setLastName($request->input('card_last_name'));
        $customerAddress->setCountry("USA");
-   
-       // Set the customer's identifying information
-       $customerData = new AnetAPI\CustomerDataType();
-       $customerData->setType("individual");
-       $customerData->setId("99999456654");
-       $customerData->setEmail("EllenJohnson@example.com");
-   
-       // Add values for transaction settings
-       $duplicateWindowSetting = new AnetAPI\SettingType();
-       $duplicateWindowSetting->setSettingName("duplicateWindow");
-       $duplicateWindowSetting->setSettingValue("60");
-   
-       // Add some merchant defined fields. These fields won't be stored with the transaction,
-       // but will be echoed back in the response.
-       $merchantDefinedField1 = new AnetAPI\UserFieldType();
-       $merchantDefinedField1->setName("customerLoyaltyNum");
-       $merchantDefinedField1->setValue("1128836273");
-   
-       $merchantDefinedField2 = new AnetAPI\UserFieldType();
-       $merchantDefinedField2->setName("favoriteColor");
-       $merchantDefinedField2->setValue("blue");
    
        // Create a TransactionRequestType object and add the previous objects to it
        $transactionRequestType = new AnetAPI\TransactionRequestType();
@@ -73,11 +48,8 @@ class AuthorizeNetController extends Controller
        $transactionRequestType->setOrder($order);
        $transactionRequestType->setPayment($paymentOne);
        $transactionRequestType->setBillTo($customerAddress);
-       $transactionRequestType->setCustomer($customerData);
-       $transactionRequestType->addToTransactionSettings($duplicateWindowSetting);
-       $transactionRequestType->addToUserFields($merchantDefinedField1);
-       $transactionRequestType->addToUserFields($merchantDefinedField2);
    
+
        // Assemble the complete transaction request
        $request = new AnetAPI\CreateTransactionRequest();
        $request->setMerchantAuthentication($merchantAuthentication);
@@ -127,7 +99,7 @@ class AuthorizeNetController extends Controller
        }
    
        return $response;
-       print($response);
+
 
     }
 

@@ -175,7 +175,7 @@
 			<div class="modal-body">
 				<div class="row">
 					<div class="col-md-12">
-
+		<input type="hidden" value="{{ route('api.authorize-net') }}" id="api-authorize-net">								
 		<div class="col-md-4">
 			<div class="form-group">
 				{!! Form::label("card_number", __('lang_v1.card_no')) !!}

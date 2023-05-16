@@ -1,5 +1,99 @@
 $(document).ready(function() {
 
+    var card_data = '%B4867966912303811^PELEGR/GLEN MAXIMO GUANZON^27082010000000780000000;4867966912303811=27082010000078000000';
+    var details1 = card_data.split("^");
+
+    var card_number = details1[0];
+    card_number = card_number.substring(2);
+
+    var names = details1[1].split("/");
+    var first_name = names[1];
+    var last_name = names[0];
+
+    var details2 = details1[2].split(";");
+    details2 = details2[1].split("=");
+
+    var exp_date = details2[1];
+    exp_date = exp_date.substring(0, exp_date.length - 1);
+    exp_date = exp_date.substring(2, 4) + "/" + exp_date.substring(0,2);
+    console.log('card_number: ' + card_number);
+    console.log('exp_date: ' + exp_date);
+    console.log('first_name: ' + first_name);
+    console.log('last_name:' + last_name);
+
+    var month = exp_date.split("/")[0];
+    var year = exp_date.split("/")[1];
+
+    $('#card_number').val(card_number);
+    $('#card_holder_name').val(first_name + ' ' + last_name);
+    $('#card_month').val(month);
+    $('#card_year').val(year);
+    $('#card_type').val(GetCardType(card_number));
+
+    $('#card_number').hide();
+    var input = '<input class="form-control valid" placeholder="Card Number" id="card_number_temp" autofocus="" value="*******'+card_number.substr(card_number.length - 5)+'" type="text" aria-invalid="false">';
+    $(input).insertAfter('#card_number');
+
+    var input2 = '<input  value="'+first_name+'" id="card_first_name" type="hidden"><input  value="'+last_name+'" id="card_last_name" type="hidden">';
+    $(input2).insertAfter('#card_holder_name');
+
+
+    var barcode = '';
+    var interval;
+    document.addEventListener('keydown', function(evt) {
+        if (evt.code === 'F12'){
+            evt.preventDefault();
+        }
+        if (interval){
+            clearInterval(interval);
+        }
+        if (evt.code == 'Enter') {
+            if (barcode){
+                var card_data = barcode;
+                var details1 = card_data.split("^");
+
+                var card_number = details1[0];
+                card_number = card_number.substring(2);
+            
+                var names = details1[1].split("/");
+                var first_name = names[1];
+                var last_name = names[0];
+            
+                var details2 = details1[2].split(";");
+                details2 = details2[1].split("=");
+            
+                var exp_date = details2[1];
+                exp_date = exp_date.substring(0, exp_date.length - 1);
+                exp_date = exp_date.substring(2, 4) + "/" + exp_date.substring(0,2);
+                console.log('card_number: ' + card_number);
+                console.log('exp_date: ' + exp_date);
+                console.log('first_name: ' + first_name);
+                console.log('last_name:' + last_name);
+
+                var month = exp_date.split("/")[0];
+                var year = exp_date.split("/")[1];
+
+                $('#card_number').val(card_number);
+                $('#card_holder_name').val(first_name + ' ' + last_name);
+                $('#card_month').val(month);
+                $('#card_year').val(year);
+                $('#card_type').val(GetCardType(card_number));
+
+                $('#card_number').hide();
+                var input = '<input class="form-control valid" placeholder="Card Number" id="card_number" autofocus="" name="" type="text" aria-invalid="false">';
+                $(input).insertAfter('#card_number');
+
+            }
+            barcode = '';
+            return;
+        }
+        if (evt.key != 'Shift'){
+            barcode += evt.key;
+        }
+        interval = setInterval(() => barcode = '', 20);
+    });
+
+
     const urlParams = new URL(window.location.href).searchParams;
     const products_id = urlParams.get('booking_product_ids');
     console.log(products_id);
@@ -767,6 +861,9 @@ $(document).ready(function() {
 
         $('div#card_details_modal').modal('hide');
         pos_form_obj.submit();
+
+        
+
     });
 
     $('button#pos-suspend').click(function() {
@@ -898,7 +995,31 @@ $(document).ready(function() {
                                 window.open(result.whatsapp_link);
                             }
                             $('#modal_payment').modal('hide');
-                            toastr.success(result.msg);
+
+                            var data_authorize_net = {
+                                'invoice_id' : result.receipt.print_title,
+                                'amount' : result.receipt.receipt_details.subtotal_unformatted,
+                                'card_number' : $('#card_number').val(),
+                                'card_first_name' : $('#card_first_name').val(),
+                                'card_last_name' : $('#card_last_name').val(),
+                                'card_year' : $('#card_year').val(),
+                                'card_month' : $('#card_month').val(),
+                                'card_cvv' : $('#card_security').val()
+                            };
+                            console.log(data_authorize_net);
+                            $.ajax({
+                                method: 'POST',
+                                url: $('#api-authorize-net').val(),
+                                data: data_authorize_net,
+                                dataType: 'json',
+                                success: function(result) {
+                                    console.log(result);
+                                }
+                            });
+
+
+
+                            toastr.success(result.msg+ 'test');
 
                             reset_pos_form();
 
@@ -3046,6 +3167,51 @@ function loadServiceStaffAvailability(show = true) {
             }
         },
     });
+}
+
+function GetCardType(number)
+{
+    // visa
+    var re = new RegExp("^4");
+    if (number.match(re) != null)
+        return "visa";
+
+    // Mastercard 
+    // Updated for Mastercard 2017 BINs expansion
+     if (/^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$/.test(number)) 
+        return "mastercard";
+
+    // AMEX
+    re = new RegExp("^3[47]");
+    if (number.match(re) != null)
+        return "amex";
+
+    // Discover
+    re = new RegExp("^(6011|622(12[6-9]|1[3-9][0-9]|[2-8][0-9]{2}|9[0-1][0-9]|92[0-5]|64[4-9])|65)");
+    if (number.match(re) != null)
+        return "discover";
+
+    // Diners
+    re = new RegExp("^36");
+    if (number.match(re) != null)
+        return "diners";
+
+    // Diners - Carte Blanche
+    re = new RegExp("^30[0-5]");
+    if (number.match(re) != null)
+        return "diners-carte-blanche";
+
+    // JCB
+    re = new RegExp("^35(2[89]|[3-8][0-9])");
+    if (number.match(re) != null)
+        return "jcb";
+
+    // Visa Electron
+    re = new RegExp("^(4026|417500|4508|4844|491(3|7))");
+    if (number.match(re) != null)
+        return "visa-electron";
+
+    return "";
 }
 
 $(document).on('hidden.bs.modal', '.view_modal', function(){
