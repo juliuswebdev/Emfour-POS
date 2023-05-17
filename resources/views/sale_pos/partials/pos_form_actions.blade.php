@@ -18,15 +18,30 @@
 			@endif
 			<button type="button" class="@if($is_mobile) col-xs-6 @endif btn bg-info text-white btn-default btn-flat @if($pos_settings['disable_draft'] != 0) hide @endif" id="pos-draft" @if(!empty($only_payment)) disabled @endif><i class="fas fa-edit"></i> @lang('sale.draft')</button>
 			<button type="button" class="btn btn-default bg-yellow btn-flat @if($is_mobile) col-xs-6 @endif" id="pos-quotation" @if(!empty($only_payment)) disabled @endif><i class="fas fa-edit"></i> @lang('lang_v1.quotation')</button>
-
-			@if(empty($pos_settings['disable_suspend']))
+			
+			@if($business_details->business_type_id == 1)
+				<!-- restaurant only -->
+				
 				<button type="button" 
 				class="@if($is_mobile) col-xs-6 @endif btn bg-red btn-default btn-flat no-print pos-express-finalize" 
 				data-pay_method="suspend"
-				title="@lang('lang_v1.tooltip_suspend')" @if(!empty($only_payment)) disabled @endif>
-				<i class="fas fa-pause" aria-hidden="true"></i>
-				@lang('lang_v1.suspend')
+				data-modal-title="@lang('lang_v1.modal_title_send_to_kitchen')"
+				data-modal-placeholder="@lang('lang_v1.form_label_send_to_kitchen')"
+				title="@lang('lang_v1.tooltip_send_to_kitchen')" @if(!empty($only_payment)) disabled @endif>
+				<i class="fa fas fa-fire" aria-hidden="true"></i>
+				@lang('lang_v1.btn_send_to_kitchen')
 				</button>
+				
+			@else
+				@if(empty($pos_settings['disable_suspend']))
+					<button type="button" 
+					class="@if($is_mobile) col-xs-6 @endif btn bg-red btn-default btn-flat no-print pos-express-finalize" 
+					data-pay_method="suspend"
+					title="@lang('lang_v1.tooltip_suspend')" @if(!empty($only_payment)) disabled @endif>
+					<i class="fas fa-pause" aria-hidden="true"></i>
+					@lang('lang_v1.suspend')
+					</button>
+				@endif
 			@endif
 
 			@if(empty($pos_settings['disable_credit_sale_button']))

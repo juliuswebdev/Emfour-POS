@@ -24,6 +24,8 @@
                 </h3>
         </div>
 
+        
+
         <div class="box-body">
             <div class="row">
                     <div class="col-sm-3">
@@ -33,6 +35,12 @@
                             <p class="text-muted">
                                 {{ $business->name }}
                             </p>
+
+                            <strong><i class="fa fa-globe margin-r-5"></i> 
+                                @lang('business.business_type')</strong>
+                                <p class="text-muted">
+                                    {{ ($business->business_type == null) ? '' : $business->business_type->title }}
+                                </p>
 
                             <strong><i class="fa fa-money margin-r-5"></i> 
                             @lang('business.currency')</strong>

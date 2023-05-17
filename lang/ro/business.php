@@ -12,6 +12,7 @@ return [
     */
     'register_and_get_started_in_minutes' => 'Intregistreaza-te si incepe activitatea in cateva minute',
     'business_name' => 'Denumire afacere',
+    'business_type' => 'Tip afacere',
     'start_date' => 'Data start',
     'currency' => 'Moneda',
     'currency_placeholder' => 'Selecteaza moneda',
