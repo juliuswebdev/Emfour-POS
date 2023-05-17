@@ -27,7 +27,7 @@
 		</div>
 	@endif
 
-	@if(!empty($brands))
+	@if(count($brands) > 1)
 		<div class="col-sm-4" id="product_brand_div">
 			{!! Form::select('size', $brands, null, ['id' => 'product_brand', 'class' => 'select2', 'name' => null, 'style' => 'width:100% !important']) !!}
 		</div>
