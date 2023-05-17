@@ -87,11 +87,11 @@
 					</div>
 					<div class="col-sm-12">
 						<div class="form-group">
-						<div class="checkbox">
+							<div class="checkbox">
 							{!! Form::checkbox('send_notification', 1, true, ['class' => 'input-icheck', 'id' => 'send_notification']); !!} @lang('restaurant.send_notification_to_customer')
+							</div>
 						</div>
 					</div>
-				</div>
 				</div>
 
 				<div class="modal-footer">

@@ -206,7 +206,7 @@ class BookingController extends Controller
 
                 $services = Variation::whereIn('id', explode(',', $booking->booking_details->product_id))->with(['product'])->get();
                 $services_text = '';
-                foreach($services as $service) {$
+                foreach($services as $service) {
                     $variation_name = '';
                     if($service->name != 'DUMMY') {
                         $variation_name = '['.$service->name.']';
@@ -223,7 +223,11 @@ class BookingController extends Controller
                     'cancelled' => __('restaurant.cancelled'),
                 ];
 
-                return view('restaurant.booking.show', compact('services', 'booking', 'booking_start', 'booking_end', 'booking_statuses'));
+                $business_locations = BusinessLocation::forDropdown($business_id);
+                $customers = CustomerGroup::forDropdown($business_id);
+                $correspondents = User::forDropdown($business_id, false);
+
+                return view('restaurant.booking.show', compact('business_locations', 'correspondents', 'customers', 'services', 'booking', 'booking_start', 'booking_end', 'booking_statuses'));
             }
         }
     }
