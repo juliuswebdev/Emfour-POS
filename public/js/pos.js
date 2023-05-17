@@ -1321,9 +1321,15 @@ $(document).ready(function() {
     }
 
     //Show product list.
+    var product_category_select = $('select#product_category').val();
+    var product_brand_select = $('select#product_brand').val();
+    if(product_category_select == 'all' || product_brand_select == 'all') {
+        product_category_select = 99999999999999;
+        product_brand_select = 99999999999999;
+    }
     get_product_suggestion_list(
-        $('select#product_category').val(),
-        $('select#product_brand').val(),
+        product_category_select,
+        product_brand_select,
         $('input#location_id').val(),
         null,
         is_enabled_stock,
