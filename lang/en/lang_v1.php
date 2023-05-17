@@ -1518,7 +1518,11 @@ return [
     'show_letter_head' => 'Show letter head',
     'letter_head' => 'Letter Head',
     'letter_head_help' => 'Upload a letterhead image containing all details of your business.
-         Letterhead will be added at the top of the invoices.',
+     Letterhead will be added at the top of the invoices.',
     'letter_head_help2' => 'Upload only if you want to replace previous letterhead',
     'copy_quotation' => 'Copy Quotation',
+    'tooltip_send_to_kitchen' => 'Send to Kitchen',
+    'btn_send_to_kitchen' => 'Send to Kitchen',
+    'modal_title_send_to_kitchen' => 'Send to Kitchen',
+    'form_label_send_to_kitchen' => 'Special Instructions:'
 ];

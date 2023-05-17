@@ -69,6 +69,7 @@
                                     @lang('superadmin::lang.registered_on')
                                 </th>
                                 <th>@lang( 'superadmin::lang.business_name' )</th>
+                                <th>@lang('business.business_type')</th>
                                 <th>@lang('business.owner')</th>
                                 <th>@lang('business.email')</th>
                                 <th>@lang('superadmin::lang.owner_number')</th>
@@ -112,6 +113,7 @@
             columns: [
                 { data: 'created_at', name: 'business.created_at' },
                 { data: 'name', name: 'business.name' },
+                { data: 'title', name: 'title' },
                 { data: 'owner_name', name: 'owner_name', searchable: false},
                 { data: 'owner_email', name: 'u.email' },
                 { data: 'contact_number', name: 'u.contact_number' },

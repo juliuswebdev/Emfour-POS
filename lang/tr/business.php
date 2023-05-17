@@ -12,6 +12,7 @@ return [
     */
     'register_and_get_started_in_minutes' => 'İşletmenizi dakikalar içinde kaydedin ve başlayın',
     'business_name' => 'İşletme Adı',
+    'business_type' => 'İş Tipi',
     'start_date' => 'Başlangıç Tarihi',
     'currency' => 'Para Birimi',
     'currency_placeholder' => 'Para Birimi Seç',

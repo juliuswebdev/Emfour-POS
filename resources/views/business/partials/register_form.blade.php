@@ -5,7 +5,7 @@
 
 <fieldset>
 <legend>@lang('business.business_details'):</legend>
-<div class="col-md-12">
+<div class="col-md-6">
     <div class="form-group">
         {!! Form::label('name', __('business.business_name') . ':*' ) !!}
         <div class="input-group">
@@ -13,6 +13,18 @@
                 <i class="fa fa-suitcase"></i>
             </span>
             {!! Form::text('name', null, ['class' => 'form-control','placeholder' => __('business.business_name'), 'required']); !!}
+        </div>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="form-group">
+        {!! Form::label('business_type_id', __('business.business_type') . ':*' ) !!}
+        <div class="input-group">
+            <span class="input-group-addon">
+                <i class="fa fa-globe"></i>
+            </span>
+            {!! Form::select('business_type_id', $business_types, '', ['class' => 'form-control select2_register','placeholder' => __('business.business_type'), 'required']); !!}
         </div>
     </div>
 </div>

@@ -3,6 +3,7 @@
  return [
      'register_and_get_started_in_minutes' => 'रजिस्टर करें और मिनटों में आरंभ करें',
      'business_name' => 'व्यवास्यक नाम',
+     'business_type' => 'व्यापार के प्रकार',
      'start_date' => 'आरंभ करने की तिथि',
      'currency' => 'मुद्रा',
      'currency_placeholder' => 'मुद्रा चुनें',
