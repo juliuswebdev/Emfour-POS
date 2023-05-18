@@ -11,15 +11,15 @@
     </div>
 </div>
 
-
+   
 	<div class="box">
         <div class="box-header">
             <button type="button" class="btn btn-sm btn-primary pull-right" id="refresh_orders"><i class="fas fa-sync"></i> @lang( 'restaurant.refresh' )</button>
         </div>
-        <div class="box-body">
+        <div class="box-body kitchen-wrapper">
             <input type="hidden" id="orders_for" value="kitchen">
         	<div class="row" id="orders_div">
-             @include('restaurant.partials.show_orders', array('orders_for' => 'kitchen'))   
+                @include('restaurant.partials.show_orders', array('orders_for' => 'kitchen', 'business_details' => $business_details))   
             </div>
         </div>
         <div class="overlay hide">
@@ -58,6 +58,25 @@
                                 }
                             }
                         });
+                    }
+                });
+            });
+
+            //Used for update the cooking stage
+            $(document).on('click', 'a.btn-cooking-stage', function(e){
+                e.preventDefault();
+                var href = $(this).data('href');
+                $.ajax({
+                    method: "GET",
+                    url: href,
+                    dataType: "json",
+                    success: function(result){
+                        if(result.success == true){
+                            toastr.success(result.msg);
+                            $('#refresh_orders').click();
+                        } else {
+                            toastr.error(result.msg);
+                        }
                     }
                 });
             });
