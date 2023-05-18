@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Restaurant;
 
 use App\TransactionSellLine;
 use App\Utils\RestaurantUtil;
+use App\Utils\BusinessUtil;
+
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,6 +20,8 @@ class KitchenController extends Controller
 
     protected $restUtil;
 
+    protected $businessUtil;
+
     /**
      * Constructor
      *
@@ -25,10 +29,11 @@ class KitchenController extends Controller
      * @param  RestaurantUtil  $restUtil
      * @return void
      */
-    public function __construct(Util $commonUtil, RestaurantUtil $restUtil)
+    public function __construct(Util $commonUtil, RestaurantUtil $restUtil, BusinessUtil $businessUtil,)
     {
         $this->commonUtil = $commonUtil;
         $this->restUtil = $restUtil;
+        $this->businessUtil = $businessUtil;
     }
 
     /**
@@ -44,8 +49,8 @@ class KitchenController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received']);
-
-        return view('restaurant.kitchen.index', compact('orders'));
+        $business_details = $this->businessUtil->getDetails($business_id);
+        return view('restaurant.kitchen.index', compact('orders', 'business_details'));
     }
 
     /**

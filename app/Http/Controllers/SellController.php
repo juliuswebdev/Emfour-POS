@@ -860,7 +860,8 @@ class SellController extends Controller
                 'statuses',
                 'status_color_in_activity',
                 'sales_orders',
-                'line_taxes'
+                'line_taxes',
+                'business_details'
             ));
     }
 

@@ -71,7 +71,7 @@ return [
     'no_products_to_display' => 'No Products to display',
     'item_out_of_stock' => 'Product out of stock',
     'go_back' => 'Go Back',
-    'disable_pay_checkout' => 'Disable Multiple Pay',
+    'disable_pay_checkout' => 'Disable Split Payment',
     'disable_draft' => 'Disable Draft',
     'disable_express_checkout' => 'Disable Express Checkout',
     'hide_product_suggestion' => 'Don\'t show product suggestion',
@@ -295,7 +295,7 @@ return [
     'design' => 'Design',
     'express_checkout_cash' => 'Cash',
     'express_checkout_card' => 'Card',
-    'checkout_multi_pay' => 'Multiple Pay',
+    'checkout_multi_pay' => 'Split Payment',
     'tooltip_checkout_multi_pay' => 'Checkout using multiple payment methods',
     'tooltip_express_checkout_card' => 'Express checkout using card',
     'card_transaction_details' => 'Card transaction details',
@@ -1518,7 +1518,11 @@ return [
     'show_letter_head' => 'Show letter head',
     'letter_head' => 'Letter Head',
     'letter_head_help' => 'Upload a letterhead image containing all details of your business.
-         Letterhead will be added at the top of the invoices.',
+     Letterhead will be added at the top of the invoices.',
     'letter_head_help2' => 'Upload only if you want to replace previous letterhead',
     'copy_quotation' => 'Copy Quotation',
+    'tooltip_send_to_kitchen' => 'Send to Kitchen',
+    'btn_send_to_kitchen' => 'Send to Kitchen',
+    'modal_title_send_to_kitchen' => 'Send to Kitchen',
+    'form_label_send_to_kitchen' => 'Special Instructions:'
 ];

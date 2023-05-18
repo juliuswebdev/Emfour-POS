@@ -375,7 +375,8 @@
     </div>
     <div class="row">
       <div class="col-sm-6">
-        <strong>{{ __( 'sale.sell_note')}}:</strong><br>
+        <!-- business_type_id = 1 for restaurant -->
+        <strong>{{ ($business_details->business_type_id == 1) ? __('lang_v1.form_label_send_to_kitchen') : __( 'sale.sell_note')}}:</strong><br>
         <p class="well well-sm no-shadow bg-gray">
           @if($sell->additional_notes)
             {!! nl2br($sell->additional_notes) !!}

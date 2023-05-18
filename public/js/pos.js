@@ -833,6 +833,14 @@ $(document).ready(function() {
         if (pay_method == 'card') {
             $('div#card_details_modal').modal('show');
         } else if (pay_method == 'suspend') {
+            //Change the modal title & label
+            var send_to_kitchen_title = $(this).data('modal-title');
+            if(send_to_kitchen_title != undefined){
+                var send_to_kitchen_label = $(this).data('modal-placeholder');
+                $('#confirmSuspendModal').find('.modal-title').text(send_to_kitchen_title);
+                $('#confirmSuspendModal').find('.modal-body label:eq(0)').text(send_to_kitchen_label);
+            }
+            
             $('div#confirmSuspendModal').modal('show');
         } else {
             pos_form_obj.submit();

@@ -12,6 +12,7 @@ return [
     */
     'register_and_get_started_in_minutes' => 'ລົງທະບຽນແລະເລີ່ມຕົ້ນໃຊ້ງານໃນບໍ່ເທົ່າໃດນາທີ',
     'business_name' => 'ຊື່ທຸລະກິດ',
+    'business_type' => 'ປະເພດທຸລະກິດ',
     'start_date' => 'ວັນທີເລີ່ມຕົ້ນ',
     'currency' => 'ສະກຸນເງິນ',
     'currency_placeholder' => 'ເລືອກສະກຸນເງິນ',

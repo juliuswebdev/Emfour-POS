@@ -71,6 +71,14 @@ class Business extends Model
     }
 
     /**
+     * Get the Business type.
+     */
+    public function business_type()
+    {
+        return $this->belongsTo(\App\BusinessType::class);
+    }
+
+    /**
      * Get the Business currency.
      */
     public function locations()

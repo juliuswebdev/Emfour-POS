@@ -12,6 +12,7 @@ return [
     */
     'register_and_get_started_in_minutes' => 'Đăng ký và bắt đầu trong vài phút',
     'business_name' => 'Tên doanh nghiệp',
+    'business_type' => 'Loại hình kinh doanh',
     'start_date' => 'Ngày bắt đầu',
     'currency' => 'Tiền tệ',
     'currency_placeholder' => 'Chọn tiền tệ',

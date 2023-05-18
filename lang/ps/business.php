@@ -12,6 +12,7 @@ return [
     */
     'register_and_get_started_in_minutes' => 'راجستر او په دقیقو کې پیل کړئ',
     'business_name' => 'د سوداګرۍ نوم',
+    'business_type' => 'د سوداګرۍ ډول',
     'start_date' => 'د شروع تاریخ',
     'currency' => 'اسعار',
     'currency_placeholder' => 'د اسعارو انتخاب',

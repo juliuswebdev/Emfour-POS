@@ -3,6 +3,7 @@
  return [
      'register_and_get_started_in_minutes' => 'Regjistro dhe fillo në minuta',
      'business_name' => 'Emri i biznesit',
+     'business_type' => 'Lloji i biznesit',
      'start_date' => 'Data e fillimit',
      'currency' => 'Valuta',
      'currency_placeholder' => 'Zgjidh monedhën',

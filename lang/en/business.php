@@ -12,6 +12,7 @@ return [
     */
     'register_and_get_started_in_minutes' => 'Register and Get Started in minutes',
     'business_name' => 'Business Name',
+    'business_type' => 'Business Type',
     'start_date' => 'Start Date',
     'currency' => 'Currency',
     'currency_placeholder' => 'Select Currency',
