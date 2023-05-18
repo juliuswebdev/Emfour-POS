@@ -72,13 +72,13 @@
 <div class="clearfix"></div>
 <div class="col-md-6">
     <div class="form-group">
-    {!! Form::label('mobile', __('lang_v1.business_telephone') . ':') !!}
-    <div class="input-group">
-        <span class="input-group-addon">
-            <i class="fa fa-phone"></i>
-        </span>
-        {!! Form::text('mobile', null, ['class' => 'form-control','placeholder' => __('lang_v1.business_telephone')]); !!}
-    </div>
+        {!! Form::label('mobile', __('lang_v1.business_telephone') . ':') !!}
+        <div class="input-group">
+            <span class="input-group-addon">
+                <i class="fa fa-phone"></i>
+            </span>
+            {!! Form::text('mobile', null, ['class' => 'form-control','placeholder' => __('lang_v1.business_telephone')]); !!}
+        </div>
     </div>
 </div>
 
@@ -98,14 +98,14 @@
 
 <div class="col-md-6">
     <div class="form-group">
-    {!! Form::label('country', __('business.country') . ':*') !!}
-    <div class="input-group">
-        <span class="input-group-addon">
-            <i class="fa fa-globe"></i>
-        </span>
-        <!-- {!! Form::text('country', null, ['class' => 'form-control','placeholder' => __('business.country'), 'required']); !!} -->
-        {!! Form::select('country', $countries, '', ['class' => 'form-control select2_register','placeholder' => __('business.country'), 'required']); !!}
-    </div>
+        {!! Form::label('country', __('business.country') . ':*') !!}
+        <div class="input-group">
+            <span class="input-group-addon">
+                <i class="fa fa-globe"></i>
+            </span>
+            <!-- {!! Form::text('country', null, ['class' => 'form-control','placeholder' => __('business.country'), 'required']); !!} -->
+            {!! Form::select('country', $countries, '', ['class' => 'form-control select2_register','placeholder' => __('business.country'), 'required']); !!}
+        </div>
     </div>
 </div>
 
