@@ -1524,5 +1524,13 @@ return [
     'tooltip_send_to_kitchen' => 'Send to Kitchen',
     'btn_send_to_kitchen' => 'Send to Kitchen',
     'modal_title_send_to_kitchen' => 'Send to Kitchen',
-    'form_label_send_to_kitchen' => 'Special Instructions:'
+    'form_label_send_to_kitchen' => 'Special Instructions:',
+    'product' => 'Product',
+    'state' => 'State',
+    'cooking' => 'Cooking',
+    'ready' => 'Ready',
+    'served' => 'Served',
+    'mark_as_completed' => 'Mark as Completed',
+    'cooking_state_update_message' => 'Cooking state has been updated.',
+    'order_item_served_message' => 'Order item has been served.',
 ];

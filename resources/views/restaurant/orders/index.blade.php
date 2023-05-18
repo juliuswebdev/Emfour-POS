@@ -90,6 +90,25 @@
                 });
             });
 
+            //Function used for update the is_served column
+            $(document).on('click', 'a.btn-served', function(e){
+                e.preventDefault();
+                var href = $(this).data('href');
+                $.ajax({
+                    method: "GET",
+                    url: href,
+                    dataType: "json",
+                    success: function(result){
+                        if(result.success == true){
+                            toastr.success(result.msg);
+                            $('#refresh_orders').click();
+                        } else {
+                            toastr.error(result.msg);
+                        }
+                    }
+                });
+            });
+
             $(document).on('click', 'a.mark_line_order_as_served', function(e){
                 e.preventDefault();
                 swal({
@@ -138,5 +157,11 @@
                 });
             });
         });
+
+       
+        setInterval(function(){
+            $('.blink-allow').fadeIn(1000).fadeOut(1000);
+        },0)
+
     </script>
 @endsection

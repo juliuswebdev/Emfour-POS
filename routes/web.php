@@ -447,11 +447,15 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/add-selected-modifiers', [Restaurant\ProductModifierSetController::class, 'add_selected_modifiers']);
 
         Route::get('/kitchen', [Restaurant\KitchenController::class, 'index']);
+        Route::get('/kitchen/cook-progress/{stage}/{id}/{product_id}', [Restaurant\KitchenController::class, 'updateCookProgress']);
+       
         Route::get('/kitchen/mark-as-cooked/{id}', [Restaurant\KitchenController::class, 'markAsCooked']);
         Route::post('/refresh-orders-list', [Restaurant\KitchenController::class, 'refreshOrdersList']);
         Route::post('/refresh-line-orders-list', [Restaurant\KitchenController::class, 'refreshLineOrdersList']);
 
         Route::get('/orders', [Restaurant\OrderController::class, 'index']);
+        Route::get('/orders/update-served/{stage}/{id}/{product_id}', [Restaurant\OrderController::class, 'updateServed']);
+       
         Route::get('/orders/mark-as-served/{id}', [Restaurant\OrderController::class, 'markAsServed']);
         Route::get('/data/get-pos-details', [Restaurant\DataController::class, 'getPosDetails']);
         Route::get('/orders/mark-line-order-as-served/{id}', [Restaurant\OrderController::class, 'markLineOrderAsServed']);
