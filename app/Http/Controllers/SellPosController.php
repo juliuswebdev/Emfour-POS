@@ -318,7 +318,7 @@ class SellPosController extends Controller
             return redirect()->action([\App\Http\Controllers\CashRegisterController::class, 'create']);
         }
 
-        try {
+        // try {
             $input = $request->except('_token');
 
             $input['is_quotation'] = 0;
@@ -359,6 +359,7 @@ class SellPosController extends Controller
             if (! empty($input['products'])) {
                 $business_id = $request->session()->get('user.business_id');
 
+
                 //Check if subscribed or not, then check for users quota
                 if (! $this->moduleUtil->isSubscribed($business_id)) {
                     return $this->moduleUtil->expiredResponse();
@@ -371,7 +372,29 @@ class SellPosController extends Controller
                 $discount = ['discount_type' => $input['discount_type'],
                     'discount_amount' => $input['discount_amount'],
                 ];
+
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+
+                // Card Charge J
+                $business = Business::find($business_id);
+                $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
+                $input_final_total_temp = 0;
+                $invoice_total_total_before_tax_temp = 0;
+                $invoice_total_final_total_temp = 0;
+                foreach($input['payment'] as $payment) {
+                    if($payment['method']  == 'card'){
+                        $input_final_total_temp = $input_final_total_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
+                        $invoice_total_total_before_tax_temp = $invoice_total_total_before_tax_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
+                        $invoice_total_final_total_temp = $invoice_total_final_total_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
+                    } else {
+                        $input_final_total_temp = $input_final_total_temp + $payment['amount'];
+                        $invoice_total_total_before_tax_temp = $invoice_total_total_before_tax_temp + $payment['amount'];
+                        $invoice_total_final_total_temp = $invoice_total_final_total_temp + $payment['amount'];
+                    }
+                }
+                $input['final_total'] = $input_final_total_temp;
+                $invoice_total['total_before_tax'] = $invoice_total_total_before_tax_temp;
+                $invoice_total['final_total'] = $invoice_total_final_total_temp;
 
                 DB::beginTransaction();
 
@@ -475,6 +498,7 @@ class SellPosController extends Controller
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
+                
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
 
                 //Upload Shipping documents
@@ -635,22 +659,22 @@ class SellPosController extends Controller
                     'msg' => trans('messages.something_went_wrong'),
                 ];
             }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
-            $msg = trans('messages.something_went_wrong');
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+        //     $msg = trans('messages.something_went_wrong');
 
-            if (get_class($e) == \App\Exceptions\PurchaseSellMismatch::class) {
-                $msg = $e->getMessage();
-            }
-            if (get_class($e) == \App\Exceptions\AdvanceBalanceNotAvailable::class) {
-                $msg = $e->getMessage();
-            }
+        //     if (get_class($e) == \App\Exceptions\PurchaseSellMismatch::class) {
+        //         $msg = $e->getMessage();
+        //     }
+        //     if (get_class($e) == \App\Exceptions\AdvanceBalanceNotAvailable::class) {
+        //         $msg = $e->getMessage();
+        //     }
 
-            $output = ['success' => 0,
-                'msg' => $msg,
-            ];
-        }
+        //     $output = ['success' => 0,
+        //         'msg' => $msg,
+        //     ];
+        // }
 
         if (! $is_direct_sale) {
             return $output;
@@ -2141,7 +2165,7 @@ class SellPosController extends Controller
             $payment_link = $this->transactionUtil->getInvoicePaymentLink($transaction->id, $transaction->business_id);
 
             $paid_amount = $this->transactionUtil->getTotalPaid($transaction->id);
-            $total_payable = $transaction->final_total - $paid_amount;
+            $total_payable = ($transaction->final_total - $paid_amount);
 
             $pay_function = 'pay_'.$request->gateway;
 
@@ -2164,6 +2188,8 @@ class SellPosController extends Controller
                     'business_id' => $transaction->business_id,
                     'payment_ref_no' => $payment_ref_no,
                 ];
+
+
 
                 $tp = TransactionPayment::create($data);
 

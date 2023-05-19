@@ -16,6 +16,7 @@
 		$is_rp_enabled = session('business.enable_rp') == 1 ? true : false;
 	@endphp
 	{!! Form::open(['url' => action([\App\Http\Controllers\SellPosController::class, 'store']), 'method' => 'post', 'id' => 'add_pos_sell_form' ]) !!}
+	<input type="hidden" id="card_charge_percent_hidden" value="{{ $business_details->card_charge }}">
 	<div class="row mb-12">
 		<div class="col-md-12">
 			<div class="row">
@@ -26,6 +27,8 @@
 							<!-- sub_type -->
 							{!! Form::hidden('sub_type', isset($sub_type) ? $sub_type : null) !!}
 							<input type="hidden" id="item_addition_method" value="{{$business_details->item_addition_method}}">
+							
+							
 								@include('sale_pos.partials.pos_form')
 
 								@include('sale_pos.partials.pos_form_totals')

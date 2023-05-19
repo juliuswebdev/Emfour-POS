@@ -780,6 +780,11 @@ $(document).ready(function() {
 
     //Finalize without showing payment options
     $('button.pos-express-finalize').click(function() {
+        var total_payable = parseFloat($('#total_payable').text());
+        var card_charge_percent = parseFloat($('#card_charge_percent_hidden').val()) / 100;
+        var total_payable = $('#__symbol').val() +' '+ (total_payable + ( total_payable * card_charge_percent ))
+        $('#card_total_payable').text( total_payable );
+       
 
         //Check if product is present or not.
         if ($('table#pos_table tbody').find('.product_row').length <= 0) {
@@ -1004,28 +1009,26 @@ $(document).ready(function() {
                             }
                             $('#modal_payment').modal('hide');
 
-                            var data_authorize_net = {
-                                'invoice_id' : result.receipt.print_title,
-                                'amount' : result.receipt.receipt_details.subtotal_unformatted,
-                                'card_number' : $('#card_number').val(),
-                                'card_first_name' : $('#card_first_name').val(),
-                                'card_last_name' : $('#card_last_name').val(),
-                                'card_year' : $('#card_year').val(),
-                                'card_month' : $('#card_month').val(),
-                                'card_cvv' : $('#card_security').val()
-                            };
-                            console.log(data_authorize_net);
-                            $.ajax({
-                                method: 'POST',
-                                url: $('#api-authorize-net').val(),
-                                data: data_authorize_net,
-                                dataType: 'json',
-                                success: function(result) {
-                                    console.log(result);
-                                }
-                            });
-
-
+                            // var data_authorize_net = {
+                            //     'invoice_id' : result.receipt.print_title,
+                            //     'amount' : result.receipt.receipt_details.subtotal_unformatted,
+                            //     'card_number' : $('#card_number').val(),
+                            //     'card_first_name' : $('#card_first_name').val(),
+                            //     'card_last_name' : $('#card_last_name').val(),
+                            //     'card_year' : $('#card_year').val(),
+                            //     'card_month' : $('#card_month').val(),
+                            //     'card_cvv' : $('#card_security').val()
+                            // };
+                           
+                            // $.ajax({
+                            //     method: 'POST',
+                            //     url: $('#api-authorize-net').val(),
+                            //     data: data_authorize_net,
+                            //     dataType: 'json',
+                            //     success: function(result) {
+                            //         console.log(result);
+                            //     }
+                            // });
 
                             toastr.success(result.msg+ 'test');
 
@@ -1033,6 +1036,7 @@ $(document).ready(function() {
 
                             //Check if enabled or not
                             if (result.receipt.is_enabled) {
+                                console.log(result.receipt);
                                 pos_print(result.receipt);
                             }
                         } else {

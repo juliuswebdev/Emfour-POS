@@ -1,3 +1,4 @@
+
 <table style="width:100%;">
 	<thead>
 		<tr>
@@ -723,6 +724,7 @@
         @endif
     @endif
 </div>
+
 
 @if(!empty($receipt_details->additional_notes))
 	<div class="row ">

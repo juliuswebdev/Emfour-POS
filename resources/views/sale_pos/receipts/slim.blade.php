@@ -10,7 +10,6 @@
     </head>
     <body>
         <div class="ticket">
-        	
 			@if(empty($receipt_details->letter_head))
 				@if(!empty($receipt_details->logo))
 					<div class="text-box centered">
@@ -25,7 +24,6 @@
 						<span class="headings">{!! $receipt_details->header_text !!}</span>
 						<br/>
 					@endif
-
 					<!-- business information here -->
 					@if(!empty($receipt_details->display_name))
 						<span class="headings">
