@@ -53,7 +53,7 @@
 							@endphp
 						@endif
 
-						@if($row->res_line_order_status)
+						@if($row->res_line_order_status == "served")
 							@php
 								$served_btn_bg = 'bg-grey';
 							@endphp
