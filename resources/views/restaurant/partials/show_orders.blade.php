@@ -47,15 +47,18 @@
 							@endphp
 						@endif
 						
-						@if( ($row->served_at == NULL && $row->res_line_order_status == null) || ($row->res_line_order_status == "served"))
+						@if( ($row->served_at == NULL && $row->res_line_order_status == null) || ($row->res_line_order_status == "served" && $row->served_at == NULL) || ($row->res_line_order_status == "cooked" && $row->served_at == NULL) )
 							@php
 								$served_clickable = false;
 							@endphp
 						@endif
 
+					
+
 						@if($row->res_line_order_status == "served")
 							@php
 								$served_btn_bg = 'bg-grey';
+								$served_clickable = false;
 							@endphp
 						@endif
 						
