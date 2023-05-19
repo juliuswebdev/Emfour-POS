@@ -175,51 +175,58 @@
 			<div class="modal-body">
 				<div class="row">
 					<div class="col-md-12">
-		<input type="hidden" value="{{ route('api.authorize-net') }}" id="api-authorize-net">								
-		<div class="col-md-4">
-			<div class="form-group">
-				{!! Form::label("card_number", __('lang_v1.card_no')) !!}
-				{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.card_no'), 'id' => "card_number", 'autofocus']); !!}
-			</div>
-		</div>
-		<div class="col-md-4">
-			<div class="form-group">
-				{!! Form::label("card_holder_name", __('lang_v1.card_holder_name')) !!}
-				{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.card_holder_name'), 'id' => "card_holder_name"]); !!}
-			</div>
-		</div>
-		<div class="col-md-4">
-			<div class="form-group">
-				{!! Form::label("card_transaction_number",__('lang_v1.card_transaction_no')) !!}
-				{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.card_transaction_no'), 'id' => "card_transaction_number"]); !!}
-			</div>
-		</div>
-		<div class="clearfix"></div>
-		<div class="col-md-3">
-			<div class="form-group">
-				{!! Form::label("card_type", __('lang_v1.card_type')) !!}
-				{!! Form::select("", ['visa' => 'Visa', 'master' => 'MasterCard'], 'visa',['class' => 'form-control select2', 'id' => "card_type" ]); !!}
-			</div>
-		</div>
-		<div class="col-md-3">
-			<div class="form-group">
-				{!! Form::label("card_month", __('lang_v1.month')) !!}
-				{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.month'),
-				'id' => "card_month" ]); !!}
-			</div>
-		</div>
-		<div class="col-md-3">
-			<div class="form-group">
-				{!! Form::label("card_year", __('lang_v1.year')) !!}
-				{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.year'), 'id' => "card_year" ]); !!}
-			</div>
-		</div>
-		<div class="col-md-3">
-			<div class="form-group">
-				{!! Form::label("card_security",__('lang_v1.security_code')) !!}
-				{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.security_code'), 'id' => "card_security"]); !!}
-			</div>
-		</div>
+						<input type="hidden" value="{{ route('api.authorize-net') }}" id="api-authorize-net">							
+						<div class="col-md-4">
+							<div class="form-group">
+								{!! Form::label("card_number", __('lang_v1.card_no')) !!}
+								{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.card_no'), 'id' => "card_number", 'autofocus']); !!}
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group">
+								{!! Form::label("card_holder_name", __('lang_v1.card_holder_name')) !!}
+								{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.card_holder_name'), 'id' => "card_holder_name"]); !!}
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="form-group">
+								{!! Form::label("card_transaction_number",__('lang_v1.card_transaction_no')) !!}
+								{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.card_transaction_no'), 'id' => "card_transaction_number"]); !!}
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<div class="col-md-3">
+							<div class="form-group">
+								{!! Form::label("card_type", __('lang_v1.card_type')) !!}
+								{!! Form::select("", ['visa' => 'Visa', 'master' => 'MasterCard'], 'visa',['class' => 'form-control select2', 'id' => "card_type" ]); !!}
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="form-group">
+								{!! Form::label("card_month", __('lang_v1.month')) !!}
+								{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.month'),
+								'id' => "card_month" ]); !!}
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="form-group">
+								{!! Form::label("card_year", __('lang_v1.year')) !!}
+								{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.year'), 'id' => "card_year" ]); !!}
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="form-group">
+								{!! Form::label("card_security",__('lang_v1.security_code')) !!}
+								{!! Form::text("", null, ['class' => 'form-control', 'placeholder' => __('lang_v1.security_code'), 'id' => "card_security"]); !!}
+							</div>
+						</div>
+						<div class="col-md-12">
+							<strong>Note:</strong>  @lang('lang_v1.additional_card_charge')
+							{{ $business_details->card_charge }}%
+						</div>
+						<div class="col-md-12">
+							<strong>Total Payable: </strong><span id="card_total_payable"></span>
+						</div>
 					</div>
 				</div>
 			</div>
