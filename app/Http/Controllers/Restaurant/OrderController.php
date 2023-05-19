@@ -123,7 +123,7 @@ class OrderController extends Controller
                         ->where('t.business_id', $business_id)
                         ->where('transaction_id', $id)
                         ->where('product_id', $product_id)
-                        ->update([$stage => 1]);
+                        ->update([$stage => date('Y-m-d H:i:s')]);
 
             $output = [
                 'success' => 1,

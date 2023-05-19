@@ -13,7 +13,7 @@ class TransactionSellLine extends Model
      */
     protected $guarded = ['id'];
 
-    protected $appends = ['display_cook_start_time', 'display_cook_end_time', 'display_cook_time'];
+    protected $appends = ['display_cook_start_time', 'display_cook_end_time', 'display_served_time'];
 
     public function transaction()
     {
@@ -119,15 +119,10 @@ class TransactionSellLine extends Model
         return date("h:i a", strtotime($this->cook_end));
     }
 
-    public function getDisplayCookTimeAttribute(){
-        if($this->cook_start != null && $this->cook_end != null){
-            $to_time = strtotime($this->cook_start);
-            $from_time = strtotime($this->cook_end);
-            return round(abs($to_time - $from_time) / 60). " minutes";
-        }else{
-            return "";
-        }
-       
+    public function getDisplayServedTimeAttribute(){
+        return date("h:i a", strtotime($this->served_at));
     }
+
+    
 
 }

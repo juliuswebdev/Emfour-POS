@@ -1004,36 +1004,34 @@ $(document).ready(function() {
                             }
                             $('#modal_payment').modal('hide');
 
-                            var data_authorize_net = {
-                                'invoice_id' : result.receipt.print_title,
-                                'amount' : result.receipt.receipt_details.subtotal_unformatted,
-                                'card_number' : $('#card_number').val(),
-                                'card_first_name' : $('#card_first_name').val(),
-                                'card_last_name' : $('#card_last_name').val(),
-                                'card_year' : $('#card_year').val(),
-                                'card_month' : $('#card_month').val(),
-                                'card_cvv' : $('#card_security').val()
-                            };
-                            console.log(data_authorize_net);
-                            $.ajax({
-                                method: 'POST',
-                                url: $('#api-authorize-net').val(),
-                                data: data_authorize_net,
-                                dataType: 'json',
-                                success: function(result) {
-                                    console.log(result);
+                            if(result.receipt.print_title == undefined){
+                                toastr.success(result.msg+ 'test');
+                                reset_pos_form();
+                                //Check if enabled or not
+                                if (result.receipt.is_enabled) {
+                                    pos_print(result.receipt);
                                 }
-                            });
-
-
-
-                            toastr.success(result.msg+ 'test');
-
-                            reset_pos_form();
-
-                            //Check if enabled or not
-                            if (result.receipt.is_enabled) {
-                                pos_print(result.receipt);
+                            }else{
+                                var data_authorize_net = {
+                                    'invoice_id' : result.receipt.print_title,
+                                    'amount' : result.receipt.receipt_details.subtotal_unformatted,
+                                    'card_number' : $('#card_number').val(),
+                                    'card_first_name' : $('#card_first_name').val(),
+                                    'card_last_name' : $('#card_last_name').val(),
+                                    'card_year' : $('#card_year').val(),
+                                    'card_month' : $('#card_month').val(),
+                                    'card_cvv' : $('#card_security').val()
+                                };
+                                console.log(data_authorize_net);
+                                $.ajax({
+                                    method: 'POST',
+                                    url: $('#api-authorize-net').val(),
+                                    data: data_authorize_net,
+                                    dataType: 'json',
+                                    success: function(result) {
+                                        console.log(result);
+                                    }
+                                });
                             }
                         } else {
                             toastr.error(result.msg);
