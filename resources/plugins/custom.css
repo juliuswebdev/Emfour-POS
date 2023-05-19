@@ -672,3 +672,27 @@ background-image: linear-gradient(to right, #3c3c4e, #245b80);
     transform: translate(230px, 0); } }
 
 /*# sourceMappingURL=custom.css.map */
+
+.d-none{
+  display: none !important;
+}
+.kitchen-order-table-wrapper{
+  height: 190px;
+  overflow: auto;
+}
+.smt-5px{
+  margin-top: 5px;
+}
+.smb-5px{
+  margin-bottom: 5px;
+}
+
+.kit-fix-w-label {
+  padding: 5px 5px;
+  min-width: 60px !important;
+  display: inline-block !important
+}
+
+.kit-fix-w-label.bg-grey, .btn-flat.bg-grey{
+  background: #a9a9a9b3;
+}
