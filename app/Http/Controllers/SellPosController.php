@@ -382,14 +382,16 @@ class SellPosController extends Controller
                 $invoice_total_total_before_tax_temp = 0;
                 $invoice_total_final_total_temp = 0;
                 foreach($input['payment'] as $payment) {
-                    if($payment['method']  == 'card'){
-                        $input_final_total_temp = $input_final_total_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
-                        $invoice_total_total_before_tax_temp = $invoice_total_total_before_tax_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
-                        $invoice_total_final_total_temp = $invoice_total_final_total_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
-                    } else {
-                        $input_final_total_temp = $input_final_total_temp + $payment['amount'];
-                        $invoice_total_total_before_tax_temp = $invoice_total_total_before_tax_temp + $payment['amount'];
-                        $invoice_total_final_total_temp = $invoice_total_final_total_temp + $payment['amount'];
+                    if(isset($payment['method'])) {
+                        if($payment['method']  == 'card'){
+                            $input_final_total_temp = $input_final_total_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
+                            $invoice_total_total_before_tax_temp = $invoice_total_total_before_tax_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
+                            $invoice_total_final_total_temp = $invoice_total_final_total_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
+                        } else {
+                            $input_final_total_temp = $input_final_total_temp + $payment['amount'];
+                            $invoice_total_total_before_tax_temp = $invoice_total_total_before_tax_temp + $payment['amount'];
+                            $invoice_total_final_total_temp = $invoice_total_final_total_temp + $payment['amount'];
+                        }
                     }
                 }
                 $input['final_total'] = $input_final_total_temp;
