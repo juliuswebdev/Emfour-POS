@@ -3052,6 +3052,7 @@ function get_contact_due(id) {
     });
 }
 
+
 function submitQuickContactForm(form) {
     var data = $(form).serialize();
     $.ajax({
@@ -3231,6 +3232,31 @@ function GetCardType(number)
 
     return "";
 }
+
+function cardChargeSplitPayment()
+{
+    var charge = 0;
+    var symbol = $('#__symbol').val();
+    var card_charge_percent = parseFloat($('#card_charge_percent_hidden').val()) / 100;
+    $('.payment_types_dropdown').each(function(){
+        var val = $(this).val();
+        if(val === 'card') {
+           var parent = $(this).parents('.payment_row');
+           var amount = parent.find('.payment-amount').val();
+           charge += amount * card_charge_percent;
+           //console.log('test: ', amount * card_charge_percent);
+        }
+    });
+    $('.additional_card_charge_split_payment').text(symbol +' '+ charge.toFixed(2))
+}
+
+$(document).on('change', '.payment_types_dropdown', function(){
+    cardChargeSplitPayment();
+});
+
+$(document).on('keyup', '.payment-amount', function(){
+    cardChargeSplitPayment();
+});
 
 $(document).on('hidden.bs.modal', '.view_modal', function(){
     if (service_staff_availability_interval !== null) {
