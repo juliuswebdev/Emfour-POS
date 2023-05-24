@@ -75,7 +75,7 @@
 							</td>
 							<td>
 								<div>
-									<div>
+									<div class="status-inline-block">
 
 										@if($row->cook_start == null && $row->cook_end == null)
 											@php
@@ -100,11 +100,11 @@
 											</span>
 										</a>
 										@if($row->cook_start != null)
-										<span class="fs-12">&nbsp;{{ $row->display_cook_start_time }}</span>
+											<br><span class="fs-12">&nbsp;{{ $row->display_cook_start_time }}</span>
 										@endif
 									</div>
 
-									<div class="smt-5px smb-5px">
+									<div class="smt-5px smb-5px status-inline-block">
 
 										@if($row->cook_end == null && $row->cook_start == null)
 											@php
@@ -133,14 +133,12 @@
 											>{{ __('lang_v1.ready') }} </span>
 										</a>
 										@if($row->cook_end != null)
-											<span class="fs-12">&nbsp;{{ $row->display_cook_end_time }}</span>
+											<br><span class="fs-12">&nbsp;{{ $row->display_cook_end_time }}</span>
 										@endif
 									</div>
 									
-									
-									
 									@if($orders_for == 'waiter' && $order->res_order_status != 'served')
-									<div class="smt-5px smb-5px">
+									<div class="smt-5px smb-5px status-inline-block">
 
 										@if($row->cook_start != null && $row->cook_end != null && $row->served_at == null)
 											@php
@@ -169,7 +167,7 @@
 										</a>
 
 										@if($row->served_at != null)
-											<span class="fs-12">&nbsp;{{ $row->display_served_time }}</span>
+											<br><span class="fs-12">&nbsp;{{ $row->display_served_time }}</span>
 										@endif
 
 									</div>

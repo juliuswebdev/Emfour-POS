@@ -103,6 +103,21 @@ $(document).ready(function() {
         });
     }
 
+    $('#restaurant-search-order').submit(function(e){
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            context: this,
+            method: "GET",
+            url: $(this).attr("action"),
+            data: data,
+            success: function(result) {
+                $('#restaurant-search-order_result').html(result);
+                $('.btn-search').removeAttr('disabled');
+            }
+        });
+    });
+
     $('.search-check').submit(function(e){
         e.preventDefault();
         var data = $(this).serialize();

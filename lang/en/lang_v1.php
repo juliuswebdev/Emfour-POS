@@ -1536,4 +1536,11 @@ return [
     'mark_as_completed' => 'Mark as Completed',
     'cooking_state_update_message' => 'Cooking state has been updated.',
     'order_item_served_message' => 'Order item has been served.',
+    'checkout' => 'Checkout',
+    'salon_checkout' => 'Salon Checkout',
+    'restaurant_checkout' => 'Restaurant Checkout',
+    'checkout_details' => 'Checkout Details',
+    'search_by_1' => 'Search by Invoice, Table name...',
+    'search_by_2' => 'Search by Reference No, Phone...',
+    'search' => 'Search'
 ];

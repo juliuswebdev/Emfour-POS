@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Restaurant;
 
 use App\TransactionSellLine;
+use App\Transaction;
 use App\User;
 use App\Utils\RestaurantUtil;
 use App\Utils\BusinessUtil;
@@ -206,4 +207,42 @@ class OrderController extends Controller
 
         return $output;
     }
+
+
+    public function searchOrderByStatus(Request $request, $res_line_order_status)
+    {
+
+        if(request()->ajax()) {
+            $q = $request->input('search_query');
+
+            $query = Transaction::leftJoin('transaction_sell_lines', 'transaction_sell_lines.transaction_id', '=', 'transactions.id')
+            ->leftJoin('res_tables', 'res_tables.id', '=', 'transactions.res_table_id');
+
+            if($q) {
+                $query->where('transactions.invoice_no', '=', $q)->orWhere('res_tables.name', '=', $q);
+            }
+
+            $transactions = $query->where('transaction_sell_lines.res_line_order_status', '=', $res_line_order_status)
+            ->where('transactions.final_total', '=', 0.0000)
+            ->select(
+                'transactions.id as id',
+                'transactions.invoice_no as invoice_no',
+                'transactions.res_table_id as res_table_id',
+                'transactions.res_waiter_id as res_waiter_id',
+                'res_tables.name as table_name',
+                'transactions.final_total as final_total'
+            )
+            ->with('sell_lines')
+            ->get();
+            
+            if(count($transactions) > 0) {
+                return view('restaurant.orders.checkout-result', compact('transactions'));
+            } else {
+                return 'No Result Found!';
+            }
+        }
+
+    }
+
+
 }

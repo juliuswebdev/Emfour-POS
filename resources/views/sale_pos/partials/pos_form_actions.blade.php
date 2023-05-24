@@ -13,8 +13,11 @@
 					<span id="total_payable" class="text-success lead text-bold text-right">0</span>
 				</div>
 			@endif
-            @if(in_array('booking', $enabled_modules) && (auth()->user()->can('crud_all_bookings') || auth()->user()->can('crud_own_bookings')))
-				<button type="button" data-toggle="modal" data-target="#booking-checkout" class="btn bg-primary">Checkout</button>
+			@if($business_details->business_type_id == 1)
+				<button type="button" data-toggle="modal" data-target="#restaurant-checkout" title="@lang('lang_v1.restaurant_checkout')" class="btn bg-primary">@lang('lang_v1.checkout')</button>
+			@endif
+            @if($business_details->business_type_id == 2)
+				<button type="button" data-toggle="modal" data-target="#booking-checkout" title="@lang('lang_v1.salon_checkout')" class="btn bg-primary">@lang('lang_v1.checkout')</button>
 			@endif
 			<button type="button" class="@if($is_mobile) col-xs-6 @endif btn bg-info text-white btn-default btn-flat @if($pos_settings['disable_draft'] != 0) hide @endif" id="pos-draft" @if(!empty($only_payment)) disabled @endif><i class="fas fa-edit"></i> @lang('sale.draft')</button>
 			<button type="button" class="btn btn-default bg-yellow btn-flat @if($is_mobile) col-xs-6 @endif" id="pos-quotation" @if(!empty($only_payment)) disabled @endif><i class="fas fa-edit"></i> @lang('lang_v1.quotation')</button>

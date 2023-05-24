@@ -108,32 +108,28 @@
 
 @include('sale_pos.partials.weighing_scale_modal')
 
+@include('restaurant.orders.checkout-modal')
 
-
-@if(in_array('booking', $enabled_modules) && (auth()->user()->can('crud_all_bookings') || auth()->user()->can('crud_own_bookings')))
-	@php
-		$business_id = request()->session()->get('user.business_id');
-		$business = App\Business::find($business_id);
-	@endphp				
+@if($business_details->business_type_id == 2)		
 	<div class="modal fade in" tabindex="-1" role="dialog" id="booking-checkout">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-					<h4 class="modal-title">Checkout Details</h4>
+					<h4 class="modal-title">@lang('lang_v1.checkout_details')</h4>
 				</div>
 				<div class="modal-body">
 					<!-- /.box-header -->
 					<div class="box-body">
-						<form action="{{ action('\App\Http\Controllers\Restaurant\BookingController@getBookings', $business->slug) }}" class="form search-check" method="post">
+						<form action="{{ action('\App\Http\Controllers\Restaurant\BookingController@getBookings', $business_details->slug) }}" class="form search-check" method="post">
 							<label>Search: </label>
 							<div class="row">
 								<div class="col-md-10">
 									<input type="hidden" name="from" value="checkin">
-									<input type="text" placeholder="Search by Reference No, Phone..." name="search_query" class="form-control">
+									<input type="text" placeholder="@lang('lang_v1.search_by_2')" name="search_query" class="form-control">
 								</div>
 								<div class="col-md-2">
-									<button type="submit" class="btn btn-primary btn-search">Search</button>
+									<button type="submit" class="btn btn-primary btn-search">@lang('lang_v1.search')</button>
 								</div>
 							</div>
 						</form>
@@ -145,6 +141,8 @@
 		</div>
 	</div>
 @endif
+
+
 
 
 @stop

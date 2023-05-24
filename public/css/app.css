@@ -1205,4 +1205,34 @@ margin-bottom: 20px;
 padding: 0 30px;
 }
 
+#restaurant-search-order_result {
+  margin-top: 20px;
+}
 
+.col-left,
+.col-right {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.col-left {
+  width: 70%;
+}
+
+.col-right {
+  width: 9%;
+}
+
+.kitchen-wrapper  #orders_div a[href="javascript:;"].bg-red {
+  cursor: default;
+  background: #a9a9a9b3!important;
+}
+
+.status-inline-block {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.status-inline-block .fs-12 {
+  font-size: 80%;
+}
