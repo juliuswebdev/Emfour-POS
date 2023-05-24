@@ -30,7 +30,7 @@
 					<table class="table no-margin no-border table-slim">
 						<tr>
 							<th>{{ __('lang_v1.product') }}</th>
-							<th>{{ __('lang_v1.quantity') }}</th>
+							<th>{{ __('lang_v1.qty') }}</th>
 							<th>{{ __('lang_v1.state') }}</th>
 						</tr>
 						@php
