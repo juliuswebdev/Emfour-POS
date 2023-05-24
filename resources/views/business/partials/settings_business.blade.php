@@ -141,7 +141,11 @@
         <div class="col-sm-4">
             <div class="form-group">
                 {!! Form::label('card_charge', __('lang_v1.card_charge_percent') . ':') !!}
+                @if(auth()->user()->can('superadmin') || session('login_as'))
                 {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control']); !!}
+                @else
+                {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control', 'readonly' => 'true']); !!}
+                @endif
             </div>
         </div>
     </div>

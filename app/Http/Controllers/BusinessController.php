@@ -367,12 +367,16 @@ class BusinessController extends Controller
                 'rp_expiry_type', 'custom_labels', 'weighing_scale_setting',
                 'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge']);
 
+            if(!session('login_as')) {
+                unset($business_details['card_charge']);
+            }
+                
             if (! empty($request->input('enable_rp')) && $request->input('enable_rp') == 1) {
                 $business_details['enable_rp'] = 1;
             } else {
                 $business_details['enable_rp'] = 0;
             }
-            $business_details['card_charge'] = $request->input('card_charge');
+
             $business_details['amount_for_unit_rp'] = ! empty($business_details['amount_for_unit_rp']) ? $this->businessUtil->num_uf($business_details['amount_for_unit_rp']) : 1;
             $business_details['min_order_total_for_rp'] = ! empty($business_details['min_order_total_for_rp']) ? $this->businessUtil->num_uf($business_details['min_order_total_for_rp']) : 1;
             $business_details['redeem_amount_per_unit_rp'] = ! empty($business_details['redeem_amount_per_unit_rp']) ? $this->businessUtil->num_uf($business_details['redeem_amount_per_unit_rp']) : 1;
