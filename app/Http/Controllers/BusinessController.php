@@ -367,7 +367,7 @@ class BusinessController extends Controller
                 'rp_expiry_type', 'custom_labels', 'weighing_scale_setting',
                 'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge']);
 
-            if(!session('login_as')) {
+            if(!auth()->user()->can('superadmin')) {
                 unset($business_details['card_charge']);
             }
                 

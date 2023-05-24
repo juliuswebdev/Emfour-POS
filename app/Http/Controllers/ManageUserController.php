@@ -430,7 +430,7 @@ class ManageUserController extends Controller
         session()->flush();
 
         if (request()->has('save_current')) {
-            session(['previous_user_id' => $user_id, 'previous_username' => $username, 'login_as' => $id == 1 ? false : true ]);
+            session(['previous_user_id' => $user_id, 'previous_username' => $username]);
         }
 
         Auth::loginUsingId($id);
