@@ -210,6 +210,7 @@ return [
     'brand_ins' => 'Name of the brand',
     'brand_ins2' => 'If not found new brand with the given name will be created',
     'unit_ins' => 'Name of the unit',
+    'categories' => 'Categories',
     'category_ins' => 'Name of the Category',
     'category_ins2' => 'If not found new category with the given name will be created',
     'sub_category_ins' => 'Name of the Sub-Category',
