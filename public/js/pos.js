@@ -1348,6 +1348,7 @@ $(document).ready(function() {
     }
 
     //Show product list.
+
     var product_category_select = $('select#product_category').val();
     var product_brand_select = $('select#product_brand').val();
     if(product_category_select == 'all' || product_brand_select == 'all') {
@@ -1362,18 +1363,19 @@ $(document).ready(function() {
         is_enabled_stock,
         device_model_id
     );
-    $('select#product_category, select#product_brand, select#select_location_id').on('change', function(e) {
+
+    $('input[name="category_id"], select#product_brand, select#select_location_id').on('change', function(e) {
+       
         $('input#suggestion_page').val(1);
         var location_id = $('input#location_id').val();
         if (location_id != '' || location_id != undefined) {
             get_product_suggestion_list(
-                $('select#product_category').val(),
+                $('input[name="category_id"]:checked').attr('value'),
                 $('select#product_brand').val(),
                 $('input#location_id').val(),
                 null
             );
         }
-
         get_featured_products();
     });
 
