@@ -14,23 +14,23 @@
 	@if(!empty($categories))
 		<div class="col-md-12" id="product_category_div">
 			<h4>@lang('lang_v1.categories')</h4>
-			<div class="row">
-				<div class="col-md-3">
-					<input type="radio" name="category_id" class="" value="all" id="cat-parent-0">
+			<div>
+				<div style="display: inline-block; margin-right: 10px;">
+					<input type="radio" name="category_id" value="all" id="cat-parent-0">
 					<label for="cat-parent-0">@lang('lang_v1.all_category')</label>
 				</div>
 				@foreach($categories as $category)
-					<div class="col-md-2">
-						<input type="radio" name="category_id" class="" value="{{$category['id']}}" id="cat-parent-{{$category['id']}}">
+					<div style="display: inline-block; margin-right: 10px;">
+						<input type="radio" name="category_id" value="{{$category['id']}}" id="cat-parent-{{$category['id']}}">
 						<label for="cat-parent-{{$category['id']}}">{{$category['name']}}</label>
 					</div>
 				@endforeach
 				@foreach($categories as $category)
 					@if(!empty($category['sub_categories']))
 							@foreach($category['sub_categories'] as $sc)
-								<div class="col-md-2">
+								<div style="display: inline-block; margin-right: 10px;">
 									<label for="cat-child-{{$sc['id']}}">{{$sc['name']}}</label>
-									<input type="radio" name="category_id" class="" value="{{$sc['id']}}" id="cat-child-{{$sc['id']}}">
+									<input type="radio" name="category_id" value="{{$sc['id']}}" id="cat-child-{{$sc['id']}}">
 								</div>
 							@endforeach
 					@endif

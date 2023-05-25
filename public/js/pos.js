@@ -1322,7 +1322,7 @@ $(document).ready(function() {
 
     //Show product list.
 
-    var product_category_select = $('select#product_category').val();
+    var product_category_select = $('input[name="category_id"]:checked').attr('value');
     var product_brand_select = $('select#product_brand').val();
     if(product_category_select == 'all' || product_brand_select == 'all') {
         product_category_select = 99999999999999;
