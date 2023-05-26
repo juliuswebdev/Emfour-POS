@@ -569,8 +569,16 @@
 			@if(!empty($receipt_details->payments))
 				@foreach($receipt_details->payments as $payment)
 					<div class="flex-box">
-						<p class="width-50 text-left">{{$payment['method']}} ({{$payment['date']}}) </p>
-						<p class="width-50 text-right">{{$payment['amount']}}</p>
+						<p class="width-50 text-right">{{$payment['method']}} ({{$payment['date']}}) </p>
+						<p class="width-50 text-right">
+							@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
+							{{$payment['original_amount']}}<br>
+							@lang('lang_v1.card_charge') {{$payment['card_charge_percent']}}%
+							{{$payment['card_charge_amount']}}
+							@else
+							{{$payment['amount']}}
+							@endif
+						</p>
 					</div>
 				@endforeach
 			@endif
