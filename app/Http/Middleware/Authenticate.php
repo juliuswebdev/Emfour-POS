@@ -21,7 +21,11 @@ class Authenticate extends Middleware
 
     protected function unauthenticated($request, array $guards)
     {
-        abort(response()->json(['error' => 'Token Mismatch!.'], 401));
+        if( $request->is('api/*')){
+            abort(response()->json(['error' => 'Token Mismatch!.'], 401));
+        }else{
+            abort(redirect('/login'));
+        } 
     }
 
 }
