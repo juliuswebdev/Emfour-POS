@@ -150,21 +150,46 @@ class OrderingAppController extends Controller
         }
     }
 
-    public function getProduct($product_id)
+    public function getProduct(Request $request, $product_id)
     {
 
-        $product = Product::where('id', $product_id)->with(['variations'])->first();
-        $modifier_sets_temp = DB::table('res_product_modifier_sets')->where('product_id', $product->id)->get();
+        $get = $request->all();
 
-        $modifier_sets = [];
-        foreach($modifier_sets_temp as $item) {
-            $modifier_sets[] = Product::where('id', $item->modifier_set_id)->with(['variations'])->first();
+        $rules = [
+            'location_id' => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+
+            return response([
+                'message' => 'Missing parameters!',
+                'errors' => $validator->messages()
+            ], 401);
+
+        } else {
+
+
+            $product = Product::leftJoin('product_locations', 'product_locations.product_id', '=', 'products.id')
+            ->where('products.id', $product_id)
+            ->where('product_locations.location_id', $get['location_id'])
+            ->with(['variations'])->first();
+
+
+            $modifier_sets_temp = DB::table('res_product_modifier_sets')->where('product_id', $product->id)->get();
+
+            $modifier_sets = [];
+            foreach($modifier_sets_temp as $item) {
+                $modifier_sets[] = Product::where('id', $item->modifier_set_id)->with(['variations'])->first();
+            }
+        
+            return response([
+                'product' => $product,
+                'add_ons' => $modifier_sets
+            ], 200);
+
         }
-    
-        return response([
-            'product' => $product,
-            'add_ons' => $modifier_sets
-        ], 200);
         
     }
 
