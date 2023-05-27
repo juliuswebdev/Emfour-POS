@@ -123,6 +123,15 @@
 				            		<input type="hidden" id="total_paying_input">
 				            	</div>
 
+								<div class="col-md-12">
+									<hr>
+				            		<strong>
+				            			@lang('lang_v1.additional_card_charge'):  {{ $business_details->card_charge }}%
+				            		</strong>
+				            		<br/>
+				            		<span class="lead text-bold additional_card_charge_split_payment">0</span>
+				            	</div>
+
 				            	<div class="col-md-12">
 				            		<hr>
 				            		<strong>

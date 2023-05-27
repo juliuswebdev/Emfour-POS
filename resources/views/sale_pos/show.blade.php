@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-xl no-print" role="document">
+<div class="modal-dialog modal-xl no-print" role="documentxx">
   <div class="modal-content">
     <div class="modal-header">
     <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -236,6 +236,13 @@
                 <td><span class="display_currency" data-currency_symbol="true">{{ $payment_line->amount }}</span></td>
                 <td>
                   {{ $payment_types[$payment_line->method] ?? $payment_line->method }}
+
+                  @if($payment_types[$payment_line->method] == 'Card')
+                  <br>
+                  <small>{{ __('lang_v1.card_charge') }} {{ $payment_line->card_charge_percent }}%: </small>
+                  <span class="display_currency pull-right" data-currency_symbol="true">{{ $payment_line->card_charge_amount }}</span>
+                  @endif
+
                   @if($payment_line->is_return == 1)
                     <br/>
                     ( {{ __('lang_v1.change_return') }} )
