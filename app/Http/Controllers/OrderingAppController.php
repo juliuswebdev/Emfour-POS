@@ -66,8 +66,10 @@ class OrderingAppController extends Controller
                     short_code,
                     parent_id,
                     category_type,
-                    CONCAT('".env('APP_URL')."/img/default.png') as banner
+                    CONCAT('".env('APP_URL')."/uploads/category_logos/', logo) as banner
                 ")
+                ->where('parent_id', '=',  0)
+                ->with(['sub_categories'])
                 ->get();
 
             $tables = ResTable::where('business_id', $business_id)
