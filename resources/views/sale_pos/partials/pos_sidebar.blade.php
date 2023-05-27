@@ -14,23 +14,25 @@
 	@if(!empty($categories))
 		<div class="col-md-12" id="product_category_div">
 			<h4>@lang('lang_v1.categories')</h4>
-			<div>
-				<div style="display: inline-block; margin-right: 10px;">
-					<input type="radio" name="category_id" value="all" id="cat-parent-0">
+			<div class="cat-parent-area">
+				<div class="cat-container">
+					<input type="radio" name="category_id" value="all" id="cat-parent-0" data-id="0">
 					<label for="cat-parent-0">@lang('lang_v1.all_category')</label>
 				</div>
 				@foreach($categories as $category)
-					<div style="display: inline-block; margin-right: 10px;">
-						<input type="radio" name="category_id" value="{{$category['id']}}" id="cat-parent-{{$category['id']}}">
-						<label for="cat-parent-{{$category['id']}}">{{$category['name']}}</label>
+					<div class="cat-container">
+						<input type="radio" name="category_id" value="{{$category['id']}}" id="cat-parent-{{$category['id']}}" class="cat_parent" data-id="{{$category['id']}}">
+						<label for="cat-parent-{{$category['id']}}"><div class="cat_image"><img src=" {{ env('APP_URL')}}/uploads/category_logos/{{$category['logo']}} "></div> {{$category['name']}}</label>
 					</div>
 				@endforeach
+			</div>
+			<div class="cat-sub-area">
 				@foreach($categories as $category)
 					@if(!empty($category['sub_categories']))
 							@foreach($category['sub_categories'] as $sc)
-								<div style="display: inline-block; margin-right: 10px;">
-									<label for="cat-child-{{$sc['id']}}">{{$sc['name']}}</label>
-									<input type="radio" name="category_id" value="{{$sc['id']}}" id="cat-child-{{$sc['id']}}">
+								<div class="cat-container">
+									<input type="radio" name="category_id" value="{{$sc['id']}}" id="cat-child-{{$sc['id']}}" class="cat_parent_{{$sc['parent_id']}}">
+									<label for="cat-child-{{$sc['id']}}"><div class="cat_image"><img src=" {{ env('APP_URL')}}/uploads/category_logos/{{$sc['logo']}} "></div> {{$sc['name']}}</label>
 								</div>
 							@endforeach
 					@endif

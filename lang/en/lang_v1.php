@@ -212,6 +212,7 @@ return [
     'unit_ins' => 'Name of the unit',
     'categories' => 'Categories',
     'category_ins' => 'Name of the Category',
+    'category_logo' => 'Category Logo',
     'category_ins2' => 'If not found new category with the given name will be created',
     'sub_category_ins' => 'Name of the Sub-Category',
     'sub_category_ins2' => 'If not found new sub-category with the given name under the <br> parent Category will be created',
