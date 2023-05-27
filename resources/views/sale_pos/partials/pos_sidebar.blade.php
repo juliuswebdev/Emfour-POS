@@ -16,7 +16,7 @@
 			<h4>@lang('lang_v1.categories')</h4>
 			<div class="cat-parent-area">
 				<div class="cat-container">
-					<input type="radio" name="category_id" value="all" id="cat-parent-0" data-id="0">
+					<input type="radio" name="category_id" value="all" id="cat-parent-0" data-id="0" checked>
 					<label for="cat-parent-0">@lang('lang_v1.all_category')</label>
 				</div>
 				@foreach($categories as $category)
