@@ -57,6 +57,7 @@
                             @if($cat_code_enabled)
                                 <th>{{ $module_category_data['taxonomy_code_label'] ?? __( 'category.code' )}}</th>
                             @endif
+                            <th>@lang( 'lang_v1.category_logo' )</th>
                             <th>@lang( 'lang_v1.description' )</th>
                             <th>@lang( 'messages.action' )</th>
                         </tr>
