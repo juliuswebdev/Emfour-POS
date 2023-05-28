@@ -35,6 +35,8 @@
 
 								@include('sale_pos.partials.payment_modal')
 
+								@include('payment_device.list_modal')
+
 								@if(empty($pos_settings['disable_suspend']))
 									@include('sale_pos.partials.suspend_note_modal')
 								@endif
@@ -146,7 +148,6 @@
 	</div>
 @endif
 
-
 @stop
 @section('css')
 	<!-- include module css -->
@@ -177,4 +178,41 @@
             @endif
 	    @endforeach
 	@endif
+
+	@if(auth()->user()->can('access_payment_devices'))
+	<script>
+		$(document).ready(function(){
+			var user_default_payment_device = {{ auth()->user()->default_payment_device }};
+			if(user_default_payment_device == 0) {
+				$('#payment_device_modal').modal('show');
+			}
+			showDeviceList($('#select_location_id').val());
+			$('#select_location_id').change(function(){
+				showDeviceList($(this).val());
+			});
+			$(document).on('click', '.btn-select_device', function(){
+				var payment_device = $('input[name="payment_device"]:checked').val();
+				$.ajax({
+					method: 'POST',
+					url: '/modules/set-user-payment-device',
+					data : { payment_device },
+					success: function(result) {
+						toastr.success(result.msg);
+						$('#payment_device_modal').modal('hide');
+					}
+				});
+			});
+			function showDeviceList(location_id) {
+				$.ajax({
+					method: 'GET',
+					url: '/modules/payment-devices-list/' + location_id,
+					success: function(html) {
+						$('.payment_device_list').html(html);
+					}
+				});
+			}
+		})
+	</script>
+	@endif
+
 @endsection

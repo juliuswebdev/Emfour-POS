@@ -755,6 +755,14 @@ class AdminSidebarMenu
                             );
                         }
 
+                        if (auth()->user()->can('access_payment_devices')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\PaymentDevicesController::class, 'index']),
+                                __('payment_device.payment_devices'),
+                                ['icon' => 'fa fas fa-table', 'active' => request()->segment(1) == 'modules' && request()->segment(2) == 'payment-devices']
+                            );
+                        }
+
                         if (in_array('modifiers', $enabled_modules) && (auth()->user()->can('product.view') || auth()->user()->can('product.create'))) {
                             $sub->url(
                                 action([\App\Http\Controllers\Restaurant\ModifierSetsController::class, 'index']),

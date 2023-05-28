@@ -1395,8 +1395,8 @@
           <div class="col-md-12">
             <div class="checkbox">
               <label>
-                {!! Form::checkbox('permissions[]', 'access_printers', in_array('access_printers', $role_permissions),['class' => 'input-icheck']); !!}
-                {{ __('lang_v1.access_printers') }}
+                {!! Form::checkbox('permissions[]', 'access_payment_devices', in_array('access_payment_devices', $role_permissions),['class' => 'input-icheck']); !!}
+                {{ __('payment_device.access_payment_devices') }}
               </label>
             </div>
           </div>

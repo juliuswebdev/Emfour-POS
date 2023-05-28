@@ -60,6 +60,7 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationTemplateController;
 use App\Http\Controllers\WarrantyController;
+use App\Http\Controllers\PaymentDevicesController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -74,6 +75,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 include_once 'install_r.php';
+
+Route::get('/generate-migration', function() {
+    $exitCode = Artisan::call('migrate');
+    return '<h1>php artisan migrate</h1>';
+});
 
 Route::middleware(['setData'])->group(function () {
     Route::get('/', function () {
@@ -437,6 +443,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     //Restaurant module
     Route::prefix('modules')->group(function () {
         Route::resource('tables', Restaurant\TableController::class);
+        Route::resource('payment-devices', PaymentDevicesController::class);
+        Route::get('payment-devices-list/{location_id}', [PaymentDevicesController::class, 'list']);
+        Route::post('set-user-payment-device', [PaymentDevicesController::class, 'selectDefault']);
         Route::resource('modifiers', Restaurant\ModifierSetsController::class);
 
         //Map modifier to products

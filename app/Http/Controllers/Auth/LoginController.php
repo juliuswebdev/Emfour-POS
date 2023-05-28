@@ -67,10 +67,18 @@ class LoginController extends Controller
 
     public function logout()
     {
+        $user_id = request()->session()->get('user.id');
+        $user = User::find($user_id);
+        $user->default_payment_device = 0;
+        $user->update();
+        
         $this->businessUtil->activityLog(auth()->user(), 'logout');
 
         request()->session()->flush();
         \Auth::logout();
+
+   
+
 
         return redirect('/login');
     }
