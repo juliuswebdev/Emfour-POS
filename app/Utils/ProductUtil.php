@@ -1880,6 +1880,7 @@ class ProductUtil extends Util
                         'p.type',
                         'p.sku',
                         'p.id as product_id',
+                        'units.actual_name as actual_name',
                         'units.short_name as unit',
                         'u.short_name as second_unit',
                         'pv.name as product_variation',
@@ -1916,6 +1917,7 @@ class ProductUtil extends Util
         $output = [
             'variation' => $product_name,
             'unit' => $purchase_details->unit,
+            'actual_name' => $purchase_details->actual_name,
             'second_unit' => $purchase_details->second_unit,
             'total_purchase' => $purchase_details->total_purchase,
             'total_purchase_return' => $purchase_details->total_purchase_return,

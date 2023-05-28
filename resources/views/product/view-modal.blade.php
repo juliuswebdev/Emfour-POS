@@ -182,11 +182,12 @@
       		@endif
       	</div>
       	<div class="modal-footer">
+			<a href="{{ action('\App\Http\Controllers\ProductController@showSubUnitInventory', $product->id) }}" class="btn btn-primary">View Sub-Unit Inventory</a>
       		<button type="button" class="btn btn-primary no-print" 
-	        aria-label="Print" 
-	          onclick="$(this).closest('div.modal').printThis();">
-	        <i class="fa fa-print"></i> @lang( 'messages.print' )
-	      </button>
+				aria-label="Print" 
+				onclick="$(this).closest('div.modal').printThis();">
+				<i class="fa fa-print"></i> @lang( 'messages.print' )
+			</button>
 	      	<button type="button" class="btn btn-default no-print" data-dismiss="modal">@lang( 'messages.close' )</button>
 	    </div>
 	</div>

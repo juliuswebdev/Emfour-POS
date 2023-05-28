@@ -173,6 +173,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/products/download-excel', [ProductController::class, 'downloadExcel']);
 
     Route::get('/products/stock-history/{id}', [ProductController::class, 'productStockHistory']);
+    Route::get('/products/sub-unit-inventory/{id}', [ProductController::class, 'showSubUnitInventory']);
     Route::get('/delete-media/{media_id}', [ProductController::class, 'deleteMedia']);
     Route::post('/products/mass-deactivate', [ProductController::class, 'massDeactivate']);
     Route::get('/products/activate/{id}', [ProductController::class, 'activate']);
