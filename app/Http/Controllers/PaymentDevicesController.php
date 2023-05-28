@@ -307,24 +307,53 @@ class PaymentDevicesController extends Controller
 
     public function paymentDejavoo(Request $request)
     {
-        
-        $xml = '<request>
-                    <PaymentType>Credit</PaymentType>
-                    <TransType>Sale</TransType>
-                    <Amount>1.00</Amount>
-                    <Tip></Tip>
-                    <CustomFee>0</CustomFee>
-                    <Frequency>OneTime</Frequency>
-                    <InvNum>123</InvNum>
-                    <RefId>123</RefId>
-                    <RegisterId>116058001</RegisterId>
-                    <AuthKey>cyzdiH7Ca6</AuthKey>
-                    <PrintReceipt>No</PrintReceipt>
-                    <SigCapture>No</SigCapture>
-                </request>';
-        $response = Http::get('HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction='.$xml);
-        return $response->body();  
 
+        try {
+
+            $payment_type = $request->input('payment_type');
+            $trans_type = $request->input('trans_type');
+            $amount = $request->input('amount');
+            $tip = $request->input('tip');
+            $inv_num = $request->input('invoice_num');
+            $ref_id = $request->input('ref_id');
+
+            $register_id = '116058001';
+            $auth_key = 'cyzdiH7Ca6';
+
+            $xml = '<request>
+                        <PaymentType>'. $payment_type .'</PaymentType>
+                        <TransType>'. $trans_type .'</TransType>
+                        <Amount>'. $amount .'</Amount>
+                        <Tip>'. $tip .'</Tip>
+                        <CustomFee>0</CustomFee>
+                        <Frequency>OneTime</Frequency>
+                        <InvNum>'. $inv_num .'</InvNum>
+                        <RefId>'. $ref_id .'</RefId>
+                        <RegisterId>'. $register_id .'</RegisterId>
+                        <AuthKey>'. $auth_key .'</AuthKey>
+                        <PrintReceipt>No</PrintReceipt>
+                        <SigCapture>No</SigCapture>
+                    </request>';
+
+            $response = Http::get('HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction='.$xml);
+            $xml_data = $response->body();
+            $data = simplexml_load_string($xml_data);
+            
+            $output = ['success' => 1,
+                'msg' => __('business.settings_updated_success'),
+                'data' => $data
+            ];
+
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = ['success' => 0,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        return $output;
+        
     }
 
 }
