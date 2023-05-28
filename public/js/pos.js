@@ -1,97 +1,60 @@
 $(document).ready(function() {
 
-    var card_data = '%B4867966912303811^PELEGR/GLEN MAXIMO GUANZON^27082010000000780000000;4867966912303811=27082010000078000000';
-    var details1 = card_data.split("^");
 
-    var card_number = details1[0];
-    card_number = card_number.substring(2);
+    // var barcode = '';
+    // var interval;
+    // document.addEventListener('keydown', function(evt) {
+    //     if (evt.code === 'F12'){
+    //         evt.preventDefault();
+    //     }
+    //     if (interval){
+    //         clearInterval(interval);
+    //     }
+    //     if (evt.code == 'Enter') {
+    //         if (barcode){
+    //             var card_data = barcode;
+    //             var details1 = card_data.split("^");
 
-    var names = details1[1].split("/");
-    var first_name = names[1];
-    var last_name = names[0];
-
-    var details2 = details1[2].split(";");
-    details2 = details2[1].split("=");
-
-    var exp_date = details2[1];
-    exp_date = exp_date.substring(0, exp_date.length - 1);
-    exp_date = exp_date.substring(2, 4) + "/" + exp_date.substring(0,2);
-    console.log('card_number: ' + card_number);
-    console.log('exp_date: ' + exp_date);
-    console.log('first_name: ' + first_name);
-    console.log('last_name:' + last_name);
-
-    var month = exp_date.split("/")[0];
-    var year = exp_date.split("/")[1];
-
-    $('#card_number').val(card_number);
-    $('#card_holder_name').val(first_name + ' ' + last_name);
-    $('#card_month').val(month);
-    $('#card_year').val(year);
-    $('#card_type').val(GetCardType(card_number));
-
-    $('#card_number').hide();
-    var input = '<input class="form-control valid" placeholder="Card Number" id="card_number_temp" autofocus="" value="*******'+card_number.substr(card_number.length - 5)+'" type="text" aria-invalid="false">';
-    $(input).insertAfter('#card_number');
-
-    var input2 = '<input  value="'+first_name+'" id="card_first_name" type="hidden"><input  value="'+last_name+'" id="card_last_name" type="hidden">';
-    $(input2).insertAfter('#card_holder_name');
-
-
-    var barcode = '';
-    var interval;
-    document.addEventListener('keydown', function(evt) {
-        if (evt.code === 'F12'){
-            evt.preventDefault();
-        }
-        if (interval){
-            clearInterval(interval);
-        }
-        if (evt.code == 'Enter') {
-            if (barcode){
-                var card_data = barcode;
-                var details1 = card_data.split("^");
-
-                var card_number = details1[0];
-                card_number = card_number.substring(2);
+    //             var card_number = details1[0];
+    //             card_number = card_number.substring(2);
             
-                var names = details1[1].split("/");
-                var first_name = names[1];
-                var last_name = names[0];
+    //             var names = details1[1].split("/");
+    //             var first_name = names[1];
+    //             var last_name = names[0];
             
-                var details2 = details1[2].split(";");
-                details2 = details2[1].split("=");
+    //             var details2 = details1[2].split(";");
+    //             details2 = details2[1].split("=");
             
-                var exp_date = details2[1];
-                exp_date = exp_date.substring(0, exp_date.length - 1);
-                exp_date = exp_date.substring(2, 4) + "/" + exp_date.substring(0,2);
-                console.log('card_number: ' + card_number);
-                console.log('exp_date: ' + exp_date);
-                console.log('first_name: ' + first_name);
-                console.log('last_name:' + last_name);
+    //             var exp_date = details2[1];
+    //             exp_date = exp_date.substring(0, exp_date.length - 1);
+    //             exp_date = exp_date.substring(2, 4) + "/" + exp_date.substring(0,2);
+    //             console.log('card_number: ' + card_number);
+    //             console.log('exp_date: ' + exp_date);
+    //             console.log('first_name: ' + first_name);
+    //             console.log('last_name:' + last_name);
 
-                var month = exp_date.split("/")[0];
-                var year = exp_date.split("/")[1];
+    //             var month = exp_date.split("/")[0];
+    //             var year = exp_date.split("/")[1];
 
-                $('#card_number').val(card_number);
-                $('#card_holder_name').val(first_name + ' ' + last_name);
-                $('#card_month').val(month);
-                $('#card_year').val(year);
-                $('#card_type').val(GetCardType(card_number));
+    //             $('#card_number').val(card_number);
+    //             $('#card_holder_name').val(first_name + ' ' + last_name);
+    //             $('#card_month').val(month);
+    //             $('#card_year').val(year);
+    //             $('#card_type').val(GetCardType(card_number));
 
-                $('#card_number').hide();
-                var input = '<input class="form-control valid" placeholder="Card Number" id="card_number" autofocus="" name="" type="text" aria-invalid="false">';
-                $(input).insertAfter('#card_number');
+    //             $('#card_number').hide();
+    //             var input = '<input class="form-control valid" placeholder="Card Number" id="card_number" autofocus="" name="" type="text" aria-invalid="false">';
+    //             $(input).insertAfter('#card_number');
 
-            }
-            barcode = '';
-            return;
-        }
-        if (evt.key != 'Shift'){
-            barcode += evt.key;
-        }
-        interval = setInterval(() => barcode = '', 20);
-    });
+    //         }
+    //         barcode = '';
+    //         return;
+    //     }
+    //     if (evt.key != 'Shift'){
+    //         barcode += evt.key;
+    //     }
+    //     interval = setInterval(() => barcode = '', 20);
+    // });
 
 
     const urlParams = new URL(window.location.href).searchParams;
@@ -102,6 +65,21 @@ $(document).ready(function() {
             pos_product_row(item);
         });
     }
+
+    $('#restaurant-search-order').submit(function(e){
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            context: this,
+            method: "GET",
+            url: $(this).attr("action"),
+            data: data,
+            success: function(result) {
+                $('#restaurant-search-order_result').html(result);
+                $('.btn-search').removeAttr('disabled');
+            }
+        });
+    });
 
     $('.search-check').submit(function(e){
         e.preventDefault();
@@ -1333,7 +1311,20 @@ $(document).ready(function() {
     }
 
     //Show product list.
-    var product_category_select = $('select#product_category').val();
+    $('#product_category_div .cat-parent-area label').click(function() {
+        var parent_id = $(this).parent().find('input').val();
+        $('#product_category_div .cat-sub-area .cat-container').css({'display':'none'});
+        $('#product_category_div .cat-sub-area .cat_parent_'+parent_id).parent().css({'display':'inline-block'});
+    });
+
+    $('#product_category_div label').click(function() {
+        $('div#product_list_body').html('');
+        $('#product_category_div .cat-sub-area label').parent().removeClass('active');
+        $(this).parent().addClass('active').siblings().removeClass('active');
+    });
+
+
+    var product_category_select = $('input[name="category_id"]:checked').attr('value');
     var product_brand_select = $('select#product_brand').val();
     if(product_category_select == 'all' || product_brand_select == 'all') {
         product_category_select = 99999999999999;
@@ -1347,18 +1338,19 @@ $(document).ready(function() {
         is_enabled_stock,
         device_model_id
     );
-    $('select#product_category, select#product_brand, select#select_location_id').on('change', function(e) {
+
+    $('input[name="category_id"], select#product_brand, select#select_location_id').on('change', function(e) {
+       
         $('input#suggestion_page').val(1);
         var location_id = $('input#location_id').val();
         if (location_id != '' || location_id != undefined) {
             get_product_suggestion_list(
-                $('select#product_category').val(),
+                $('input[name="category_id"]:checked').attr('value'),
                 $('select#product_brand').val(),
                 $('input#location_id').val(),
                 null
             );
         }
-
         get_featured_products();
     });
 
@@ -1651,7 +1643,6 @@ function get_product_suggestion_list(category_id, brand_id, location_id, url = n
     if($('div#product_list_body').length == 0) {
         return false;
     }
-
     if (url == null) {
         url = '/sells/pos/get-product-suggestion';
     }
@@ -1677,6 +1668,7 @@ function get_product_suggestion_list(category_id, brand_id, location_id, url = n
         },
         dataType: 'html',
         success: function(result) {
+            $('div#product_list_body').html('');
             $('div#product_list_body').append(result);
             $('#suggestion_page_loader').fadeOut(700);
         },

@@ -28,6 +28,7 @@
                         @if($cat_code_enabled)
                             { data: 'short_code', name: 'short_code' },
                         @endif
+                        { data: 'logo', name: 'logo' },
                         { data: 'description', name: 'description' },
                         { data: 'action', name: 'action', orderable: false, searchable: false},
                     ],
@@ -50,7 +51,9 @@
             method: 'POST',
             url: $(this).attr('action'),
             dataType: 'json',
-            data: data,
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
             beforeSend: function(xhr) {
                 __disable_submit_button(form.find('button[type="submit"]'));
             },
@@ -80,13 +83,14 @@
             $('form#category_edit_form').submit(function(e) {
                 e.preventDefault();
                 var form = $(this);
-                var data = form.serialize();
-
+                
                 $.ajax({
                     method: 'POST',
                     url: $(this).attr('action'),
                     dataType: 'json',
-                    data: data,
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
                     beforeSend: function(xhr) {
                         __disable_submit_button(form.find('button[type="submit"]'));
                     },
