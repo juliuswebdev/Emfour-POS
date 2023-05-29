@@ -1295,7 +1295,8 @@ $(document).ready(function() {
         $('#product_category_div .cat-sub-area label').parent().removeClass('active');
         $(this).parent().addClass('active').siblings().removeClass('active');
     });
-
+    
+    $('.cat-parent-area').eqHeights({child:'.cat-container'});
 
     var product_category_select = $('input[name="category_id"]:checked').attr('value');
     var product_brand_select = $('select#product_brand').val();

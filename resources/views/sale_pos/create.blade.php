@@ -156,6 +156,7 @@
     @endif
 @stop
 @section('javascript')
+	<script src="{{ asset('js/auto_height.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/pos.js?v=' . date('yymmddhhiiss')) }}"></script>
 	<script src="{{ asset('js/printer.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/product.js?v=' . $asset_v) }}"></script>
