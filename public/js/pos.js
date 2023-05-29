@@ -2595,7 +2595,6 @@ $(document).on('change', '#types_of_service_id', function(){
             },
             dataType: 'json',
             success: function(result) {
-                console.log(result.packing_charge)
                 if(result.packing_charge != 0.0000) {
                     //reset form if price group is changed
                     var prev_price_group = $('#types_of_service_price_group').val();
