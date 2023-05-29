@@ -1211,6 +1211,7 @@ padding: 0 30px;
 
 #product_category_div .cat-container {
   display: inline-block;
+  vertical-align: top;
   margin-right: 10px;
 }
 
@@ -1219,9 +1220,17 @@ padding: 0 30px;
   border: 1px solid #999;
   border-radius: 5px;
   box-sizing: border-box;
+  width: 120px;
+  height: 100%;
+  text-align: center;
+  line-height: 1;
 }
 #product_category_div .cat-container.active label {
   border-color: #5353ab;
+}
+
+#product_category_div .cat-container label span {
+  min-height: 30px;
 }
 
 #product_category_div .cat-container label:hover {
@@ -1233,12 +1242,11 @@ padding: 0 30px;
 }
 
 #product_category_div .cat-container label .cat_image {
-  width: 25px;
-  height: 18px;
+  width: 50px;
+  height: 50px;
   overflow: hidden;
-  margin-right: 5px;
-  display: inline-block;
-  margin-bottom: 0;
+  margin: 0 auto 5px;
+  display: block;
   vertical-align: middle;
   position: relative;
 }
@@ -1247,7 +1255,8 @@ padding: 0 30px;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 25px;
+  width: 50px;
+  left: 0;
 }
 
 #product_category_div .cat-sub-area {
