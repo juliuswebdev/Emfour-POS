@@ -1174,6 +1174,7 @@ return [
     'deactivate' => 'Deactivate',
     'add_quotation' => 'Add Quotation',
     'product_stock_history' => 'Product stock history',
+    'sub_unit_inventory' => 'Sub Unit Inventory',
     'quantities_in' => 'Quantities In',
     'quantities_out' => 'Quantities Out',
     'in' => 'In',
