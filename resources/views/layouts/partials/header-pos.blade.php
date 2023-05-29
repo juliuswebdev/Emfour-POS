@@ -47,9 +47,13 @@
     </div>
     <div class="col-md-6">
 
+      {{--
       <a href="{{$go_back_url}}" title="{{ __('lang_v1.go_back') }}" class="btn btn-info btn-flat m-6 btn-xs m-5 pull-right">
         <strong><i class="fa fa-backward fa-lg"></i></strong>
       </a>
+      --}}
+
+
       @if(!empty($pos_settings['inline_service_staff']))
         <button type="button" id="show_service_staff_availability" title="{{ __('lang_v1.service_staff_availability') }}" class="btn btn-primary btn-flat m-6 btn-xs m-5 pull-right" data-container=".view_modal" 
           data-href="{{ action([\App\Http\Controllers\SellPosController::class, 'showServiceStaffAvailibility'])}}">

@@ -223,6 +223,12 @@
 				});
 			}
 
+			//Handel Transaction Cancel event Through click button
+			$(document).on('click', '#card-payment-close', function(){
+				$('.modal-backdrop').remove();
+                enable_pos_form_actions();
+			})
+
 		})
 	</script>
 	@endif

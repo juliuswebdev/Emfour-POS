@@ -815,7 +815,7 @@ $(document).ready(function() {
             payment_method_dropdown.change();
         if (pay_method == 'card') {
 
-            var processing_text = "<span style='position: absolute; color: #fff;font-weight: 900;font-size: 28px;text-align: center;position: absolute;top: 50%;left: 0;right: 0;margin: auto; transform: translateY(-50%);'>Processing of Payment..</span>"
+            var processing_text = "<span class='card-payment-popup'><div>Processing of Payment..</div><div><button id='card-payment-close' class='btn-danger'>Close</button></div></span>"
             var bg_black_fade_in = '<div class="modal-backdrop fade in">'+processing_text+'</div>';
             $('.ui-helper-hidden-accessible').after(bg_black_fade_in);
             pos_form_obj.submit();
@@ -823,6 +823,7 @@ $(document).ready(function() {
             //$('div#card_details_modal').modal('show');
         } else if (pay_method == 'suspend') {
             //Change the modal title & label
+           
             var send_to_kitchen_title = $(this).data('modal-title');
             if(send_to_kitchen_title != undefined){
                 var send_to_kitchen_label = $(this).data('modal-placeholder');

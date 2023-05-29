@@ -623,25 +623,30 @@ class SellPosController extends Controller
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
                 $this->transactionUtil->activityLog($transaction, 'added');
-
-                //Make Payment through card
-                $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
-                $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
-                $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id);
-                if($response_of_payment['success'] == 0){
-                    //Payment Failed Rollback Transaction
-                    DB::rollback();
-                    $output = [
-                        'success' => 0,
-                        'msg' => $response_of_payment['msg']
-                    ];
-                    return $output;
-                }else{
-                    //Store Payment Response
-                    $payment_response_json = json_encode($response_of_payment['data'], true);
-                    TransactionPayment::where('transaction_id', $transaction->id)
-                                        ->where('business_id', $business_id)
-                                        ->update(['payment_collect_response' => $payment_response_json]);
+                
+                
+                if(isset($input['payment'][0]['method'])){
+                    if($input['payment'][0]['method'] == "card"){
+                        //Make Payment through card
+                        $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
+                        $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id);
+                        if($response_of_payment['success'] == 0){
+                            //Payment Failed Rollback Transaction
+                            DB::rollback();
+                            $output = [
+                                'success' => 0,
+                                'msg' => $response_of_payment['msg']
+                            ];
+                            return $output;
+                        }else{
+                            //Store Payment Response
+                            $payment_response_json = json_encode($response_of_payment['data'], true);
+                            TransactionPayment::where('transaction_id', $transaction->id)
+                                                ->where('business_id', $business_id)
+                                                ->update(['payment_collect_response' => $payment_response_json]);
+                        }
+                    }
                 }
                 
                 DB::commit();
