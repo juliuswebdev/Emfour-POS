@@ -814,7 +814,13 @@ $(document).ready(function() {
             payment_method_dropdown.val(pay_method);
             payment_method_dropdown.change();
         if (pay_method == 'card') {
-            $('div#card_details_modal').modal('show');
+
+            var processing_text = "<span style='position: absolute; color: #fff;font-weight: 900;font-size: 28px;text-align: center;position: absolute;top: 50%;left: 0;right: 0;margin: auto; transform: translateY(-50%);'>Processing of Payment..</span>"
+            var bg_black_fade_in = '<div class="modal-backdrop fade in">'+processing_text+'</div>';
+            $('.ui-helper-hidden-accessible').after(bg_black_fade_in);
+            pos_form_obj.submit();
+            
+            //$('div#card_details_modal').modal('show');
         } else if (pay_method == 'suspend') {
             //Change the modal title & label
             var send_to_kitchen_title = $(this).data('modal-title');
@@ -986,7 +992,6 @@ $(document).ready(function() {
                                 window.open(result.whatsapp_link);
                             }
                             $('#modal_payment').modal('hide');
-
                             // var data_authorize_net = {
                             //     'invoice_id' : result.receipt.print_title,
                             //     'amount' : result.receipt.receipt_details.subtotal_unformatted,
@@ -1021,6 +1026,7 @@ $(document).ready(function() {
                             toastr.error(result.msg);
                         }
 
+                        $('.modal-backdrop').remove();
                         enable_pos_form_actions();
                     },
                 });

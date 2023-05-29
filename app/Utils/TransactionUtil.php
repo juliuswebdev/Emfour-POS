@@ -1523,9 +1523,9 @@ class TransactionUtil extends Util
                                 ['method' => $method.(! empty($value['card_transaction_number']) ? (', Transaction Number:'.$value['card_transaction_number']) : ''),
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
-                                    'card_charge_amount' => $this->num_f($value['card_charge_amount'], $show_currency, $business_details),
-                                    'card_charge_percent' => $value['card_charge_percent'],
-                                    'original_amount' => $this->num_f($value['original_amount'], $show_currency, $business_details)
+                                    'card_charge_amount' => isset($value['card_charge_amount']) ? $this->num_f($value['card_charge_amount'], $show_currency, $business_details) : '',
+                                    'card_charge_percent' => isset($value['card_charge_percent']) ? $value['card_charge_percent'] : '',
+                                    'original_amount' => isset($value['original_amount']) ? $this->num_f($value['original_amount'], $show_currency, $business_details) : ''
                                 ];
                         } elseif ($value['method'] == 'cheque') {
                             $output['payments'][] =

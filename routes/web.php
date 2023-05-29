@@ -447,6 +447,10 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::resource('payment-devices', PaymentDevicesController::class);
         Route::get('payment-devices-list/{location_id}', [PaymentDevicesController::class, 'list']);
         Route::post('set-user-payment-device', [PaymentDevicesController::class, 'selectDefault']);
+
+        //Temp XML Receiver
+        Route::get('payment-xml-response', [PaymentDevicesController::class, 'paymentXmlResponse']);
+
         Route::resource('modifiers', Restaurant\ModifierSetsController::class);
 
         //Map modifier to products

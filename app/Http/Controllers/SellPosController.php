@@ -261,6 +261,14 @@ class SellPosController extends Controller
         //Added check because $users is of no use if enable_contact_assign if false
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
 
+        //Check Payment Devices
+        if(auth()->user()->default_payment_device != 0){
+            $payment_device = PaymentDevice::select('id', 'name')->where('id', auth()->user()->default_payment_device)->first();
+        }else{
+            $payment_device = null;
+        }
+
+
         return view('sale_pos.create')
             ->with(compact(
                 'edit_discount',
@@ -293,7 +301,8 @@ class SellPosController extends Controller
                 'invoice_schemes',
                 'default_invoice_schemes',
                 'invoice_layouts',
-                'users'
+                'users',
+                'payment_device'
             ));
     }
 
@@ -503,7 +512,7 @@ class SellPosController extends Controller
 
                 
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
-
+                
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
 
@@ -615,6 +624,26 @@ class SellPosController extends Controller
 
                 $this->transactionUtil->activityLog($transaction, 'added');
 
+                //Make Payment through card
+                $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
+                $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id);
+                if($response_of_payment['success'] == 0){
+                    //Payment Failed Rollback Transaction
+                    DB::rollback();
+                    $output = [
+                        'success' => 0,
+                        'msg' => $response_of_payment['msg']
+                    ];
+                    return $output;
+                }else{
+                    //Store Payment Response
+                    $payment_response_json = json_encode($response_of_payment['data'], true);
+                    TransactionPayment::where('transaction_id', $transaction->id)
+                                        ->where('business_id', $business_id)
+                                        ->update(['payment_collect_response' => $payment_response_json]);
+                }
+                
                 DB::commit();
 
                 if ($request->input('is_save_and_print') == 1) {
@@ -1095,6 +1124,13 @@ class SellPosController extends Controller
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
         $only_payment = request()->segment(2) == 'payment';
 
+        //Check Payment Devices
+        if(auth()->user()->default_payment_device != 0){
+            $payment_device = PaymentDevice::select('id', 'name')->where('id', auth()->user()->default_payment_device)->first();
+        }else{
+            $payment_device = null;
+        }
+
         return view('sale_pos.edit')
             ->with(compact('business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
@@ -1102,7 +1138,7 @@ class SellPosController extends Controller
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
             'shipping_statuses', 'warranties', 'sub_type', 'pos_module_data', 'invoice_schemes',
             'default_invoice_schemes', 'invoice_layouts', 'featured_products', 'customer_due',
-            'users', 'only_payment'));
+            'users', 'only_payment', 'payment_device'));
     }
 
     /**

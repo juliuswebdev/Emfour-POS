@@ -1546,5 +1546,6 @@ return [
     'checkout_details' => 'Checkout Details',
     'search_by_1' => 'Search by Invoice, Table name...',
     'search_by_2' => 'Search by Reference No, Phone...',
-    'search' => 'Search'
+    'search' => 'Search',
+    'select_payment_device' => 'Select Payment Device'
 ];

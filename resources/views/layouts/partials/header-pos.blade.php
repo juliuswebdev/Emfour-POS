@@ -46,6 +46,7 @@
       </div>
     </div>
     <div class="col-md-6">
+
       <a href="{{$go_back_url}}" title="{{ __('lang_v1.go_back') }}" class="btn btn-info btn-flat m-6 btn-xs m-5 pull-right">
         <strong><i class="fa fa-backward fa-lg"></i></strong>
       </a>
@@ -55,7 +56,7 @@
             <strong><i class="fa fa-users fa-lg"></i></strong>
         </button>
       @endif
-
+      
       @can('close_cash_register')
       <button type="button" id="close_register" title="{{ __('cash_register.close_register') }}" class="btn btn-danger btn-flat m-6 btn-xs m-5 btn-modal pull-right" data-container=".close_register_modal" 
           data-href="{{ action([\App\Http\Controllers\CashRegisterController::class, 'getCloseRegister'])}}">
@@ -110,6 +111,11 @@
             <strong><i class="fa fas fa-minus-circle"></i> @lang('expense.add_expense')</strong>
         </button>
         @endcan
+
+        <button id="open_device_change_modal" type="button" class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right">
+          <span id="device_label">{{ ($payment_device == null) ? __('lang_v1.select_payment_device') : $payment_device->name }}</span> <strong><i class="fa fa-cog fa-lg"></i></strong>
+        </button>
+
 
     </div>
     

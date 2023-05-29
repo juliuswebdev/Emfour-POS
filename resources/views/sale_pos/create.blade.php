@@ -184,20 +184,27 @@
 		$(document).ready(function(){
 			var user_default_payment_device = {{ auth()->user()->default_payment_device }};
 			if(user_default_payment_device == 0) {
-				$('#payment_device_modal').modal('show');
+				showDeviceList($('#select_location_id').val());
 			}
-			showDeviceList($('#select_location_id').val());
+			//call when click to select payment device cog icon.
+			$('#open_device_change_modal').click(function(){
+				showDeviceList($('#select_location_id').val());
+			})
+
 			$('#select_location_id').change(function(){
 				showDeviceList($(this).val());
 			});
+
 			$(document).on('click', '.btn-select_device', function(){
 				var payment_device = $('input[name="payment_device"]:checked').val();
+				var device_name = $('label[for="d_'+payment_device+'"]').text();
 				$.ajax({
 					method: 'POST',
 					url: '/modules/set-user-payment-device',
 					data : { payment_device },
 					success: function(result) {
 						toastr.success(result.msg);
+						$('#device_label').text(device_name);
 						$('#payment_device_modal').modal('hide');
 					}
 				});
@@ -207,10 +214,16 @@
 					method: 'GET',
 					url: '/modules/payment-devices-list/' + location_id,
 					success: function(html) {
-						$('.payment_device_list').html(html);
+						if(html == ""){
+							toastr.error("Please added payment methods.");
+						}else{
+							$('.payment_device_list').html(html);
+							$('#payment_device_modal').modal('show');
+						}
 					}
 				});
 			}
+
 		})
 	</script>
 	@endif
