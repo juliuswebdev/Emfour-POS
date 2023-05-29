@@ -2595,32 +2595,35 @@ $(document).on('change', '#types_of_service_id', function(){
             },
             dataType: 'json',
             success: function(result) {
-                //reset form if price group is changed
-                var prev_price_group = $('#types_of_service_price_group').val();
-                if(result.price_group_id) {
-                    $('#types_of_service_price_group').val(result.price_group_id);
-                    $('#price_group_text').removeClass('hide');
-                    $('#price_group_text span').text(result.price_group_name);
-                } else {
-                    $('#types_of_service_price_group').val('');
-                    $('#price_group_text').addClass('hide');
-                    $('#price_group_text span').text('');
-                }
-                $('#types_of_service_id').val(types_of_service_id);
-                $('.types_of_service_modal').html(result.modal_html);
-                
-                if (prev_price_group != result.price_group_id) {
-                    if ($('form#edit_pos_sell_form').length > 0) {
-                        $('table#pos_table tbody').html('');
-                        pos_total_row();
+                console.log(result.packing_charge)
+                if(result.packing_charge != 0.0000) {
+                    //reset form if price group is changed
+                    var prev_price_group = $('#types_of_service_price_group').val();
+                    if(result.price_group_id) {
+                        $('#types_of_service_price_group').val(result.price_group_id);
+                        $('#price_group_text').removeClass('hide');
+                        $('#price_group_text span').text(result.price_group_name);
                     } else {
-                        reset_pos_form();
+                        $('#types_of_service_price_group').val('');
+                        $('#price_group_text').addClass('hide');
+                        $('#price_group_text span').text('');
                     }
-                } else {
-                    pos_total_row();
-                }
+                    $('#types_of_service_id').val(types_of_service_id);
+                    $('.types_of_service_modal').html(result.modal_html);
+                    
+                    if (prev_price_group != result.price_group_id) {
+                        if ($('form#edit_pos_sell_form').length > 0) {
+                            $('table#pos_table tbody').html('');
+                            pos_total_row();
+                        } else {
+                            reset_pos_form();
+                        }
+                    } else {
+                        pos_total_row();
+                    }
 
-                $('.types_of_service_modal').modal('show');
+                    $('.types_of_service_modal').modal('show');
+                }
             },
         });
     } else {
