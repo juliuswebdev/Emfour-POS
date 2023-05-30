@@ -332,6 +332,25 @@ class PaymentDevicesController extends Controller
     }
 
 
+    public function checkTerminalIsActive($register_id){
+        $url = "https://spinpos.net/spin/GetTerminalStatus?RegisterID=".$register_id;
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        return $response;
+    }   
     /**
      * Function use for create the payment in terminal device
      *
@@ -340,6 +359,7 @@ class PaymentDevicesController extends Controller
      * @return \Illuminate\Http\Response
     */
     public function paymentInit($payment_type, $trans_type, $amount, $invoice_num){
+
         try {
             $active_payment_device = PaymentDevice::select('settings')->where('id', auth()->user()->default_payment_device)->first();
             $payment_setting = json_decode($active_payment_device->settings, true);
@@ -348,42 +368,52 @@ class PaymentDevicesController extends Controller
             $auth_key = $payment_setting['auth_key'];
             //$amount = "1.10";
 
-            $xml = '<request>
-                        <PaymentType>'. $payment_type .'</PaymentType>
-                        <TransType>'. $trans_type .'</TransType>
-                        <Amount>'. $amount .'</Amount>
-                        <Tip></Tip>
-                        <CustomFee>0</CustomFee>
-                        <Frequency>OneTime</Frequency>
-                        <InvNum></InvNum>
-                        <RefId>'. $invoice_num .'</RefId>
-                        <RegisterId>'. $register_id .'</RegisterId>
-                        <AuthKey>'. $auth_key .'</AuthKey>
-                        <PrintReceipt>No</PrintReceipt>
-                        <SigCapture>No</SigCapture>
-                    </request>';
+            $check_terminal = $this->checkTerminalIsActive($register_id);
+            if($check_terminal == "Online"){
+            
+                $xml = '<request>
+                            <PaymentType>'. $payment_type .'</PaymentType>
+                            <TransType>'. $trans_type .'</TransType>
+                            <Amount>'. $amount .'</Amount>
+                            <Tip></Tip>
+                            <CustomFee>0</CustomFee>
+                            <Frequency>OneTime</Frequency>
+                            <InvNum></InvNum>
+                            <RefId>'. $invoice_num .'</RefId>
+                            <RegisterId>'. $register_id .'</RegisterId>
+                            <AuthKey>'. $auth_key .'</AuthKey>
+                            <PrintReceipt>No</PrintReceipt>
+                            <SigCapture>No</SigCapture>
+                        </request>';
 
-            $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
+                $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
 
-            $response = Http::timeout(1000)->get($request_url);
-            $xml_data = $response->body();
-            $xml_response = simplexml_load_string($xml_data);
-            $json_response = json_encode($xml_response);
-            $array_response = json_decode($json_response,TRUE);
+                $response = Http::timeout(1000)->get($request_url);
+                $xml_data = $response->body();
+                $xml_response = simplexml_load_string($xml_data);
+                $json_response = json_encode($xml_response);
+                $array_response = json_decode($json_response,TRUE);
 
-            $payment_response_message = $array_response['response']['Message'];
-            //$payment_response_message = "Approved";
-            if($payment_response_message == "Approved"){
-                $output = [
-                    'success' => 1,
-                    'msg' => __('business.settings_updated_success'),
-                    'data' => $array_response
-                ];    
+                $payment_response_message = $array_response['response']['Message'];
+                //$payment_response_message = "Approved";
+                if($payment_response_message == "Approved"){
+                    $output = [
+                        'success' => 1,
+                        'msg' => __('business.settings_updated_success'),
+                        'data' => $array_response
+                    ];    
+                }else{
+                    $output = [
+                        'success' => 0,
+                        'msg' => $payment_response_message,
+                        'data' => $array_response
+                    ];  
+                }
             }else{
                 $output = [
                     'success' => 0,
-                    'msg' => $payment_response_message,
-                    'data' => $array_response
+                    'msg' => __('business.your_device_is_offline'),
+                    'data' => []
                 ];  
             }
 

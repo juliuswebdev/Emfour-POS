@@ -107,4 +107,6 @@ return [
     'tax_number2' => 'Tax Number 2',
     'is_active' => 'Active',
     'created_by' => 'Created By',
+    'your_device_is_offline' => 'Your device is offline, Please turn on the device.',
+    'sale_return_pin' => 'Sale Return 9 Digits Pin'
 ];
