@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use App\BusinessType;
 
 class BusinessController extends Controller
 {
@@ -102,7 +103,7 @@ class BusinessController extends Controller
         $package_id = request()->package;
 
         $system_settings = System::getProperties(['superadmin_enable_register_tc', 'superadmin_register_tc'], true);
-
+        $business_types = BusinessType::select('id', 'title')->pluck('title', 'id')->toArray();
         return view('business.register', compact(
             'currencies',
             'timezone_list',
@@ -110,7 +111,8 @@ class BusinessController extends Controller
             'months',
             'accounting_methods',
             'package_id',
-            'system_settings'
+            'system_settings',
+            'business_types'
         ));
     }
 
