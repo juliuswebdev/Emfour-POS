@@ -76,6 +76,7 @@
 			</tr>
 		</table>
 	</div>
+	@if(count($units) > 0)
     <div class="col-md-8 col-xs-8">
 		<strong>@lang('lang_v1.totals')</strong>
 		<table class="table table-bordered">
@@ -97,4 +98,5 @@
             @endforeach
 		</table>
 	</div>
+	@endif
 </div>
