@@ -102,20 +102,7 @@
                         if(result.success == true) {
                             $('#pin_server_modal').modal('show');
                         } else {
-                            $.ajax({
-                                method: "GET",
-                                url: href,
-                                dataType: "json",
-                                success: function(result){
-                                    if(result.success == true){
-                                        refresh_orders();
-                                        toastr.success(result.msg);
-                                        $('#pin_server_modal').modal('hide');
-                                    } else {
-                                        toastr.error(result.msg);
-                                    }
-                                }
-                            });
+                            toastr.error(result.msg);
                         }
                     }
                 });
