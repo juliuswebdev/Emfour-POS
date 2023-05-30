@@ -85,12 +85,13 @@
             </tr>
             @foreach($units as $unit)
             @php
-                $stock = $stock_details['current_stock'] / $unit->base_unit_multiplier;
+                $stock_temp = intval($stock_details['current_stock'] / $unit->base_unit_multiplier);
+				$stock = floor($stock_temp*100)/100;
             @endphp
             <tr>
 				<td>{{ $unit->actual_name }}</td>
 				<td>
-					<span class="display_currency" data-is_quantity="true">{{$stock}}</span> {{ $unit->short_name }}
+					<span>{{$stock}}</span> {{ $unit->short_name }}
 				</td>
 			</tr>
             @endforeach
