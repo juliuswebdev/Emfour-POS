@@ -245,4 +245,27 @@ class OrderController extends Controller
     }
 
 
+    public function userCheckPin(Request $request)
+    {
+
+        $user_id = $request->input('user_id') ?? \Auth::user()->id;
+        $pin = $request->input('pin');
+        $user = User::where('id', $user_id)->where('sale_return_pin', $pin)->first();
+
+        if($user) {
+            $output = [
+                'success' => true,
+                'msg' => __('business.sucess_pin')
+            ];
+        } else {
+            $output = [
+                'success' => false,
+                'msg' => __('business.invalid_pin')
+            ];
+        }
+        return $output;
+
+    }
+
+
 }
