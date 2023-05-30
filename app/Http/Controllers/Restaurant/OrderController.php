@@ -251,13 +251,12 @@ class OrderController extends Controller
         $user = User::where('id', $user_id)->first();
         if($user->sale_return_pin) {
             $output = [
-                'success' => true,
-                'msg' => $user->sale_return_pin,
+                'success' => true
             ];
         } else {
             $output = [
                 'success' => false,
-                'msg' => $user->sale_return_pin,
+                'msg' => __('business.user_no_pin'),
             ];
         }
         return $output;

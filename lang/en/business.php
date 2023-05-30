@@ -111,5 +111,6 @@ return [
     'sale_return_pin' => 'Sale Return 9 Digits Pin',
     'digits_pin' => 'Digits Pin',
     'sucess_pin' => 'Success',
-    'invalid_pin' => 'Inalid Pin'
+    'invalid_pin' => 'Inalid Pin',
+    'user_no_pin' => 'User doesn\'t have PIN'
 ];
