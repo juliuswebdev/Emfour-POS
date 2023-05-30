@@ -108,6 +108,126 @@
 	    @endforeach
 	@endif
 	
+	<!-- Sale Return -->
+	@if(request()->get('sale-return') == 1)
+	<script>
+		$(document).ready(function(){
+
+			//Hide the html component on sale return
+			$('#product_brand_div').hide();
+			$('#product_category_div').hide();
+			$('#product_list_body').hide();
+			$('#recent-transactions').hide();
+			$('#suggestion_page_loader').hide();
+			$('.wrapper-of-add-action').hide();
+			$('.wrapper-of-sale-return').show();
+			$('#customer_id').attr('disabled', 'disabled');
+			$('#search_product').attr('readonly', 'readonly');
+			$('select[name="res_table_id"]').attr('disabled', 'disabled');
+			$('#res_waiter_id').attr('disabled', 'disabled');
+			$('#is_recurring').attr('disabled', 'disabled');
+
+			//confirm button event in sale return
+			$('.sale-retun-confirm').click(function(){
+				$(this).hide();
+				$('.btn-payment-sale-return').show();
+			});
+
+			//sale return refund event
+			$('.btn-payment-sale-return').click(function(){
+				var sale_return_action = "{{ url('sale-return/'.$transaction->id.'/invoice') }}"
+				var form = document.getElementById("edit_pos_sell_form");
+				var data = new FormData(form)
+				var sale_return_method = $(this).attr('data-payment-type');
+				data.append('sale_return_via', sale_return_method);
+				$.ajax({
+					url: sale_return_action,
+					type: "POST",
+					headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+					data: data,
+					contentType: false,
+					cache: false,
+					processData: false,
+					success: function (result) {
+						if (result.success == 1) {
+                            toastr.success(result.msg);
+                            //Check if enabled or not
+                            if (result.receipt.is_enabled) {
+                                pos_print(result.receipt);
+                            }
+                        } else {
+                            toastr.error(result.msg);
+                        }
+					},
+				});
+
+
+			});
+
+			//printer setting
+			function initialize_printer() {
+				if ($('input#location_id').data('receipt_printer_type') == 'printer') {
+					initializeSocket();
+				}
+			}
+
+			function pos_print(receipt) {
+				//If printer type then connect with websocket
+				if (receipt.print_type == 'printer') {
+					var content = receipt;
+					content.type = 'print-receipt';
+
+					//Check if ready or not, then print.
+					if (socket.readyState != 1) {
+						initializeSocket();
+						setTimeout(function() {
+							socket.send(JSON.stringify(content));
+						}, 700);
+					} else {
+						socket.send(JSON.stringify(content));
+					}
+				} else if (receipt.html_content != '') {
+					var title = document.title;
+					if (typeof receipt.print_title != 'undefined') {
+						document.title = receipt.print_title;
+					}
+
+					//If printer type browser then print content
+					$('#sale_return_invoice_print').html(receipt.html_content);
+					__currency_convert_recursively($('#sale_return_invoice_print'));
+					setTimeout(function() {
+						window.print();
+						document.title = title;
+					}, 1000);
+				}
+			}
+
+			//Input qty validation in sale return screen
+			$('.input_quantity').on('input', function(){
+				var max_qty = $(this).attr('data-max');
+				max_qty = parseFloat(max_qty).toFixed(2);
+				var input_qty = $(this).val();
+				input_qty = parseFloat(input_qty).toFixed(2);
+				if(max_qty < input_qty){
+					$(this).val(max_qty);
+				}
+			});
+
+			//Set max qty in sale return screen
+			function set_max_quantity(){
+				$('#pos_table > tbody > tr').each(function(index, tr) { 
+					var max_qty = $(this).find('.input_quantity').attr('value');
+					$(this).find('.input_quantity').attr('data-max', max_qty);
+				});
+			}
+			
+			set_max_quantity();
+
+		});
+	</script>
+	@endif
+
+
 @endsection
 
 @section('css')

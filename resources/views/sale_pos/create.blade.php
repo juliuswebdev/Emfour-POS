@@ -144,6 +144,62 @@
 	</div>
 @endif
 
+<div class="modal fade in" tabindex="-1" role="dialog" id="sale-return-modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+				<h4 class="modal-title">@lang('lang_v1.title_sale_return')</h4>
+			</div>
+			<div class="modal-body">
+				<!-- /.box-header -->
+				<div class="box-body">
+					<form action="{{ action('\App\Http\Controllers\SellPosController@saleReturnPinVerify') }}" class="form" method="post" id="frmSalePinVerify">
+						<label>@lang('lang_v1.enter_sale_return_9_digit_pin')</label>
+						<div class="row">
+							<div class="col-md-10">
+								<input type="text" placeholder="@lang('lang_v1.enter_sale_return_9_digit_pin')" required="required" maxlength="9" minlength="9" name="sale_return_pin" class="form-control">
+							</div>
+							<div class="col-md-2">
+								<button type="submit" class="btn btn-primary btn-verify-pin">@lang('lang_v1.verify')</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!-- /.box-body --> 
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade in" tabindex="-1" role="dialog" id="sale-return-invoice-modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+				<h4 class="modal-title">@lang('lang_v1.title_sale_return_invoice')</h4>
+			</div>
+			<div class="modal-body">
+				<!-- /.box-header -->
+				<div class="box-body">
+					<form action="{{ action('\App\Http\Controllers\SellPosController@getSaleReturnInvoice') }}" class="form" method="post" id="frmSaleReturnInvoiceVerify">
+						<label>@lang('lang_v1.enter_sale_return_invoice_number')</label>
+						<div class="row">
+							<div class="col-md-10">
+								<input type="text" placeholder="@lang('lang_v1.enter_sale_return_invoice_number')" required="required" name="sale_return_invoice_number" class="form-control">
+							</div>
+							<div class="col-md-2">
+								<button type="submit" class="btn btn-primary btn-sale-return-invoice">@lang('lang_v1.submit')</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!-- /.box-body --> 
+			</div>
+		</div>
+	</div>
+</div>
 
 
 
@@ -228,6 +284,103 @@
 				$('.modal-backdrop').remove();
                 enable_pos_form_actions();
 			})
+
+			//Sale Return click event
+			$(document).on('click', '.sale-return', function(){
+				$('#sale-return-modal').modal('show');
+			})
+
+			//Verify Sale Return to Server Side
+			$("#frmSalePinVerify").validate({
+				errorElement: 'span',
+				errorPlacement: function (error, element) {
+					error.addClass('invalid-feedback');
+					element.closest('.form-group').append(error);
+					if (element.hasClass('select2')) {
+						error.insertAfter(element.parent().find('span.select2'));
+					} else if (element.parent('.input-group').length ||
+						element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
+						error.insertAfter(element.parent());
+					} else {
+						error.insertAfter(element);
+					}
+				},
+				highlight: function (element, errorClass, validClass) {
+					$(element).addClass('is-invalid').removeClass('is-valid');
+				},
+				unhighlight: function (element, errorClass, validClass) {
+					$(element).removeClass('is-invalid').addClass('is-valid');
+				},
+				focusInvalid: true,
+				submitHandler: function (form) {
+					$.ajax({
+						url: $('#frmSalePinVerify').attr('action'),
+						type: "POST",
+						headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+						data: new FormData(form),
+						contentType: false,
+						cache: false,
+						processData: false,
+						success: function (res) {
+							if(res.status == true){
+								$('#sale-return-modal').modal('hide');
+								$('#frmSalePinVerify')[0].reset();
+								$('#sale-return-invoice-modal').modal('show');
+								toastr.success(res.message);	
+							}else{
+								toastr.error(res.message);	
+							}
+						},
+					});
+				}
+			});
+
+			//Check Invoice Number is Exit or Not & Return the Redirect URL
+			$("#frmSaleReturnInvoiceVerify").validate({
+				errorElement: 'span',
+				errorPlacement: function (error, element) {
+					error.addClass('invalid-feedback');
+					element.closest('.form-group').append(error);
+					if (element.hasClass('select2')) {
+						error.insertAfter(element.parent().find('span.select2'));
+					} else if (element.parent('.input-group').length ||
+						element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
+						error.insertAfter(element.parent());
+					} else {
+						error.insertAfter(element);
+					}
+				},
+				highlight: function (element, errorClass, validClass) {
+					$(element).addClass('is-invalid').removeClass('is-valid');
+				},
+				unhighlight: function (element, errorClass, validClass) {
+					$(element).removeClass('is-invalid').addClass('is-valid');
+				},
+				focusInvalid: true,
+				submitHandler: function (form) {
+					$.ajax({
+						url: $('#frmSaleReturnInvoiceVerify').attr('action'),
+						type: "POST",
+						headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+						data: new FormData(form),
+						contentType: false,
+						cache: false,
+						processData: false,
+						success: function (res) {
+							if(res.status == true){
+								$('#sale-return-invoice-modal').modal('hide');
+								$('#frmSaleReturnInvoiceVerify')[0].reset();
+								//console.log(res.data.redirect_url);
+								window.location.href = res.data.redirect_url;
+							}else{
+								toastr.error(res.message);	
+							}
+						},
+					});
+				}
+			});
+
+			
 
 		})
 	</script>

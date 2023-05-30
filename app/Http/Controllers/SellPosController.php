@@ -1065,8 +1065,7 @@ class SellPosController extends Controller
 
         //If brands, category are enabled then send else false.
         $categories = (request()->session()->get('business.enable_category') == 1) ? Category::catAndSubCategories($business_id) : false;
-        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)
-                    ->prepend(__('lang_v1.all_brands'), 'all') : false;
+        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)->prepend(__('lang_v1.all_brands'), 'all') : false;
 
         $change_return = $this->dummyPaymentLine;
 
@@ -3147,4 +3146,60 @@ class SellPosController extends Controller
 
         return ['success' => true];
     }
+
+
+    public function saleReturnPinVerify(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('sale_return_pin') && $request->filled('sale_return_pin')){
+
+            if($request->sale_return_pin == auth()->user()->sale_return_pin){
+                return response()->json(['status' => true, 'message' => __('lang_v1.verified_success'), 'data' => '']);
+            }else{
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.sale_return_pin_incorrect'), 'data' => '']);   
+            }
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_sale_return_pin'), 'data' => '']);    
+        }
+    }
+
+    public function getSaleReturnInvoice(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('sale_return_invoice_number') && $request->filled('sale_return_invoice_number')){
+            
+            $business_id = request()->session()->get('user.business_id');
+
+            $invoice_number = $request->sale_return_invoice_number;
+            $is_exit_invoice = Transaction::select('id', 'payment_status', 'invoice_no')->where('invoice_no', $invoice_number)
+            ->where('payment_status', 'paid')
+            ->where('business_id', $business_id)
+            ->first();
+
+            if($is_exit_invoice == null){
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.invoice_number_is_invalid'), 'data' => '']); 
+            }
+            
+            /*
+            if($is_exit_invoice->payment_status != "paid"){
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.invoice_payment_is_pending'), 'data' =>'']); 
+            }
+            */
+
+            $url = url('pos/'.$is_exit_invoice->id.'/edit?sale-return=1');
+            $array_res = array('redirect_url' => $url);
+            return response()->json(['status' => true, 'message' => "", 'data' => $array_res]); 
+
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_sale_return_invoice_number'), 'data' => '']);    
+        }
+    }
+
+
+
+
 }

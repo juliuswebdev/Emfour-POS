@@ -285,7 +285,6 @@ class SellReturnController extends Controller
                 DB::beginTransaction();
 
                 $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
-
                 $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
 
                 DB::commit();
@@ -591,4 +590,90 @@ class SellReturnController extends Controller
             'redirect_url' => action([\App\Http\Controllers\SellReturnController::class, 'add'], [$sell->id]),
         ];
     }
+
+
+    public function getSaleReturnTransaction($id, Request $request){
+        if (! auth()->user()->can('access_sell_return') && ! auth()->user()->can('access_own_sell_return')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        
+        try {
+
+            $transaction_id = $id;
+            $invoice_no = Transaction::where('id', $id)->pluck('invoice_no')->first();
+            $transaction_date = date('m/d/Y h:i');
+            $discount_type = "percentage";
+            $discount_amount = "0.00";
+            $tax_id = null;
+            $tax_amount = $tax_percent = 0;
+
+            $products = $request->products;
+            if(empty($products)){
+
+                $output = [
+                    'success' => 0,
+                    'msg' =>  __('lang_v1.please_update_the_return_product'),
+                ];
+
+            }else{
+                $product_data = [];
+                foreach($products as $k => $product){
+                    $product_data[$k]['quantity'] = $product['quantity'];
+                    $product_data[$k]['unit_price_inc_tax'] = $product['unit_price_inc_tax'];
+                    $product_data[$k]['sell_line_id'] = $product['transaction_sell_lines_id'];
+                }
+
+                $business_id = $request->session()->get('user.business_id');
+                //Check if subscribed or not
+                if (! $this->moduleUtil->isSubscribed($business_id)) {
+                    return $this->moduleUtil->expiredResponse(action([\App\Http\Controllers\SellReturnController::class, 'index']));
+                }
+                $user_id = $request->session()->get('user.id');
+
+                $input = array();
+                $input['transaction_id'] = $transaction_id;
+                $input['invoice_no'] = $invoice_no;
+                $input['transaction_date'] = $transaction_date;
+                $input['discount_type'] = $discount_type;
+                $input['discount_amount'] = $discount_amount;
+                $input['tax_id'] = $tax_id;
+                $input['tax_amount'] = $tax_amount;
+                $input['tax_percent'] = $tax_percent;
+                $input['products'] = $product_data;
+
+                 
+                DB::beginTransaction();
+
+                $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
+                $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
+
+                DB::commit();
+
+                $output = ['success' => 1,
+                    'msg' => __('lang_v1.success'),
+                    'receipt' => $receipt,
+                ];
+            }
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            dd($e->getMessage());
+            if (get_class($e) == \App\Exceptions\PurchaseSellMismatch::class) {
+                $msg = $e->getMessage();
+            } else {
+                \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+                $msg = __('messages.something_went_wrong');
+            }
+
+            $output = ['success' => 0,
+                'msg' => $msg,
+            ];
+        }
+
+        return $output;
+
+    }
+
+
 }

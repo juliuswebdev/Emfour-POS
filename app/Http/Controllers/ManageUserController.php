@@ -292,6 +292,11 @@ class ManageUserController extends Controller
 
             $user = User::where('business_id', $business_id)
                           ->findOrFail($id);
+            
+            if( $request->input('sale_return_pin') == ""){
+                $user_data['sale_return_pin'] = $user->sale_return_pin;
+            }
+            
             $user->update($user_data);
             $role_id = $request->input('role');
             $user_role = $user->roles->first();
