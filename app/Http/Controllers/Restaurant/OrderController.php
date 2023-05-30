@@ -245,10 +245,28 @@ class OrderController extends Controller
     }
 
 
+    public function userCheckHasPin(Request $request)
+    {
+        $user_id = $request->input('user_id');
+        $user = User::where('id', $user_id)->first();
+        if($user->sale_return_pin) {
+            $output = [
+                'success' => true,
+                'msg' => $user->sale_return_pin,
+            ];
+        } else {
+            $output = [
+                'success' => false,
+                'msg' => $user->sale_return_pin,
+            ];
+        }
+        return $output;
+    }
+
     public function userCheckPin(Request $request)
     {
 
-        $user_id = $request->input('user_id') ?? \Auth::user()->id;
+        $user_id = $request->input('user_id');
         $pin = $request->input('pin');
         $user = User::where('id', $user_id)->where('sale_return_pin', $pin)->first();
 

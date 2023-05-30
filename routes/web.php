@@ -143,6 +143,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/user/update-password', [UserController::class, 'updatePassword'])->name('user.updatePassword');
 
     Route::post('/user/check-pin', [Restaurant\OrderController::class, 'userCheckPin']);
+    Route::post('/user/check-has-pin', [Restaurant\OrderController::class, 'userCheckHasPin']);
 
     Route::resource('brands', BrandController::class);
 

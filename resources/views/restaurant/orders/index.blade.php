@@ -63,6 +63,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     {!! Form::open(['action' => '\App\Http\Controllers\Restaurant\OrderController@userCheckPin', 'id' => 'check_user_pin', 'method' => 'post']) !!}
+                        <input id="user_id" name="user_id" type="hidden">
                         {!! Form::label('pin', __('business.digits_pin') . ':') !!}
                         {!! Form::text('pin', null, ['class' => 'form-control', 'autoComplete' => 'false', 'placeholder' => __('business.digits_pin')]); !!}
                         <br>
@@ -82,50 +83,78 @@
             $('form#select_service_staff_form').submit();
         });
         $(document).ready(function(){
+
             $(document).on('click', 'a.mark_as_served_btn', function(e){
                 e.preventDefault();
                 var _this = $(this);
                 var href = _this.data('href');
                 $('#check_user_pin').attr('mark-as-serve-url', href);
-                $('#pin_server_modal').modal('show');
-
-                $('#check_user_pin').submit(function(e) {
-                    e.preventDefault();
-                    var data = $(this).serialize();
-                    $.ajax({
-                        context: this,
-                        method: "POST",
-                        url: $(this).attr("action"),
-                        data: data,
-                        dataType: "json",
-                        success: function(result) {
-                            if(result.success == true) {
-                                toastr.success(result.msg);
-                                var href = $(this).attr('mark-as-serve-url');
-                                $.ajax({
-                                    method: "GET",
-                                    url: href,
-                                    dataType: "json",
-                                    success: function(result){
-                                        if(result.success == true){
-                                            refresh_orders();
-                                            toastr.success(result.msg);
-                                            $('#pin_server_modal').modal('hide');
-                                        } else {
-                                            toastr.error(result.msg);
-                                        }
+                const urlParams = new URL(window.location.href).searchParams;
+                const service_staff = urlParams.get('service_staff');
+                $('#check_user_pin #user_id').val(service_staff);
+                $.ajax({
+                    context: this,
+                    method: "POST",
+                    url: '/user/check-has-pin',
+                    data: { user_id : service_staff },
+                    dataType: "json",
+                    success: function(result) {
+                        if(result.success == true) {
+                            $('#pin_server_modal').modal('show');
+                        } else {
+                            $.ajax({
+                                method: "GET",
+                                url: href,
+                                dataType: "json",
+                                success: function(result){
+                                    if(result.success == true){
+                                        refresh_orders();
+                                        toastr.success(result.msg);
+                                        $('#pin_server_modal').modal('hide');
+                                    } else {
+                                        toastr.error(result.msg);
                                     }
-                                });
-                            } else {
-                                toastr.error(result.msg);
-                                $('#check_user_pin #pin').val('');
-                                $('#check_user_pin button').removeAttr('disabled');
-                            }
+                                }
+                            });
                         }
-                    });
+                    }
                 });
+            });
 
-
+            $('#check_user_pin').submit(function(e) {
+                e.preventDefault();
+                var data = $(this).serialize();
+                $.ajax({
+                    context: this,
+                    method: "POST",
+                    url: $(this).attr("action"),
+                    data: data,
+                    dataType: "json",
+                    success: function(result) {
+                        if(result.success == true) {
+                            toastr.success(result.msg);
+                            var href = $(this).attr('mark-as-serve-url');
+                            $.ajax({
+                                method: "GET",
+                                url: href,
+                                dataType: "json",
+                                success: function(result){
+                                    if(result.success == true){
+                                        refresh_orders();
+                                        toastr.success(result.msg);
+                                        $('#pin_server_modal').modal('hide');
+                                    } else {
+                                        toastr.error(result.msg);
+                                    }
+                                }
+                            });
+                        } else {
+                            toastr.error(result.msg);
+                            $('#check_user_pin #pin').val('');
+                            $('#check_user_pin button').removeAttr('disabled');
+                        }
+                    }
+                });
             });
 
             //Function used for update the is_served column
