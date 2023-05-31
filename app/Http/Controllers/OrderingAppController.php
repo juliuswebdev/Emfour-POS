@@ -8,7 +8,11 @@ use App\Product;
 use App\Variation;
 use App\Transaction;
 use App\BusinessLocation;
+use App\TransactionSellLine;
 use App\Restaurant\ResTable;
+use App\Utils\RestaurantUtil;
+use App\Utils\ProductUtil;
+use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Hash;
@@ -16,6 +20,18 @@ use Validator;
 
 class OrderingAppController extends Controller
 {
+
+    protected $restUtil;
+
+    protected $productUtil;
+
+    protected $transactionUtil;
+
+
+    public function __construct(RestaurantUtil $restUtil, ProductUtil $productUtil, TransactionUtil $transactionUtil)
+    {
+        $this->restUtil = $restUtil;
+    }
 
     public function login(Request $request)
     {
@@ -303,6 +319,101 @@ class OrderingAppController extends Controller
             ], 200);
 
         }
+
+    }
+
+
+    public function markAsCompleted(Request $request, $order_id)
+    {
+
+        $get = $request->all();
+
+        $rules = [
+            'location_id' => 'required',
+            'waiter_id' => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+
+            return response([
+                'message' => 'Missing parameters!',
+                'errors' => $validator->messages()
+            ], 401);
+
+        } else {
+
+            $query = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                        ->where('t.location_id', $get['location_id'])
+                        ->where('transaction_id', $order_id);
+
+            if ($this->restUtil->is_service_staff($get['waiter_id'])) {
+                $query->where('res_waiter_id', $get['waiter_id']);
+            }
+
+            $query->update(['res_line_order_status' => 'served']);
+
+            return response([
+                'message' => 'Order successfully completed!'
+            ], 200);
+
+
+        }
+    }
+
+
+    public function store(Request $request)
+    {
+
+        $input = $request->all();
+
+        $rules = [
+            'location_id' => 'required',
+            'res_table_id' => 'required',
+            'res_waiter_id' => 'required',
+            'final_total' => 'required',
+            'products' => 'required',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+
+            return response([
+                'message' => 'Missing parameters!',
+                'errors' => $validator->messages()
+            ], 401);
+            
+        } else {
+
+            try {
+
+                $location = BusinessLocation::find($input->location_id);
+                $business_id = $location->business_id;
+
+                $contact = Contact::where('business_id', $business_id)->first();
+                $contact_id = $contact->id;
+                $input['contact_id'] = $contact_id;
+
+                $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
+                $sell_lines = $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id'], true, $status_before);
+            
+            } catch (Exception $e) {
+
+                return response([
+                    'success' => 0,
+                    'msg' => trans('messages.something_went_wrong'),
+                ]);
+
+            }
+
+        }
+
+
+
+
+
 
     }
 

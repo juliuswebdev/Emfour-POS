@@ -37,6 +37,7 @@ Route::prefix('v1')->group(function() {
         Route::get('/product/{product_id}', [OrderingAppController::class, 'getProduct']);
         Route::get('/orders', [OrderingAppController::class, 'getOrders']);
         Route::get('/order/{order_id}', [OrderingAppController::class, 'getOrder']);
+        Route::post('/order/mark-as-completed/{order_id}', [OrderingAppController::class, 'markAsCompleted']);
     });
 
 });
