@@ -237,10 +237,10 @@ class OrderController extends Controller
             ->orderBy('transactions.id', 'DESC')
             ->get();
             
-            if(count($transactions) > 0) {
+            if(count($transactions) > 0 && $q != '') {
                 return view('restaurant.orders.checkout-result', compact('transactions'));
             } else {
-                return 'No Result Found!';
+                return '<div style="margin-top: 20px">No Result Found!</div>';
             }
         }
 
