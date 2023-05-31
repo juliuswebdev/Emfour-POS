@@ -285,7 +285,6 @@ class SellReturnController extends Controller
                 DB::beginTransaction();
 
                 $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
-
                 $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
 
                 DB::commit();
@@ -591,4 +590,128 @@ class SellReturnController extends Controller
             'redirect_url' => action([\App\Http\Controllers\SellReturnController::class, 'add'], [$sell->id]),
         ];
     }
+
+     /**
+     * Function use for create sale return transaction
+     */
+    public function makeSaleReturnTransaction($id, Request $request){
+        if (! auth()->user()->can('access_sell_return') && ! auth()->user()->can('access_own_sell_return')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+
+            $transaction_id = $id;
+            
+            $transation_row = Transaction::select('id', 'invoice_no', \DB::raw('DATE(created_at) AS transaction_date'))->where('id', $id)->where('type', 'sell')->first();
+           
+            $invoice_no = $transation_row->invoice_no;
+            $transaction_date = date('m/d/Y h:i');
+            $discount_type = "percentage";
+            $discount_amount = "0.00";
+            $tax_id = null;
+            $sale_return_via = $request->sale_return_via;
+            $tax_amount = $tax_percent = 0;
+
+            $products = $request->products;
+            if(empty($products)){
+
+                $output = [
+                    'success' => 0,
+                    'msg' =>  __('lang_v1.please_update_the_return_product'),
+                ];
+
+            }else{
+                $product_data = [];
+                foreach($products as $k => $product){
+                    $product_data[$k]['quantity'] = $product['quantity'];
+                    $product_data[$k]['unit_price_inc_tax'] = $product['unit_price_inc_tax'];
+                    $product_data[$k]['sell_line_id'] = $product['transaction_sell_lines_id'];
+                }
+
+                $business_id = $request->session()->get('user.business_id');
+                //Check if subscribed or not
+                if (! $this->moduleUtil->isSubscribed($business_id)) {
+                    return $this->moduleUtil->expiredResponse(action([\App\Http\Controllers\SellReturnController::class, 'index']));
+                }
+                $user_id = $request->session()->get('user.id');
+
+                $input = array();
+                $input['transaction_id'] = $transaction_id;
+                $input['invoice_no'] = $invoice_no;
+                $input['transaction_date'] = $transaction_date;
+                $input['discount_type'] = $discount_type;
+                $input['discount_amount'] = $discount_amount;
+                $input['tax_id'] = $tax_id;
+                $input['tax_amount'] = $tax_amount;
+                $input['tax_percent'] = $tax_percent;
+                $input['products'] = $product_data;
+                $input['sale_return_via'] = $sale_return_via;
+
+                DB::beginTransaction();
+
+                $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
+                $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
+
+
+                if($sale_return_via == "card"){
+                    
+                    $transaction_type = ($transation_row->transaction_date == date('Y-m-d')) ? 'Void' : 'Return';
+                    
+                    $final_amount_for_payment = sprintf('%0.2f', $sell_return->final_total);
+                    $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                    $response_of_payment = $payment_device_init->paymentInit('Credit', $transaction_type, $final_amount_for_payment, $sell_return->id);
+
+                    if($response_of_payment['success'] == 0){
+                        //Payment Return Failed Rollback Transaction
+                        DB::rollback();
+                        $output = [
+                            'success' => 0,
+                            'msg' => $response_of_payment['msg']
+                        ];
+                        return $output;
+                    }else{
+                        
+                        //Store Payment Return Response
+                        $payment_response_json = json_encode($response_of_payment['data'], true);
+                        Transaction::where('id', $sell_return->id)
+                                            ->where('business_id', $business_id)
+                                            ->update(['payment_refund_response' => $payment_response_json]);
+
+                        DB::commit();
+                        $output = ['success' => 1,
+                            'msg' => __('lang_v1.success'),
+                            'receipt' => $receipt,
+                        ];
+                    }
+                }else{
+                    DB::commit();
+
+                    $output = ['success' => 1,
+                        'msg' => __('lang_v1.success'),
+                        'receipt' => $receipt,
+                    ];
+                }
+            }
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            dd($e->getMessage());
+            if (get_class($e) == \App\Exceptions\PurchaseSellMismatch::class) {
+                $msg = $e->getMessage();
+            } else {
+                \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+                $msg = __('messages.something_went_wrong');
+            }
+
+            $output = ['success' => 0,
+                'msg' => $msg,
+            ];
+        }
+
+        return $output;
+
+    }
+
+
 }

@@ -108,6 +108,102 @@
 	    @endforeach
 	@endif
 	
+	<!-- Sale Return -->
+	@if(request()->get('sale-return') == 1)
+	<script>
+		$(document).ready(function(){
+
+			//Hide the html component on sale return
+			$('#product_brand_div').hide();
+			$('#product_category_div').hide();
+			$('#product_list_body').hide();
+			$('#recent-transactions').hide();
+			$('#suggestion_page_loader').hide();
+			$('.wrapper-of-add-action').hide();
+			$('.wrapper-of-sale-return').show();
+			$('#customer_id').attr('disabled', 'disabled');
+			$('#search_product').attr('readonly', 'readonly');
+			$('select[name="res_table_id"]').attr('disabled', 'disabled');
+			$('#res_waiter_id').attr('disabled', 'disabled');
+			$('#is_recurring').attr('disabled', 'disabled');
+			$('.pos-total').find('span.text').text('Total Return');
+			$('.pos_form_totals').hide();
+			$('#pos_table thead tr th:eq(1)').text('Return Quantity');
+
+			//confirm button event in sale return
+			$('.sale-retun-confirm').click(function(){
+				$(this).hide();
+				$('.btn-payment-sale-return').show();
+			});
+
+			//sale return refund event
+			$('.btn-payment-sale-return').click(function(){
+				var sale_return_action = "{{ url('sale-return/'.$transaction->id.'/invoice') }}"
+				var form = document.getElementById("edit_pos_sell_form");
+				var data = new FormData(form)
+				var sale_return_method = $(this).attr('data-payment-type');
+				var processing_text = "<span class='card-payment-popup'><div>Processing of Return..</div><div><button id='card-payment-close' class='btn-danger'>Close</button></div></span>"
+				var bg_black_fade_in = '<div class="modal-backdrop fade in">'+processing_text+'</div>';
+				$('.ui-helper-hidden-accessible').after(bg_black_fade_in);
+
+				data.append('sale_return_via', sale_return_method);
+				$.ajax({
+					url: sale_return_action,
+					type: "POST",
+					headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+					data: data,
+					contentType: false,
+					cache: false,
+					processData: false,
+					success: function (result) {
+						$('.modal-backdrop').remove();
+						if (result.success == 1) {
+                            toastr.success(result.msg);
+                            //Check if enabled or not
+                            if (result.receipt.is_enabled) {
+                                pos_print(result.receipt);
+                            }
+							reset_pos_form();
+                        } else {
+							toastr.error(result.msg);
+                        }
+					},
+				});
+			});
+
+			//Close the card payment on return
+			$(document).on('click', '#card-payment-close', function(){
+				$('.modal-backdrop').remove();
+			});
+			
+			
+
+			//Input qty validation in sale return screen
+			$('.input_quantity').on('input', function(){
+				var max_qty = $(this).attr('data-max');
+				max_qty = parseFloat(max_qty).toFixed(2);
+				var input_qty = $(this).val();
+				input_qty = parseFloat(input_qty).toFixed(2);
+				if(max_qty < input_qty){
+					$(this).val(max_qty);
+				}
+			});
+
+			//Set max qty in sale return screen
+			function set_max_quantity(){
+				$('#pos_table > tbody > tr').each(function(index, tr) { 
+					var max_qty = $(this).find('.input_quantity').attr('value');
+					$(this).find('.input_quantity').attr('data-max', max_qty);
+				});
+			}
+			
+			set_max_quantity();
+
+		});
+	</script>
+	@endif
+
+
 @endsection
 
 @section('css')

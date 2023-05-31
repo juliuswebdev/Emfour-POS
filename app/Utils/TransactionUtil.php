@@ -2989,18 +2989,19 @@ class TransactionUtil extends Util
     public function calculatePaymentStatus($transaction_id, $final_amount = null)
     {
         $total_paid = $this->getTotalPaid($transaction_id);
-
         if (is_null($final_amount)) {
             $final_amount = Transaction::find($transaction_id)->final_total;
         }
 
         $status = 'due';
-        if ($final_amount <= $total_paid) {
+        if($total_paid == null){
+            $status = 'due';
+        }else if ($final_amount <= $total_paid) {
             $status = 'paid';
         } elseif ($total_paid > 0 && $final_amount > $total_paid) {
             $status = 'partial';
         }
-
+        
         return $status;
     }
 
@@ -5895,7 +5896,7 @@ class TransactionUtil extends Util
         $input['tax_id'] = $input['tax_id'] ?? null;
 
         $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number);
-
+        
         //Get parent sale
         $sell = Transaction::where('business_id', $business_id)
                         ->with(['sell_lines', 'sell_lines.sub_unit'])
@@ -5916,7 +5917,7 @@ class TransactionUtil extends Util
             'total_before_tax' => $invoice_total['total_before_tax'],
             'final_total' => $invoice_total['final_total'],
         ];
-
+        
         if (! empty($input['transaction_date'])) {
             $sell_return_data['transaction_date'] = $uf_number ? $this->uf_date($input['transaction_date'], true) : $input['transaction_date'];
         }
@@ -5961,7 +5962,7 @@ class TransactionUtil extends Util
                 $sell->save();
             }
         }
-
+        
         //Update payment status
         $this->updatePaymentStatus($sell_return->id, $sell_return->final_total);
 

@@ -317,7 +317,7 @@ class SellPosController extends Controller
         if (! auth()->user()->can('sell.create') && ! auth()->user()->can('direct_sell.access') && ! auth()->user()->can('so.create')) {
             abort(403, 'Unauthorized action.');
         }
-
+       
         $is_direct_sale = false;
         if (! empty($request->input('is_direct_sale'))) {
             $is_direct_sale = true;
@@ -512,6 +512,7 @@ class SellPosController extends Controller
 
                 
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
+                //dd($transaction);
                 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
@@ -525,10 +526,12 @@ class SellPosController extends Controller
 
                 $is_credit_sale = isset($input['is_credit_sale']) && $input['is_credit_sale'] == 1 ? true : false;
 
-                if (! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale) {
+                $send_to_kitchen = ($request->has('send_to_kitchen') && $request->filled('send_to_kitchen')) ? $input['send_to_kitchen'] : 0;
+
+                if (! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale && $send_to_kitchen == 0) {
                     $this->transactionUtil->createOrUpdatePaymentLines($transaction, $input['payment']);
                 }
-
+                
                 //Check for final and do some processing.
                 if ($input['status'] == 'final') {
                     if (! $is_direct_sale) {
@@ -583,13 +586,13 @@ class SellPosController extends Controller
                     }
 
                     //Add payments to Cash Register
-                    if (! $is_direct_sale && ! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale) {
+                    if (! $is_direct_sale && ! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale && $send_to_kitchen == 0) {
                         $this->cashRegisterUtil->addSellPayments($transaction, $input['payment']);
                     }
 
                     //Update payment status
                     $payment_status = $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
-
+                    
                     $transaction->payment_status = $payment_status;
 
                     if ($request->session()->get('business.enable_rp') == 1) {
@@ -625,7 +628,7 @@ class SellPosController extends Controller
                 $this->transactionUtil->activityLog($transaction, 'added');
                 
                 
-                if(isset($input['payment'][0]['method'])){
+                if(isset($input['payment'][0]['method']) && $send_to_kitchen == 0){
                     if($input['payment'][0]['method'] == "card"){
                         //Make Payment through card
                         $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
@@ -847,14 +850,14 @@ class SellPosController extends Controller
     public function edit($id)
     {
         $business_id = request()->session()->get('user.business_id');
-
+        
         if (! (auth()->user()->can('superadmin') || auth()->user()->can('sell.update')
         || auth()->user()->can('edit_pos_payment')
          || ($this->moduleUtil->hasThePermissionInSubscription($business_id, 'repair_module') &&
          auth()->user()->can('repair.update')))) {
             abort(403, 'Unauthorized action.');
         }
-
+        
         //Check if the transaction can be edited or not.
         $edit_days = request()->session()->get('business.transaction_edit_days');
         if (! $this->transactionUtil->canBeEdited($id, $edit_days)) {
@@ -862,20 +865,20 @@ class SellPosController extends Controller
                 ->with('status', ['success' => 0,
                     'msg' => __('messages.transaction_edit_not_allowed', ['days' => $edit_days]), ]);
         }
-
+        
         //Check if there is a open register, if no then redirect to Create Register screen.
         if ($this->cashRegisterUtil->countOpenedRegister() == 0) {
             return redirect()->action([\App\Http\Controllers\CashRegisterController::class, 'create']);
         }
-
+        
         //Check if return exist then not allowed
         if ($this->transactionUtil->isReturnExist($id)) {
-            return back()->with('status', ['success' => 0,
+            return redirect()->to(url('pos/create'))->with('status', ['success' => 0,
                 'msg' => __('lang_v1.return_exist'), ]);
         }
 
         $walk_in_customer = $this->contactUtil->getWalkInCustomer($business_id);
-
+        
         $business_details = $this->businessUtil->getDetails($business_id);
 
         $taxes = TaxRate::forBusinessDropdown($business_id, true, true);
@@ -884,7 +887,7 @@ class SellPosController extends Controller
                             ->where('type', 'sell')
                             ->with(['price_group', 'types_of_service'])
                             ->findorfail($id);
-
+        
         $location_id = $transaction->location_id;
         $business_location = BusinessLocation::find($location_id);
         $payment_types = $this->productUtil->payment_types($business_location, true);
@@ -1065,8 +1068,7 @@ class SellPosController extends Controller
 
         //If brands, category are enabled then send else false.
         $categories = (request()->session()->get('business.enable_category') == 1) ? Category::catAndSubCategories($business_id) : false;
-        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)
-                    ->prepend(__('lang_v1.all_brands'), 'all') : false;
+        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)->prepend(__('lang_v1.all_brands'), 'all') : false;
 
         $change_return = $this->dummyPaymentLine;
 
@@ -3147,4 +3149,66 @@ class SellPosController extends Controller
 
         return ['success' => true];
     }
+
+    /**
+     * Function is use for verify 9 digits pin in pos screen.
+     */
+    public function saleReturnPinVerify(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('sale_return_pin') && $request->filled('sale_return_pin')){
+
+            if($request->sale_return_pin == auth()->user()->sale_return_pin){
+                return response()->json(['status' => true, 'message' => __('lang_v1.verified_success'), 'data' => '']);
+            }else{
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.sale_return_pin_incorrect'), 'data' => '']);   
+            }
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_sale_return_pin'), 'data' => '']);    
+        }
+    }
+
+    /**
+     * Function use for validate transaction invoice with check it is due or paid.
+     */
+    public function getSaleReturnInvoice(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('sale_return_invoice_number') && $request->filled('sale_return_invoice_number')){
+            
+            $business_id = request()->session()->get('user.business_id');
+
+            $invoice_number = $request->sale_return_invoice_number;
+            $is_exit_invoice = Transaction::select('id', 'payment_status', 'invoice_no')->where('invoice_no', $invoice_number)
+            ->where('payment_status', 'paid')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->first();
+
+            if($is_exit_invoice == null){
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.invoice_number_is_invalid'), 'data' => '']); 
+            }
+            
+            /*
+            if($is_exit_invoice->payment_status != "paid"){
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.invoice_payment_is_pending'), 'data' =>'']); 
+            }
+            */
+
+            $url = url('pos/'.$is_exit_invoice->id.'/edit?sale-return=1');
+            $array_res = array('redirect_url' => $url);
+            return response()->json(['status' => true, 'message' => "", 'data' => $array_res]); 
+
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_sale_return_invoice_number'), 'data' => '']);    
+        }
+    }
+
+
+
+
 }

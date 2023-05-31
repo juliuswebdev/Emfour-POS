@@ -52,6 +52,13 @@ function getLocationTables(location_id) {
                 if ($("#repair_technician").length) {
                     $("select#res_waiter_id").val($("#repair_technician").val()).change();
                 }
+
+                //Sale Return Disable Dropdown.
+                var length_of_sale_return_btn = $('.wrapper-of-sale-return').length;
+                if(length_of_sale_return_btn != 0){
+                    $('span#restaurant_module_span').find('select').attr("disabled", "disabled")
+                }
+
             },
         });
     }

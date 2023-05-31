@@ -20,7 +20,27 @@
 
 		</div>
 
-		<div class="col-md-12">
+		@if(request()->get('sale-return') == 1)
+		<div class="col-md-12 wrapper-of-sale-return" style="display:none;">
+			<button type="button" title="@lang('lang_v1.confirm')" class="btn bg-primary text-white btn-flat sale-retun-confirm">@lang('lang_v1.confirm')</button>
+			<button 
+				data-payment-type="card"
+				style="display:none;"
+				type="button" 
+				class="btn bg-maroon btn-default btn-flat btn-payment-sale-return @if($is_mobile) col-xs-6 @endif" 
+				title="@lang('lang_v1.return_via_card')" >
+				<i class="fas fa-credit-card" aria-hidden="true"></i> @lang('lang_v1.express_checkout_card')
+			</button>
+			<button 
+				data-payment-type="cash"
+				style="display:none;"
+				type="button" 
+				class="btn btn-success btn-flat btn-payment-sale-return @if($is_mobile) col-xs-6 @endif" 
+				title="@lang('tooltip.return_via_cash')"> <i class="fas fa-money-bill-alt" aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
+		</div>
+		@endif
+
+		<div class="col-md-12 wrapper-of-add-action">
 			@if($is_mobile)
 				<div class="col-md-12 text-right">
 					<b>@lang('sale.total_payable'):</b>
@@ -78,6 +98,8 @@
 			@endif
 			
 			<button type="button" class="btn bg-navy btn-default @if(!$is_mobile) @endif btn-flat no-print @if($pos_settings['disable_pay_checkout'] != 0) hide @endif @if($is_mobile) col-xs-6 @endif" id="pos-finalize" title="@lang('lang_v1.tooltip_checkout_multi_pay')"><i class="fas fa-money-check-alt" aria-hidden="true"></i> @lang('lang_v1.checkout_multi_pay') </button>
+
+
 			@if(isset($pos_settings['pay_safe_key_id']))
 			<script src="{{ asset('ingenico/dist/connectsdk.min.js') }}"></script>
 			<script>
@@ -125,6 +147,12 @@
 			</button>
 
 			<button type="button" class="btn btn-success @if(!$is_mobile) @endif btn-flat no-print @if($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize @if($is_mobile) col-xs-6 @endif" data-pay_method="cash" title="@lang('tooltip.express_checkout')"> <i class="fas fa-money-bill-alt" aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
+
+			<button type="button" 
+				class="btn bg-black btn-default btn-flat sale-return @if($is_mobile) col-xs-6 @endif" 
+				title="@lang('lang_v1.tooltip_sale_return')" >
+				<i class="fas fa-undo fa-lg" aria-hidden="true"></i> @lang('lang_v1.sale_return')
+			</button>
 
 			@if(empty($edit))
 				<button type="button" class="btn btn-danger btn-flat @if($is_mobile) col-xs-6 @else btn-xs @endif" id="pos-cancel"> <i class="fas fa-window-close"></i> @lang('sale.cancel')</button>

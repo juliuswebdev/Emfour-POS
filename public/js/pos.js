@@ -865,9 +865,11 @@ $(document).ready(function() {
     });
 
     $('button#pos-suspend').click(function() {
+        $('input#send_to_kitchen').val(1);
         $('input#is_suspend').val(1);
         $('div#confirmSuspendModal').modal('hide');
         pos_form_obj.submit();
+        $('input#send_to_kitchen').val(0);
         $('input#is_suspend').val(0);
     });
 
@@ -1014,7 +1016,7 @@ $(document).ready(function() {
                             //     }
                             // });
 
-                            toastr.success(result.msg+ 'test');
+                            toastr.success(result.msg);
 
                             reset_pos_form();
 
