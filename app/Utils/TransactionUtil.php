@@ -767,6 +767,21 @@ class TransactionUtil extends Util
                         }
                     }
 
+                    // Card Charge J
+                    $business_id = $transaction->business_id;
+                    if($payment['method']  == 'card'){
+                        $business = Business::find($business_id);
+                        $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
+
+                        $card_charge_amount = ($payment_data['amount'] * $card_charge);
+
+                        $payment_data['original_amount'] = $payment_data['amount'];
+                        $payment_data['card_charge_amount'] = $card_charge_amount;
+                        $payment_data['card_charge_percent'] = $business->card_charge;
+                        $payment_data['amount'] = $payment_data['amount'] + $card_charge_amount; 
+
+                    }
+                    
                     $payments_formatted[] = new TransactionPayment($payment_data);
 
                     if (! empty($payment['denominations'])) {
@@ -1508,6 +1523,9 @@ class TransactionUtil extends Util
                                 ['method' => $method.(! empty($value['card_transaction_number']) ? (', Transaction Number:'.$value['card_transaction_number']) : ''),
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
+                                    'card_charge_amount' => isset($value['card_charge_amount']) ? $this->num_f($value['card_charge_amount'], $show_currency, $business_details) : '',
+                                    'card_charge_percent' => isset($value['card_charge_percent']) ? $value['card_charge_percent'] : '',
+                                    'original_amount' => isset($value['original_amount']) ? $this->num_f($value['original_amount'], $show_currency, $business_details) : ''
                                 ];
                         } elseif ($value['method'] == 'cheque') {
                             $output['payments'][] =

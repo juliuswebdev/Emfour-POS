@@ -123,6 +123,9 @@
                             <p class="text-muted">
                             {{$business->owner->address}}
                             </p>
+                            <strong><i class="fa fa-percent margin-r-5"></i> 
+                            @lang('lang_v1.card_charge')</strong> {{$business->card_charge}}%
+                          
                         </div>
                     </div>
 

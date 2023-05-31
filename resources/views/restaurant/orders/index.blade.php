@@ -5,7 +5,6 @@
 
 <!-- Main content -->
 <section class="content min-height-90hv no-print">
-    
     <div class="row">
         <div class="col-md-12 text-center">
             <h3>@lang( 'restaurant.all_orders' ) @show_tooltip(__('lang_v1.tooltip_serviceorder'))</h3>
@@ -54,6 +53,27 @@
     </div>
 </section>
 <!-- /.content -->
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel" id="pin_server_modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title">@lang('repair::lang.security')</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    {!! Form::open(['action' => '\App\Http\Controllers\Restaurant\OrderController@userCheckPin', 'id' => 'check_user_pin', 'method' => 'post']) !!}
+                        <input id="user_id" name="user_id" type="hidden">
+                        {!! Form::label('pin', __('business.digits_pin') . ':') !!}
+                        {!! Form::text('pin', null, ['class' => 'form-control', 'autoComplete' => 'false', 'placeholder' => __('business.digits_pin')]); !!}
+                        <br>
+                        <button type="submit" class="btn btn-primary">@lang( 'messages.submit' )</button>
+                    {!! Form::close() !!}
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
 
 @endsection
 
@@ -63,29 +83,82 @@
             $('form#select_service_staff_form').submit();
         });
         $(document).ready(function(){
+
             $(document).on('click', 'a.mark_as_served_btn', function(e){
                 e.preventDefault();
-                swal({
-                  title: LANG.sure,
-                  icon: "info",
-                  buttons: true,
-                }).then((willDelete) => {
-                    if (willDelete) {
-                        var _this = $(this);
-                        var href = _this.data('href');
-                        $.ajax({
-                            method: "GET",
-                            url: href,
-                            dataType: "json",
-                            success: function(result){
-                                if(result.success == true){
-                                    refresh_orders();
-                                    toastr.success(result.msg);
-                                } else {
-                                    toastr.error(result.msg);
+                var _this = $(this);
+                var href = _this.data('href');
+                $('#check_user_pin').attr('mark-as-serve-url', href);
+                const urlParams = new URL(window.location.href).searchParams;
+                const service_staff = urlParams.get('service_staff');
+                $('#check_user_pin #user_id').val(service_staff);
+                $.ajax({
+                    context: this,
+                    method: "POST",
+                    url: '/user/check-has-pin',
+                    data: { user_id : service_staff },
+                    dataType: "json",
+                    success: function(result) {
+                        if(result.success == true) {
+                            $('#pin_server_modal').modal('show');
+                        } else {
+                            toastr.error(result.msg);
+                        }
+                    }
+                });
+            });
+
+            $('#check_user_pin').submit(function(e) {
+                e.preventDefault();
+                var data = $(this).serialize();
+                $.ajax({
+                    context: this,
+                    method: "POST",
+                    url: $(this).attr("action"),
+                    data: data,
+                    dataType: "json",
+                    success: function(result) {
+                        if(result.success == true) {
+                            toastr.success(result.msg);
+                            var href = $(this).attr('mark-as-serve-url');
+                            $.ajax({
+                                method: "GET",
+                                url: href,
+                                dataType: "json",
+                                success: function(result){
+                                    if(result.success == true){
+                                        refresh_orders();
+                                        toastr.success(result.msg);
+                                        $('#pin_server_modal').modal('hide');
+                                    } else {
+                                        toastr.error(result.msg);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        } else {
+                            toastr.error(result.msg);
+                            $('#check_user_pin #pin').val('');
+                            $('#check_user_pin button').removeAttr('disabled');
+                        }
+                    }
+                });
+            });
+
+            //Function used for update the is_served column
+            $(document).on('click', 'a.btn-served', function(e){
+                e.preventDefault();
+                var href = $(this).data('href');
+                $.ajax({
+                    method: "GET",
+                    url: href,
+                    dataType: "json",
+                    success: function(result){
+                        if(result.success == true){
+                            toastr.success(result.msg);
+                            $('#refresh_orders').click();
+                        } else {
+                            toastr.error(result.msg);
+                        }
                     }
                 });
             });
@@ -138,5 +211,11 @@
                 });
             });
         });
+
+       
+        setInterval(function(){
+            $('.blink-allow').fadeIn(1000).fadeOut(1000);
+        },0)
+
     </script>
 @endsection

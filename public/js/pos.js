@@ -1,97 +1,60 @@
 $(document).ready(function() {
 
-    var card_data = '%B4867966912303811^PELEGR/GLEN MAXIMO GUANZON^27082010000000780000000;4867966912303811=27082010000078000000';
-    var details1 = card_data.split("^");
 
-    var card_number = details1[0];
-    card_number = card_number.substring(2);
+    // var barcode = '';
+    // var interval;
+    // document.addEventListener('keydown', function(evt) {
+    //     if (evt.code === 'F12'){
+    //         evt.preventDefault();
+    //     }
+    //     if (interval){
+    //         clearInterval(interval);
+    //     }
+    //     if (evt.code == 'Enter') {
+    //         if (barcode){
+    //             var card_data = barcode;
+    //             var details1 = card_data.split("^");
 
-    var names = details1[1].split("/");
-    var first_name = names[1];
-    var last_name = names[0];
-
-    var details2 = details1[2].split(";");
-    details2 = details2[1].split("=");
-
-    var exp_date = details2[1];
-    exp_date = exp_date.substring(0, exp_date.length - 1);
-    exp_date = exp_date.substring(2, 4) + "/" + exp_date.substring(0,2);
-    console.log('card_number: ' + card_number);
-    console.log('exp_date: ' + exp_date);
-    console.log('first_name: ' + first_name);
-    console.log('last_name:' + last_name);
-
-    var month = exp_date.split("/")[0];
-    var year = exp_date.split("/")[1];
-
-    $('#card_number').val(card_number);
-    $('#card_holder_name').val(first_name + ' ' + last_name);
-    $('#card_month').val(month);
-    $('#card_year').val(year);
-    $('#card_type').val(GetCardType(card_number));
-
-    $('#card_number').hide();
-    var input = '<input class="form-control valid" placeholder="Card Number" id="card_number_temp" autofocus="" value="*******'+card_number.substr(card_number.length - 5)+'" type="text" aria-invalid="false">';
-    $(input).insertAfter('#card_number');
-
-    var input2 = '<input  value="'+first_name+'" id="card_first_name" type="hidden"><input  value="'+last_name+'" id="card_last_name" type="hidden">';
-    $(input2).insertAfter('#card_holder_name');
-
-
-    var barcode = '';
-    var interval;
-    document.addEventListener('keydown', function(evt) {
-        if (evt.code === 'F12'){
-            evt.preventDefault();
-        }
-        if (interval){
-            clearInterval(interval);
-        }
-        if (evt.code == 'Enter') {
-            if (barcode){
-                var card_data = barcode;
-                var details1 = card_data.split("^");
-
-                var card_number = details1[0];
-                card_number = card_number.substring(2);
+    //             var card_number = details1[0];
+    //             card_number = card_number.substring(2);
             
-                var names = details1[1].split("/");
-                var first_name = names[1];
-                var last_name = names[0];
+    //             var names = details1[1].split("/");
+    //             var first_name = names[1];
+    //             var last_name = names[0];
             
-                var details2 = details1[2].split(";");
-                details2 = details2[1].split("=");
+    //             var details2 = details1[2].split(";");
+    //             details2 = details2[1].split("=");
             
-                var exp_date = details2[1];
-                exp_date = exp_date.substring(0, exp_date.length - 1);
-                exp_date = exp_date.substring(2, 4) + "/" + exp_date.substring(0,2);
-                console.log('card_number: ' + card_number);
-                console.log('exp_date: ' + exp_date);
-                console.log('first_name: ' + first_name);
-                console.log('last_name:' + last_name);
+    //             var exp_date = details2[1];
+    //             exp_date = exp_date.substring(0, exp_date.length - 1);
+    //             exp_date = exp_date.substring(2, 4) + "/" + exp_date.substring(0,2);
+    //             console.log('card_number: ' + card_number);
+    //             console.log('exp_date: ' + exp_date);
+    //             console.log('first_name: ' + first_name);
+    //             console.log('last_name:' + last_name);
 
-                var month = exp_date.split("/")[0];
-                var year = exp_date.split("/")[1];
+    //             var month = exp_date.split("/")[0];
+    //             var year = exp_date.split("/")[1];
 
-                $('#card_number').val(card_number);
-                $('#card_holder_name').val(first_name + ' ' + last_name);
-                $('#card_month').val(month);
-                $('#card_year').val(year);
-                $('#card_type').val(GetCardType(card_number));
+    //             $('#card_number').val(card_number);
+    //             $('#card_holder_name').val(first_name + ' ' + last_name);
+    //             $('#card_month').val(month);
+    //             $('#card_year').val(year);
+    //             $('#card_type').val(GetCardType(card_number));
 
-                $('#card_number').hide();
-                var input = '<input class="form-control valid" placeholder="Card Number" id="card_number" autofocus="" name="" type="text" aria-invalid="false">';
-                $(input).insertAfter('#card_number');
+    //             $('#card_number').hide();
+    //             var input = '<input class="form-control valid" placeholder="Card Number" id="card_number" autofocus="" name="" type="text" aria-invalid="false">';
+    //             $(input).insertAfter('#card_number');
 
-            }
-            barcode = '';
-            return;
-        }
-        if (evt.key != 'Shift'){
-            barcode += evt.key;
-        }
-        interval = setInterval(() => barcode = '', 20);
-    });
+    //         }
+    //         barcode = '';
+    //         return;
+    //     }
+    //     if (evt.key != 'Shift'){
+    //         barcode += evt.key;
+    //     }
+    //     interval = setInterval(() => barcode = '', 20);
+    // });
 
 
     const urlParams = new URL(window.location.href).searchParams;
@@ -102,6 +65,21 @@ $(document).ready(function() {
             pos_product_row(item);
         });
     }
+
+    $('#restaurant-search-order').submit(function(e){
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            context: this,
+            method: "GET",
+            url: $(this).attr("action"),
+            data: data,
+            success: function(result) {
+                $('#restaurant-search-order_result').html(result);
+                $('.btn-search').removeAttr('disabled');
+            }
+        });
+    });
 
     $('.search-check').submit(function(e){
         e.preventDefault();
@@ -780,6 +758,11 @@ $(document).ready(function() {
 
     //Finalize without showing payment options
     $('button.pos-express-finalize').click(function() {
+        var total_payable = parseFloat($('#total_payable').text());
+        var card_charge_percent = parseFloat($('#card_charge_percent_hidden').val()) / 100;
+        var total_payable = $('#__symbol').val() +' '+ (total_payable + ( total_payable * card_charge_percent ))
+        $('#card_total_payable').text( total_payable );
+       
 
         //Check if product is present or not.
         if ($('table#pos_table tbody').find('.product_row').length <= 0) {
@@ -831,9 +814,16 @@ $(document).ready(function() {
             payment_method_dropdown.val(pay_method);
             payment_method_dropdown.change();
         if (pay_method == 'card') {
-            $('div#card_details_modal').modal('show');
+
+            var processing_text = "<span class='card-payment-popup'><div>Processing of Payment..</div><div><button id='card-payment-close' class='btn-danger'>Close</button></div></span>"
+            var bg_black_fade_in = '<div class="modal-backdrop fade in">'+processing_text+'</div>';
+            $('.ui-helper-hidden-accessible').after(bg_black_fade_in);
+            pos_form_obj.submit();
+            
+            //$('div#card_details_modal').modal('show');
         } else if (pay_method == 'suspend') {
             //Change the modal title & label
+           
             var send_to_kitchen_title = $(this).data('modal-title');
             if(send_to_kitchen_title != undefined){
                 var send_to_kitchen_label = $(this).data('modal-placeholder');
@@ -1003,29 +993,26 @@ $(document).ready(function() {
                                 window.open(result.whatsapp_link);
                             }
                             $('#modal_payment').modal('hide');
-
-                            var data_authorize_net = {
-                                'invoice_id' : result.receipt.print_title,
-                                'amount' : result.receipt.receipt_details.subtotal_unformatted,
-                                'card_number' : $('#card_number').val(),
-                                'card_first_name' : $('#card_first_name').val(),
-                                'card_last_name' : $('#card_last_name').val(),
-                                'card_year' : $('#card_year').val(),
-                                'card_month' : $('#card_month').val(),
-                                'card_cvv' : $('#card_security').val()
-                            };
-                            console.log(data_authorize_net);
-                            $.ajax({
-                                method: 'POST',
-                                url: $('#api-authorize-net').val(),
-                                data: data_authorize_net,
-                                dataType: 'json',
-                                success: function(result) {
-                                    console.log(result);
-                                }
-                            });
-
-
+                            // var data_authorize_net = {
+                            //     'invoice_id' : result.receipt.print_title,
+                            //     'amount' : result.receipt.receipt_details.subtotal_unformatted,
+                            //     'card_number' : $('#card_number').val(),
+                            //     'card_first_name' : $('#card_first_name').val(),
+                            //     'card_last_name' : $('#card_last_name').val(),
+                            //     'card_year' : $('#card_year').val(),
+                            //     'card_month' : $('#card_month').val(),
+                            //     'card_cvv' : $('#card_security').val()
+                            // };
+                           
+                            // $.ajax({
+                            //     method: 'POST',
+                            //     url: $('#api-authorize-net').val(),
+                            //     data: data_authorize_net,
+                            //     dataType: 'json',
+                            //     success: function(result) {
+                            //         console.log(result);
+                            //     }
+                            // });
 
                             toastr.success(result.msg+ 'test');
 
@@ -1033,12 +1020,14 @@ $(document).ready(function() {
 
                             //Check if enabled or not
                             if (result.receipt.is_enabled) {
+                                console.log(result.receipt);
                                 pos_print(result.receipt);
                             }
                         } else {
                             toastr.error(result.msg);
                         }
 
+                        $('.modal-backdrop').remove();
                         enable_pos_form_actions();
                     },
                 });
@@ -1329,7 +1318,21 @@ $(document).ready(function() {
     }
 
     //Show product list.
-    var product_category_select = $('select#product_category').val();
+    $('#product_category_div .cat-parent-area label').click(function() {
+        var parent_id = $(this).parent().find('input').val();
+        $('#product_category_div .cat-sub-area .cat-container').css({'display':'none'});
+        $('#product_category_div .cat-sub-area .cat_parent_'+parent_id).parent().css({'display':'inline-block'});
+    });
+
+    $('#product_category_div label').click(function() {
+        $('div#product_list_body').html('');
+        $('#product_category_div .cat-sub-area label').parent().removeClass('active');
+        $(this).parent().addClass('active').siblings().removeClass('active');
+    });
+    
+    $('.cat-parent-area').eqHeights({child:'.cat-container'});
+
+    var product_category_select = $('input[name="category_id"]:checked').attr('value');
     var product_brand_select = $('select#product_brand').val();
     if(product_category_select == 'all' || product_brand_select == 'all') {
         product_category_select = 99999999999999;
@@ -1343,18 +1346,19 @@ $(document).ready(function() {
         is_enabled_stock,
         device_model_id
     );
-    $('select#product_category, select#product_brand, select#select_location_id').on('change', function(e) {
+
+    $('input[name="category_id"], select#product_brand, select#select_location_id').on('change', function(e) {
+       
         $('input#suggestion_page').val(1);
         var location_id = $('input#location_id').val();
         if (location_id != '' || location_id != undefined) {
             get_product_suggestion_list(
-                $('select#product_category').val(),
+                $('input[name="category_id"]:checked').attr('value'),
                 $('select#product_brand').val(),
                 $('input#location_id').val(),
                 null
             );
         }
-
         get_featured_products();
     });
 
@@ -1647,7 +1651,6 @@ function get_product_suggestion_list(category_id, brand_id, location_id, url = n
     if($('div#product_list_body').length == 0) {
         return false;
     }
-
     if (url == null) {
         url = '/sells/pos/get-product-suggestion';
     }
@@ -1673,6 +1676,7 @@ function get_product_suggestion_list(category_id, brand_id, location_id, url = n
         },
         dataType: 'html',
         success: function(result) {
+            $('div#product_list_body').html('');
             $('div#product_list_body').append(result);
             $('#suggestion_page_loader').fadeOut(700);
         },
@@ -2592,32 +2596,34 @@ $(document).on('change', '#types_of_service_id', function(){
             },
             dataType: 'json',
             success: function(result) {
-                //reset form if price group is changed
-                var prev_price_group = $('#types_of_service_price_group').val();
-                if(result.price_group_id) {
-                    $('#types_of_service_price_group').val(result.price_group_id);
-                    $('#price_group_text').removeClass('hide');
-                    $('#price_group_text span').text(result.price_group_name);
-                } else {
-                    $('#types_of_service_price_group').val('');
-                    $('#price_group_text').addClass('hide');
-                    $('#price_group_text span').text('');
-                }
-                $('#types_of_service_id').val(types_of_service_id);
-                $('.types_of_service_modal').html(result.modal_html);
-                
-                if (prev_price_group != result.price_group_id) {
-                    if ($('form#edit_pos_sell_form').length > 0) {
-                        $('table#pos_table tbody').html('');
-                        pos_total_row();
+                if(result.packing_charge != 0.0000) {
+                    //reset form if price group is changed
+                    var prev_price_group = $('#types_of_service_price_group').val();
+                    if(result.price_group_id) {
+                        $('#types_of_service_price_group').val(result.price_group_id);
+                        $('#price_group_text').removeClass('hide');
+                        $('#price_group_text span').text(result.price_group_name);
                     } else {
-                        reset_pos_form();
+                        $('#types_of_service_price_group').val('');
+                        $('#price_group_text').addClass('hide');
+                        $('#price_group_text span').text('');
                     }
-                } else {
-                    pos_total_row();
-                }
+                    $('#types_of_service_id').val(types_of_service_id);
+                    $('.types_of_service_modal').html(result.modal_html);
+                    
+                    if (prev_price_group != result.price_group_id) {
+                        if ($('form#edit_pos_sell_form').length > 0) {
+                            $('table#pos_table tbody').html('');
+                            pos_total_row();
+                        } else {
+                            reset_pos_form();
+                        }
+                    } else {
+                        pos_total_row();
+                    }
 
-                $('.types_of_service_modal').modal('show');
+                    $('.types_of_service_modal').modal('show');
+                }
             },
         });
     } else {
@@ -3048,6 +3054,7 @@ function get_contact_due(id) {
     });
 }
 
+
 function submitQuickContactForm(form) {
     var data = $(form).serialize();
     $.ajax({
@@ -3227,6 +3234,31 @@ function GetCardType(number)
 
     return "";
 }
+
+function cardChargeSplitPayment()
+{
+    var charge = 0;
+    var symbol = $('#__symbol').val();
+    var card_charge_percent = parseFloat($('#card_charge_percent_hidden').val()) / 100;
+    $('.payment_types_dropdown').each(function(){
+        var val = $(this).val();
+        if(val === 'card') {
+           var parent = $(this).parents('.payment_row');
+           var amount = parent.find('.payment-amount').val();
+           charge += amount * card_charge_percent;
+           //console.log('test: ', amount * card_charge_percent);
+        }
+    });
+    $('.additional_card_charge_split_payment').text(symbol +' '+ charge.toFixed(2))
+}
+
+$(document).on('change', '.payment_types_dropdown', function(){
+    cardChargeSplitPayment();
+});
+
+$(document).on('keyup', '.payment-amount', function(){
+    cardChargeSplitPayment();
+});
 
 $(document).on('hidden.bs.modal', '.view_modal', function(){
     if (service_staff_availability_interval !== null) {

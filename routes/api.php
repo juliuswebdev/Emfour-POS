@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\OrderingAppController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,14 +18,27 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/pos/amount', function() {
-    $data = array('amount' => 1);
-    return response($data, 200);
-});
-
 Route::post('/authorize-net', [App\Http\Controllers\AuthorizeNetController::class, 'store'])->name('api.authorize-net');
 
 Route::get('/get-locations/{id}', function($id) {
     $locations = App\BusinessLocation::where('business_id', $id)->get();
     return response($locations, 200);
 });
+
+
+
+// API Ordering APP
+Route::prefix('v1')->group(function() {
+
+    Route::post('/login', [OrderingAppController::class, 'login']);
+
+    Route::middleware('auth:api')->group(function() {
+        Route::get('/products', [OrderingAppController::class, 'getProducts']);
+        Route::get('/product/{product_id}', [OrderingAppController::class, 'getProduct']);
+        Route::get('/orders', [OrderingAppController::class, 'getOrders']);
+        Route::get('/order/{order_id}', [OrderingAppController::class, 'getOrder']);
+        Route::post('/order/mark-as-completed/{order_id}', [OrderingAppController::class, 'markAsCompleted']);
+    });
+
+});
+

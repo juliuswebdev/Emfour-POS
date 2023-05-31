@@ -1406,6 +1406,14 @@
               </label>
             </div>
           </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'access_payment_devices', false,['class' => 'input-icheck']); !!}
+                {{ __('payment_device.access_payment_devices') }}
+              </label>
+            </div>
+          </div>
         </div>
         </div>
         @if(in_array('expenses', $enabled_modules))

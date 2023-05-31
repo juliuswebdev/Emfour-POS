@@ -2338,4 +2338,49 @@ class ProductController extends Controller
 
         return Excel::download(new ProductsExport, $filename);
     }
+
+    public function showSubUnitInventory($id)
+    {
+        if (! auth()->user()->can('product.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+
+
+        if (request()->ajax()) {
+
+            //for ajax call $id is variation id else it is product id
+            $stock_details = $this->productUtil->getVariationStockDetails($business_id, $id, request()->input('location_id'));
+            $stock_history = $this->productUtil->getVariationStockHistory($business_id, $id, request()->input('location_id'));
+
+            //if mismach found update stock in variation location details
+            if (isset($stock_history[0]) && (float) $stock_details['current_stock'] != (float) $stock_history[0]['stock']) {
+                VariationLocationDetails::where('variation_id',
+                                            $id)
+                                    ->where('location_id', request()->input('location_id'))
+                                    ->update(['qty_available' => $stock_history[0]['stock']]);
+                $stock_details['current_stock'] = $stock_history[0]['stock'];
+            }
+
+            $variation = Variation::where('id', $id)->with(['product'])->first();
+
+            $sub_unit = $variation->product->sub_unit_ids ?? [];
+       
+            $units = Unit::whereIn('id', $sub_unit)->select('id', 'actual_name', 'base_unit_multiplier', 'short_name')->get();
+
+            return view('product.sub-unit-details')
+                ->with(compact('stock_details', 'units'));
+        }
+
+        $product = Product::where('business_id', $business_id)
+        ->with(['variations', 'variations.product_variation'])
+        ->findOrFail($id);
+
+        //Get all business locations
+        $business_locations = BusinessLocation::forDropdown($business_id);
+
+        return view('product.sub-unit')
+                ->with(compact('product', 'business_locations'));
+    }
 }

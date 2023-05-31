@@ -10,7 +10,6 @@
     </head>
     <body>
         <div class="ticket">
-        	
 			@if(empty($receipt_details->letter_head))
 				@if(!empty($receipt_details->logo))
 					<div class="text-box centered">
@@ -25,7 +24,6 @@
 						<span class="headings">{!! $receipt_details->header_text !!}</span>
 						<br/>
 					@endif
-
 					<!-- business information here -->
 					@if(!empty($receipt_details->display_name))
 						<span class="headings">
@@ -602,10 +600,19 @@
 					@foreach($receipt_details->payments as $payment)
 						<div class="flex-box">
 							<p class="width-50 text-right">{{$payment['method']}} ({{$payment['date']}}) </p>
-							<p class="width-50 text-right">{{$payment['amount']}}</p>
+							<p class="width-50 text-right">
+								@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
+								{{$payment['original_amount']}}<br>
+								@lang('lang_v1.card_charge') {{$payment['card_charge_percent']}}%
+								{{$payment['card_charge_amount']}}
+								@else
+								{{$payment['amount']}}
+								@endif
+							</p>
 						</div>
 					@endforeach
 				@endif
+
 
 				<!-- Total Paid-->
 				@if(!empty($receipt_details->total_paid))

@@ -1,7 +1,7 @@
 <div class="modal-dialog" role="document">
   <div class="modal-content">
 
-    {!! Form::open(['url' => action([\App\Http\Controllers\TaxonomyController::class, 'update'], [$category->id]), 'method' => 'PUT', 'id' => 'category_edit_form' ]) !!}
+    {!! Form::open(['url' => action([\App\Http\Controllers\TaxonomyController::class, 'update'], [$category->id]), 'method' => 'PUT', 'id' => 'category_edit_form', 'enctype' => 'multipart/form-data' ]) !!}
 
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -22,6 +22,12 @@
       <div class="form-group">
         {!! Form::label('name', $name_label . ':*') !!}
         {!! Form::text('name', $category->name, ['class' => 'form-control', 'required', 'placeholder' => $name_label]); !!}
+        
+      </div>
+      <div class="form-group">
+          {!! Form::label('category_logo', __('lang_v1.category_logo') . ':') !!}
+          {!! Form::file('category_logo', ['accept' => 'image/*']); !!}
+          <p class="help-block"><i> @lang('business.logo_help')</i></p>
       </div>
       @if($cat_code_enabled)
       <div class="form-group">

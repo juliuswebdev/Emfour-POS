@@ -13,6 +13,8 @@ class TransactionSellLine extends Model
      */
     protected $guarded = ['id'];
 
+    protected $appends = ['display_cook_start_time', 'display_cook_end_time', 'display_served_time'];
+
     public function transaction()
     {
         return $this->belongsTo(\App\Transaction::class);
@@ -108,4 +110,19 @@ class TransactionSellLine extends Model
     {
         return $this->belongsTo(\App\TransactionSellLine::class, 'so_line_id');
     }
+
+    public function getDisplayCookStartTimeAttribute(){
+        return date("h:i a", strtotime($this->cook_start));
+    }
+
+    public function getDisplayCookEndTimeAttribute(){
+        return date("h:i a", strtotime($this->cook_end));
+    }
+
+    public function getDisplayServedTimeAttribute(){
+        return date("h:i a", strtotime($this->served_at));
+    }
+
+    
+
 }
