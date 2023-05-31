@@ -1198,11 +1198,36 @@ table.table-text-center td, table.table-text-center th{
   right: 10px;
 }
 .search-check {
-margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 #checkout_result,
 #checkin_result {
-padding: 0 30px;
+  padding: 0 30px;
+}
+
+#table-layout-container {
+  background-color: #fff;
+}
+#table-layout-container h4 {
+  padding: 20px;
+  margin: 0;
+}
+#table-layout-map {
+  border: 1px solid #666;
+  background-color: #eee;
+  position: relative;   
+}
+#table-layout-map .table_circle {
+  border-radius: 100%;
+}
+#table-layout-map div span {
+  position: absolute;
+  display: block;
+  text-align: center;
+  top: 50%;
+  width: 100%;
+  transform: translateY(-50%);
+  color: #fff;
 }
 
 #product_brand_div {

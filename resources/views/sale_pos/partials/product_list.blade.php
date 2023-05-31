@@ -36,7 +36,7 @@
 	<div class="col-md-12">
 		<h4 class="text-center">
 			<!-- @lang('lang_v1.no_products_to_display') -->
-			Please select Category or Brand
+			@lang('restaurant.select_cat_bra')
 		</h4>
 	</div>
 @endforelse

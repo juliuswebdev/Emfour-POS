@@ -1474,6 +1474,7 @@ return [
     'currency_precision' => 'Currency precision',
     'currency_precision_help' => 'Number of digits after decimal point for currency value. Example:0.00 for value 2, 0.000 for value 3, 0.0000 for value 4',
     'quantity_precision' => 'Quantity precision',
+    'wpc_reservation_site_link' => 'WPC Reservation Site Link',
     'quantity_precision_help' => 'Number of digits after decimal point for quantity value. Example:0.00 for value 2, 0.000 for value 3, 0.0000 for value 4',
     'card_charge_percent' => 'Card Charge (%)',
     'card_charge' => 'Card Charge',

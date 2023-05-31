@@ -204,4 +204,31 @@ class TableController extends Controller
             return $output;
         }
     }
+
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  Request  $request
+     * @return Response
+     */
+    public function syncWordpress(Request $request) {
+        $url = file_get_contents('https://restaurant.emfoursolutions.com/wp-json/wpc/table_mapping');
+        $data = json_decode($url, true);
+        $map = $data['content']['common_mapping'];
+
+        $business_id = request()->user()->business_id;
+        $user_id = $request->session()->get('user.id');
+
+        $table = [];
+        foreach($map['chairIntersectData'] as $key => $item) {
+            $table[$key] = [
+                'chairs' => json_encode($item),
+            ];
+        }
+        echo '<pre>';
+        print_r($table);
+        print_r($map['mapping']);
+        echo '</pre>';
+    }
 }

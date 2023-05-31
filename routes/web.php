@@ -455,6 +455,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         //Temp XML Receiver
         Route::get('payment-xml-response', [PaymentDevicesController::class, 'paymentXmlResponse']);
 
+        Route::get('tables-sync-wordpress', [Restaurant\TableController::class, 'syncWordpress']);
+        
         Route::resource('modifiers', Restaurant\ModifierSetsController::class);
 
         //Map modifier to products
@@ -481,8 +483,12 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/orders/list/{res_line_order_status}', [Restaurant\OrderController::class, 'searchOrderByStatus']);
     });
 
+
+    Route::get('bookings/get-table-mapping', [Restaurant\BookingController::class, 'loadTableMapping']);
+    Route::get('bookings/update-table-per-location', [Restaurant\BookingController::class, 'updateTablePerLocation']);
     Route::get('bookings/get-todays-bookings', [Restaurant\BookingController::class, 'getTodaysBookings']);
     Route::resource('bookings', Restaurant\BookingController::class);
+    
 
     
 

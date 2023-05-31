@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('title', __('sale.pos_sale'))
-
 @section('content')
 <section class="content no-print">
 	<input type="hidden" id="amount_rounding_method" value="{{$pos_settings['amount_rounding_method'] ?? ''}}">
@@ -50,12 +49,16 @@
 				@if(empty($pos_settings['hide_product_suggestion']) && !isMobile())
 				<div class="col-md-5 no-padding">
 					@include('sale_pos.partials.pos_sidebar')
+					@if($business_details->wpc_reservation_site_link)
+					<div class="modal fade" id="restaurant_booking_table_modal" tabindex="-1" role="dialog"></div>
+					@endif
 				</div>
 				@endif
 			</div>
 		</div>
 	</div>
 	@include('sale_pos.partials.pos_form_actions')
+
 	{!! Form::close() !!}
 </section>
 
@@ -234,4 +237,15 @@
 	</script>
 	@endif
 
+	@if($business_details->wpc_reservation_site_link)
+	<script>
+		$.ajax({
+			method: 'GET',
+			url: '/bookings/get-table-mapping',
+			success: function(result){
+				$('#restaurant_booking_table_modal').html(result).modal('show');
+			}
+		});
+	</script>
+	@endif
 @endsection

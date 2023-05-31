@@ -59,7 +59,6 @@ $(document).ready(function() {
 
     const urlParams = new URL(window.location.href).searchParams;
     const products_id = urlParams.get('booking_product_ids');
-    console.log(products_id);
     if(products_id) {
         products_id.split(',').forEach(function(item) {
             pos_product_row(item);
