@@ -65,7 +65,7 @@
                     {!! Form::open(['action' => '\App\Http\Controllers\Restaurant\OrderController@userCheckPin', 'id' => 'check_user_pin', 'method' => 'post']) !!}
                         <input id="user_id" name="user_id" type="hidden">
                         {!! Form::label('pin', __('business.digits_pin') . ':') !!}
-                        {!! Form::text('pin', null, ['class' => 'form-control', 'autoComplete' => 'false', 'placeholder' => __('business.digits_pin')]); !!}
+                        <input type="password" name="pin" id="pin" class="form-control" placeholder="{{  __('business.digits_pin') }}">
                         <br>
                         <button type="submit" class="btn btn-primary">@lang( 'messages.submit' )</button>
                     {!! Form::close() !!}
@@ -137,9 +137,9 @@
                             });
                         } else {
                             toastr.error(result.msg);
-                            $('#check_user_pin #pin').val('');
-                            $('#check_user_pin button').removeAttr('disabled');
                         }
+                        $('#check_user_pin #pin').val('');
+                        $('#check_user_pin button').removeAttr('disabled');
                     }
                 });
             });
