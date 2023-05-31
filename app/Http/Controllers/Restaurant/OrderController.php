@@ -233,6 +233,8 @@ class OrderController extends Controller
                 'transactions.final_total as final_total'
             )
             ->with('sell_lines')
+            ->groupBy('transactions.id')
+            ->orderBy('transactions.id', 'DESC')
             ->get();
             
             if(count($transactions) > 0) {

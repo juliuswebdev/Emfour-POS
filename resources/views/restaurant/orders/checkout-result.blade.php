@@ -1,4 +1,5 @@
 @if(count($transactions) > 0)
+    <div style="margin-top: 20px">
     @foreach($transactions as $transaction)
         @php
             $total_items = 0;
@@ -8,7 +9,7 @@
             }
 
         @endphp
-        <div class="orders-section">
+        <div class="orders-section" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ccc;">
             <div class="col-left">
             <strong>Invoice No:</strong><span> {{ $transaction->invoice_no }}</span><br>
             <strong>Table :</strong><span> {{ $transaction->table_name }}</span><br>
@@ -19,4 +20,5 @@
             </div>
         </div>
     @endforeach
+    </div>
 @endif
