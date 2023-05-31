@@ -252,7 +252,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     //Sale Return Pin Verify & Return Payment
     Route::post('pos/sale-return/pin-verify', [SellPosController::class, 'saleReturnPinVerify']);
     Route::post('pos/sale-return/invoice', [SellPosController::class, 'getSaleReturnInvoice']);
-    Route::any('sale-return/{id}/invoice', [SellReturnController::class, 'getSaleReturnTransaction']);
+    Route::any('sale-return/{id}/invoice', [SellReturnController::class, 'makeSaleReturnTransaction']);
 
     Route::resource('roles', RoleController::class);
 

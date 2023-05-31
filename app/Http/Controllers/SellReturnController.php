@@ -591,21 +591,26 @@ class SellReturnController extends Controller
         ];
     }
 
-
-    public function getSaleReturnTransaction($id, Request $request){
+     /**
+     * Function use for create sale return transaction
+     */
+    public function makeSaleReturnTransaction($id, Request $request){
         if (! auth()->user()->can('access_sell_return') && ! auth()->user()->can('access_own_sell_return')) {
             abort(403, 'Unauthorized action.');
         }
 
-        
         try {
 
             $transaction_id = $id;
-            $invoice_no = Transaction::where('id', $id)->pluck('invoice_no')->first();
+            
+            $transation_row = Transaction::select('id', 'invoice_no', \DB::raw('DATE(created_at) AS transaction_date'))->where('id', $id)->where('type', 'sell')->first();
+           
+            $invoice_no = $transation_row->invoice_no;
             $transaction_date = date('m/d/Y h:i');
             $discount_type = "percentage";
             $discount_amount = "0.00";
             $tax_id = null;
+            $sale_return_via = $request->sale_return_via;
             $tax_amount = $tax_percent = 0;
 
             $products = $request->products;
@@ -641,19 +646,52 @@ class SellReturnController extends Controller
                 $input['tax_amount'] = $tax_amount;
                 $input['tax_percent'] = $tax_percent;
                 $input['products'] = $product_data;
+                $input['sale_return_via'] = $sale_return_via;
 
-                 
                 DB::beginTransaction();
 
                 $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
                 $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
 
-                DB::commit();
 
-                $output = ['success' => 1,
-                    'msg' => __('lang_v1.success'),
-                    'receipt' => $receipt,
-                ];
+                if($sale_return_via == "card"){
+                    
+                    $transaction_type = ($transation_row->transaction_date == date('Y-m-d')) ? 'Void' : 'Return';
+                    
+                    $final_amount_for_payment = sprintf('%0.2f', $sell_return->final_total);
+                    $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                    $response_of_payment = $payment_device_init->paymentInit('Credit', $transaction_type, $final_amount_for_payment, $sell_return->id);
+
+                    if($response_of_payment['success'] == 0){
+                        //Payment Return Failed Rollback Transaction
+                        DB::rollback();
+                        $output = [
+                            'success' => 0,
+                            'msg' => $response_of_payment['msg']
+                        ];
+                        return $output;
+                    }else{
+                        
+                        //Store Payment Return Response
+                        $payment_response_json = json_encode($response_of_payment['data'], true);
+                        Transaction::where('id', $sell_return->id)
+                                            ->where('business_id', $business_id)
+                                            ->update(['payment_refund_response' => $payment_response_json]);
+
+                        DB::commit();
+                        $output = ['success' => 1,
+                            'msg' => __('lang_v1.success'),
+                            'receipt' => $receipt,
+                        ];
+                    }
+                }else{
+                    DB::commit();
+
+                    $output = ['success' => 1,
+                        'msg' => __('lang_v1.success'),
+                        'receipt' => $receipt,
+                    ];
+                }
             }
             
         } catch (\Exception $e) {

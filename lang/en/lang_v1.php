@@ -1564,4 +1564,6 @@ return [
     'invoice_payment_is_pending' => 'Invoice payment is pending. Please complete the payment first.',
     'confirm' => 'Confirm',
     'please_update_the_return_product' => 'Please update the return product.',
+    'return_via_card' => 'Return via card',
+    'return_via_cash' => 'Return via cash'
 ];

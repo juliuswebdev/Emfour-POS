@@ -21,10 +21,6 @@
 		</div>
 
 		@if(request()->get('sale-return') == 1)
-		<!-- This will be printed -->
-		<section class="invoice sale_return_invoice_print" id="sale_return_invoice_print">
-		</section>
-
 		<div class="col-md-12 wrapper-of-sale-return" style="display:none;">
 			<button type="button" title="@lang('lang_v1.confirm')" class="btn bg-primary text-white btn-flat sale-retun-confirm">@lang('lang_v1.confirm')</button>
 			<button 
@@ -32,7 +28,7 @@
 				style="display:none;"
 				type="button" 
 				class="btn bg-maroon btn-default btn-flat btn-payment-sale-return @if($is_mobile) col-xs-6 @endif" 
-				title="@lang('lang_v1.tooltip_express_checkout_card')" >
+				title="@lang('lang_v1.return_via_card')" >
 				<i class="fas fa-credit-card" aria-hidden="true"></i> @lang('lang_v1.express_checkout_card')
 			</button>
 			<button 
@@ -40,7 +36,7 @@
 				style="display:none;"
 				type="button" 
 				class="btn btn-success btn-flat btn-payment-sale-return @if($is_mobile) col-xs-6 @endif" 
-				title="@lang('tooltip.express_checkout')"> <i class="fas fa-money-bill-alt" aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
+				title="@lang('tooltip.return_via_cash')"> <i class="fas fa-money-bill-alt" aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
 		</div>
 		@endif
 

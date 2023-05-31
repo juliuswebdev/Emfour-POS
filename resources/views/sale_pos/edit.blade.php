@@ -126,6 +126,9 @@
 			$('select[name="res_table_id"]').attr('disabled', 'disabled');
 			$('#res_waiter_id').attr('disabled', 'disabled');
 			$('#is_recurring').attr('disabled', 'disabled');
+			$('.pos-total').find('span.text').text('Total Return');
+			$('.pos_form_totals').hide();
+			$('#pos_table thead tr th:eq(1)').text('Return Quantity');
 
 			//confirm button event in sale return
 			$('.sale-retun-confirm').click(function(){
@@ -139,6 +142,10 @@
 				var form = document.getElementById("edit_pos_sell_form");
 				var data = new FormData(form)
 				var sale_return_method = $(this).attr('data-payment-type');
+				var processing_text = "<span class='card-payment-popup'><div>Processing of Return..</div><div><button id='card-payment-close' class='btn-danger'>Close</button></div></span>"
+				var bg_black_fade_in = '<div class="modal-backdrop fade in">'+processing_text+'</div>';
+				$('.ui-helper-hidden-accessible').after(bg_black_fade_in);
+
 				data.append('sale_return_via', sale_return_method);
 				$.ajax({
 					url: sale_return_action,
@@ -149,58 +156,27 @@
 					cache: false,
 					processData: false,
 					success: function (result) {
+						$('.modal-backdrop').remove();
 						if (result.success == 1) {
                             toastr.success(result.msg);
                             //Check if enabled or not
                             if (result.receipt.is_enabled) {
                                 pos_print(result.receipt);
                             }
+							reset_pos_form();
                         } else {
-                            toastr.error(result.msg);
+							toastr.error(result.msg);
                         }
 					},
 				});
-
-
 			});
 
-			//printer setting
-			function initialize_printer() {
-				if ($('input#location_id').data('receipt_printer_type') == 'printer') {
-					initializeSocket();
-				}
-			}
-
-			function pos_print(receipt) {
-				//If printer type then connect with websocket
-				if (receipt.print_type == 'printer') {
-					var content = receipt;
-					content.type = 'print-receipt';
-
-					//Check if ready or not, then print.
-					if (socket.readyState != 1) {
-						initializeSocket();
-						setTimeout(function() {
-							socket.send(JSON.stringify(content));
-						}, 700);
-					} else {
-						socket.send(JSON.stringify(content));
-					}
-				} else if (receipt.html_content != '') {
-					var title = document.title;
-					if (typeof receipt.print_title != 'undefined') {
-						document.title = receipt.print_title;
-					}
-
-					//If printer type browser then print content
-					$('#sale_return_invoice_print').html(receipt.html_content);
-					__currency_convert_recursively($('#sale_return_invoice_print'));
-					setTimeout(function() {
-						window.print();
-						document.title = title;
-					}, 1000);
-				}
-			}
+			//Close the card payment on return
+			$(document).on('click', '#card-payment-close', function(){
+				$('.modal-backdrop').remove();
+			});
+			
+			
 
 			//Input qty validation in sale return screen
 			$('.input_quantity').on('input', function(){

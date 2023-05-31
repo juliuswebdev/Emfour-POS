@@ -385,7 +385,7 @@ class PaymentDevicesController extends Controller
                             <PrintReceipt>No</PrintReceipt>
                             <SigCapture>No</SigCapture>
                         </request>';
-
+            
                 $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
 
                 $response = Http::timeout(1000)->get($request_url);
