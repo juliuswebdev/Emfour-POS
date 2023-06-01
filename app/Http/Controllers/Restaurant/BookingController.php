@@ -260,15 +260,26 @@ class BookingController extends Controller
             $booking = Booking::where('business_id', $business_id)
                                 ->with(['booking_details', 'customer'])
                                 ->find($id);
-            if (! empty($booking)) {
-                $booking->booking_status = $request->booking_status;
-               $booking->save();
+
+            if($request->booking_status == 'cancelled' && $booking->booking_status == 'completed') {
+
+                $output = ['success' => 0,
+                            'msg' => __('lang_v1.unable_cancel'),
+                ];
+
+            } else {
+
+                if (! empty($booking)) {
+                    $booking->booking_status = $request->booking_status;
+                    $booking->save();
+                }
+                $output = ['success' => 1,
+                    'msg' => trans('lang_v1.updated_success'),
+                    'booking' => $booking
+                ];
+
             }
 
-            $output = ['success' => 1,
-                'msg' => trans('lang_v1.updated_success'),
-                'booking' => $booking
-            ];
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
             $output = ['success' => 0,
@@ -391,7 +402,7 @@ class BookingController extends Controller
                         $text = __('restaurant.checkout');
                     }  else if ($row->booking_status  == 'completed') {
                         $type = 'bg-green';
-                        $text = __('restaurant.cancelled');
+                        $text = __('restaurant.completed');
                     } else if ($row->booking_status  == 'cancelled') {
                         $type = 'bg-black';
                         $text = __('restaurant.cancelled');
@@ -487,7 +498,7 @@ class BookingController extends Controller
 
         $correspondents = User::forDropdown($business->id, false);
 
-        $services = Product::where('business_id', $business->id)->where('enable_stock', 0)->with(['variations'])->get();
+        $services = Product::where('business_id', $business->id)->where('enable_stock', 0)->where('type', '<>', 'modifier')->with(['variations'])->get();
 
         return view('restaurant.booking.public', compact('business', 'business_info', 'business_locations', 'correspondents', 'services'));
     }

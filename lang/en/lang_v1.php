@@ -1548,5 +1548,6 @@ return [
     'search_by_1' => 'Search by Invoice, Table name...',
     'search_by_2' => 'Search by Reference No, Phone...',
     'search' => 'Search',
-    'select_payment_device' => 'Select Payment Device'
+    'select_payment_device' => 'Select Payment Device',
+    'unable_cancel' => 'Unabled to cancel a completed booking'
 ];
