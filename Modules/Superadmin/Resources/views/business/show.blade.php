@@ -24,8 +24,6 @@
                 </h3>
         </div>
 
-        
-
         <div class="box-body">
             <div class="row">
                     <div class="col-sm-3">
@@ -137,7 +135,44 @@
                             </div>
                     </div> 
                 </div> 
+        </div>
     </div>
+
+    <div class="box">
+        <div class="box-header">
+            <h3 class="box-title">
+            @lang('lang_v1.enable_disable_modules')
+            </h3>
+        </div>
+        <div class="box-body">
+                <div class="row">
+                {!! Form::open(['url' => action('\Modules\Superadmin\Http\Controllers\BusinessController@updateModules', $business->id), 'method' => 'put' ]) !!}
+                    @php
+                        $enabled_modules = $business->enabled_modules ?? [];
+                    @endphp
+                    @if(!empty($modules))
+                        @foreach($modules as $k => $v)
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <div class="checkbox" style="margin-top: 0">
+                                    <label>
+                                        {!! Form::checkbox('enabled_modules[]', $k,  in_array($k, $enabled_modules) , 
+                                        ['class' => 'input-icheck']); !!} {{$v['name']}}
+                                    </label>
+                                    @if(!empty($v['tooltip'])) @show_tooltip($v['tooltip']) @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                        <div class="col-sm-12">
+                            <button type="submit" class="btn btn-primary" style="margin-left: 15px;">
+                                @lang('messages.save')
+                            </button>
+                        </div>
+                    @endif
+                </div>
+                {!! Form::close() !!}
+        </div>
     </div>
 
     <div class="box">
