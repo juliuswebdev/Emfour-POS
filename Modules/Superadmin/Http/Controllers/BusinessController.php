@@ -365,8 +365,10 @@ class BusinessController extends BaseController
 
         $created_by = ! empty($created_id) ? User::find($created_id) : null;
 
+        $modules = $this->moduleUtil->availableModules();
+
         return view('superadmin::business.show')
-            ->with(compact('business', 'created_by'));
+            ->with(compact('business', 'modules', 'created_by'));
     }
 
     /**
@@ -558,4 +560,15 @@ class BusinessController extends BaseController
 
         return $output;
     }
+
+
+    public function updateModules(Request $request, $id)
+    {
+        $business = Business::find($id);
+        $business->enabled_modules = $request->input('enabled_modules');
+        $business->update();
+        return redirect()->back();
+    }
+
+
 }
