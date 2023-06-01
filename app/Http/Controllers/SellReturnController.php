@@ -6,6 +6,7 @@ use App\BusinessLocation;
 use App\Contact;
 use App\Events\TransactionPaymentDeleted;
 use App\Transaction;
+use App\TransactionPayment;
 use App\TransactionSellLine;
 use App\User;
 use App\Utils\BusinessUtil;
@@ -656,11 +657,26 @@ class SellReturnController extends Controller
 
                 if($sale_return_via == "card"){
                     
-                    $transaction_type = ($transation_row->transaction_date == date('Y-m-d')) ? 'Void' : 'Return';
+                    $transaction_payment_method = TransactionPayment::where('transaction_id', $transation_row->id)->pluck('method')->first();
                     
+                    if($transaction_payment_method == 'card'){
+
+                        if($transation_row->transaction_date == date('Y-m-d')){
+                            $transaction_type = "Void";
+                            $transaction_ref_no = $transation_row->id;
+                        }else{
+                            $transaction_type = "Return";
+                            $transaction_ref_no = $sell_return->id;
+                        }
+                    }else{
+                        $transaction_type = "Return";
+                        $transaction_ref_no = $sell_return->id;
+                    }
+                    
+
                     $final_amount_for_payment = sprintf('%0.2f', $sell_return->final_total);
                     $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
-                    $response_of_payment = $payment_device_init->paymentInit('Credit', $transaction_type, $final_amount_for_payment, $sell_return->id);
+                    $response_of_payment = $payment_device_init->paymentInit('Credit', $transaction_type, $final_amount_for_payment, $transaction_ref_no);
 
                     if($response_of_payment['success'] == 0){
                         //Payment Return Failed Rollback Transaction

@@ -155,7 +155,7 @@
 				<!-- /.box-header -->
 				<div class="box-body">
 					<form action="{{ action('\App\Http\Controllers\SellPosController@saleReturnPinVerify') }}" class="form" method="post" id="frmSalePinVerify">
-						<label>@lang('lang_v1.enter_sale_return_9_digit_pin')</label>
+						<label>@lang('lang_v1.enter_sale_return_9_digit_pin')*</label>
 						<div class="row">
 							<div class="col-md-10">
 								<input type="text" placeholder="@lang('lang_v1.enter_sale_return_9_digit_pin')" required="required" maxlength="9" minlength="9" name="sale_return_pin" class="form-control">
@@ -184,7 +184,7 @@
 				<!-- /.box-header -->
 				<div class="box-body">
 					<form action="{{ action('\App\Http\Controllers\SellPosController@getSaleReturnInvoice') }}" class="form" method="post" id="frmSaleReturnInvoiceVerify">
-						<label>@lang('lang_v1.enter_sale_return_invoice_number')</label>
+						<label>@lang('lang_v1.enter_sale_return_invoice_number')*</label>
 						<div class="row">
 							<div class="col-md-10">
 								<input type="text" placeholder="@lang('lang_v1.enter_sale_return_invoice_number')" required="required" name="sale_return_invoice_number" class="form-control">

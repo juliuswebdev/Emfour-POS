@@ -101,7 +101,7 @@
         <div class="col-md-4">
           <div class="form-group">
             {!! Form::label('sale_return_9_digit_pin', __( 'business.sale_return_pin' ) . ':*') !!}
-            {!! Form::password('sale_return_pin', ['class' => 'form-control', 'minlength' => '9', 'maxlenght' => '9', 'required', 'placeholder' => __( 'business.sale_return_pin' ) ]); !!}
+            {!! Form::password('sale_return_pin', ['class' => 'form-control', 'minlength' => '4', 'maxlenght' => '9', 'required', 'placeholder' => __( 'business.sale_return_pin' ) ]); !!}
           </div>
         </div>
 

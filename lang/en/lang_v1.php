@@ -1550,7 +1550,7 @@ return [
     'select_payment_device' => 'Select Payment Device',
     'tooltip_sale_return' => 'Sale Return Order',
     'sale_return' => 'Return',
-    'enter_sale_return_9_digit_pin' => 'Enter Sale Return 9 Digit Pin',
+    'enter_sale_return_9_digit_pin' => 'Enter Sale Return Pin',
     'verify' => 'Verify',
     'verified_success' => 'Verified Successfully Completed',
     'validate_sale_return_pin' => 'Please enter sale return pin',
