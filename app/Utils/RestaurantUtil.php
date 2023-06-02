@@ -73,7 +73,9 @@ class RestaurantUtil extends Util
         }
 
         if (! empty($filter['waiter_id'])) {
-            $query->where('transactions.res_waiter_id', $filter['waiter_id']);
+            if($filter['waiter_id'] != 'all') {
+                $query->where('transactions.res_waiter_id', $filter['waiter_id']);
+            }
         }
 
         $permitted_locations = auth()->user()->permitted_locations();

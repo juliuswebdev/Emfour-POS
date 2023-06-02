@@ -62,8 +62,17 @@ class OrderController extends Controller
             $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => $user_id]);
         } elseif (! empty(request()->service_staff)) {
             $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => request()->service_staff]);
-
             $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => request()->service_staff]);
+
+        } else if ( empty(request()->service_staff) ) {
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => 'all']);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => 'all']);
+
+        }
+
+        if(request()->service_staff == 'all') {
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => 'all']);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => 'all']);
         }
 
         if (! $is_service_staff) {

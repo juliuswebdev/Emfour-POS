@@ -24,13 +24,38 @@
                         <span class="input-group-addon">
                             <i class="fa fa-user-secret"></i>
                         </span>
-                        {!! Form::select('service_staff', $service_staff, request()->service_staff, ['class' => 'form-control select2', 'placeholder' => __('restaurant.select_service_staff'), 'id' => 'service_staff_id']); !!}
+                        @php
+                            $get_service_staff = request()->service_staff;
+                        @endphp
+                        <select name="service_staff" class="form-control select2" id="service_staff_id">
+                            <option value="all">All</option>
+                            @foreach($service_staff as $key => $item)
+                            <option value="{{ $key }}" @if($get_service_staff == $key) selected @endif>{{ $item }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 {!! Form::close() !!}
             </div>
         @endcomponent
+    @else
+        <div class="box box-solid">
+            <div class="box-body">
+                {!! Form::open(['url' => action([\App\Http\Controllers\Restaurant\OrderController::class, 'index']), 'method' => 'get', 'id' => 'select_service_staff_form' ]) !!}
+                <label for=""  style="margin-right: 20px;">All @lang('lang_v1.service_staff')</label>
+                @php
+                    $get_service_staff = request()->service_staff;
+                @endphp
+                <input type="checkbox" class="input-icheck" name="service_staff" value="all" @if($get_service_staff == 'all') checked @endif>
+                {!! Form::close() !!}
+            </div>
+        </div>
     @endif
+
+
+
+
+
     @component('components.widget', ['title' => __( 'lang_v1.line_orders' )])
         <input type="hidden" id="orders_for" value="waiter">
         <div class="row" id="line_orders_div">
@@ -79,18 +104,23 @@
 
 @section('javascript')
     <script type="text/javascript">
+
+        $('input[name="service_staff"]').on('ifChanged', function(event){
+            $('form#select_service_staff_form').submit();
+        });
+
         $('select#service_staff_id').change( function(){
             $('form#select_service_staff_form').submit();
         });
         $(document).ready(function(){
-
             $(document).on('click', 'a.mark_as_served_btn', function(e){
                 e.preventDefault();
                 var _this = $(this);
                 var href = _this.data('href');
                 $('#check_user_pin').attr('mark-as-serve-url', href);
-                const urlParams = new URL(window.location.href).searchParams;
-                const service_staff = urlParams.get('service_staff');
+
+                var service_staff = $(this).parents('.order_div').attr('data-service-staff');
+
                 $('#check_user_pin #user_id').val(service_staff);
                 $.ajax({
                     context: this,
