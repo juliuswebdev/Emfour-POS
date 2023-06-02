@@ -510,9 +510,7 @@ class SellPosController extends Controller
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
-                
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
-                //dd($transaction);
                 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
@@ -686,7 +684,16 @@ class SellPosController extends Controller
                 }
 
                 if ($print_invoice) {
-                    $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+
+                    if(isset($input['payment'][0]['method'])){
+                        if($input['payment'][0]['method'] == "card"){
+                            $receipt = $this->receiptContentForThermal($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+                        }else{
+                            $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);        
+                        }
+                    }else{
+                        $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+                    }
                 }
 
                 $output = ['success' => 1, 'msg' => $msg, 'receipt' => $receipt];
@@ -825,10 +832,74 @@ class SellPosController extends Controller
             $layout = ! empty($receipt_details->design) ? 'sale_pos.receipts.'.$receipt_details->design : 'sale_pos.receipts.classic';
 
             $output['html_content'] = view($layout, compact('receipt_details'))->render();
+
         }
 
         return $output;
     }
+
+
+    /**
+     * Returns the content for the thermal print receipt
+     *
+     * @param  int  $business_id
+     * @param  int  $location_id
+     * @param  int  $transaction_id
+     * @param  string  $printer_type = null
+     * @return array
+     */
+    private function receiptContentForThermal(
+        $business_id,
+        $location_id,
+        $transaction_id,
+        $printer_type = null,
+        $is_package_slip = false,
+        $from_pos_screen = true,
+        $invoice_layout_id = null,
+        $is_delivery_note = false
+    ) {
+        $output = [
+            'is_enabled' => false,
+            'print_type' => 'browser',
+            'html_content' => null,
+            'printer_config' => [],
+            'data' => [],
+        ];
+
+        $business_details = $this->businessUtil->getDetails($business_id);
+        $location_details = BusinessLocation::find($location_id);
+
+        if ($from_pos_screen && $location_details->print_receipt_on_invoice != 1) {
+            return $output;
+        }
+        //Check if printing of invoice is enabled or not.
+        //If enabled, get print type.
+        $output['is_enabled'] = true;
+
+        $invoice_layout_id = ! empty($invoice_layout_id) ? $invoice_layout_id : $location_details->invoice_layout_id;
+        $invoice_layout = $this->businessUtil->invoiceLayout($business_id, $invoice_layout_id);
+
+        //Check if printer setting is provided.
+        $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
+
+        $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
+        $output['receipt_details'] = $receipt_details;
+        $currency_details = [
+            'symbol' => $business_details->currency_symbol,
+            'thousand_separator' => $business_details->thousand_separator,
+            'decimal_separator' => $business_details->decimal_separator,
+        ];
+        $receipt_details->currency = $currency_details;
+        $receipt_details->online_sale_payment = TransactionPayment::where('transaction_id', $transaction_id)->pluck('payment_collect_response')->first();
+        
+        $output['print_title'] = $receipt_details->invoice_no;
+        //If print type browser - return the content, printer - return printer config data, and invoice format config
+        $layout = 'sale_pos.receipts.thermal_print_for_sale_slip';
+        $output['html_content'] = view($layout, compact('receipt_details'))->render();
+
+        return $output;
+    }
+
 
     /**
      * Display the specified resource.

@@ -1022,9 +1022,9 @@ $(document).ready(function() {
 
                             //Check if enabled or not
                             if (result.receipt.is_enabled) {
-                                console.log(result.receipt);
                                 pos_print(result.receipt);
                             }
+                            
                         } else {
                             toastr.error(result.msg);
                         }
@@ -1324,13 +1324,34 @@ $(document).ready(function() {
         var parent_id = $(this).parent().find('input').val();
         $('#product_category_div .cat-sub-area .cat-container').css({'display':'none'});
         $('#product_category_div .cat-sub-area .cat_parent_'+parent_id).parent().css({'display':'inline-block'});
+
+        //Add Back Button
+        /*
+        var length = $('.cat-sub-area').find('.cat_parent_'+parent_id).length;
+
+        $('.subcate-back-event').remove();
+        if(length != 0){
+            var back_btn = '<div class="subcate-back-event col-md-12"><a class="pos-subcat-back-btn" href="javascript:;">Bank</a></div>';
+            $(back_btn).insertAfter("#product_category_div");
+            $('#product_category_div').find('h4:eq(0)').hide();
+            $('.cat-parent-area').hide();
+        }else{
+            $('#product_category_div').find('h4:eq(0)').show();
+            $('.cat-parent-area').show();
+        }    
+        */   
     });
+
+
 
     $('#product_category_div label').click(function() {
         $('div#product_list_body').html('');
         $('#product_category_div .cat-sub-area label').parent().removeClass('active');
         $(this).parent().addClass('active').siblings().removeClass('active');
     });
+
+
+    
 
 
     var product_category_select = $('input[name="category_id"]:checked').attr('value');
@@ -1677,12 +1698,63 @@ function get_product_suggestion_list(category_id, brand_id, location_id, url = n
         },
         dataType: 'html',
         success: function(result) {
+            
+            /*
+            var length = $('.cat-sub-area').find('.cat_parent_'+category_id).length;
+            
+            $('.subcate-back-event').remove();
+            if(length != 0){
+                var back_btn = '<div class="subcate-back-event col-md-12"><a class="pos-subcat-back-btn" href="javascript:;">Bank</a></div>';
+                $(back_btn).insertAfter("#product_category_div");
+                $('#product_category_div').find('h4:eq(0)').hide();
+                $('.cat-parent-area').hide();
+            }else{
+                $('.cate-back-event').remove();
+                if(result != ""){
+                    var is_exit_data = result.includes("no_products_found");
+                    if(is_exit_data == false){
+                        var back_btn = '<div class="cate-back-event col-md-12"><a class="pos-cat-back-btn" href="javascript:;">Bank</a></div>';
+                        $(back_btn).insertAfter("#product_category_div");
+                        $('#product_category_div').find('h4:eq(0)').hide();
+
+                        $('.cat-parent-area').hide();
+                    }
+                }
+            }  
+            */
+
+
+
+            
+
             $('div#product_list_body').html('');
             $('div#product_list_body').append(result);
             $('#suggestion_page_loader').fadeOut(700);
         },
     });
 }
+
+
+//Category back button handeler
+$('body').on('click', '.pos-cat-back-btn', function() {
+    $('.cat-parent-area').show();
+    $('#product_category_div').find('h4:eq(0)').show();
+    $('.cat-parent-area').find('div.active').click();
+    $(this).remove();
+    $('.product_list_body').remove();
+});
+
+$('body').on('click', '.pos-subcat-back-btn', function() {
+    $('.cat-parent-area').show();
+    $('#product_category_div').find('h4:eq(0)').show();
+    $('.cat-parent-area').find('div.active').click();
+    $('.cat-sub-area').find('.cat-container').css({'display':'none'});
+    $(this).remove();
+    $('.product_list_body').remove();
+});
+
+
+
 
 //Get recent transactions
 function get_recent_transactions(status, element_obj) {

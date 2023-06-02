@@ -1565,5 +1565,16 @@ return [
     'confirm' => 'Confirm',
     'please_update_the_return_product' => 'Please update the return product.',
     'return_via_card' => 'Return via card',
-    'return_via_cash' => 'Return via cash'
+    'return_via_cash' => 'Return via cash',
+    'thermal_receipt_small_qty' => 'Qty',
+    'receipt_account_number' => 'Account Number',
+    'receipt_sequence_number' => 'Sequence Number',
+    'receipt_termial_id' => 'Terminal ID',
+    'receipt_total_amount' => 'Total Amount',
+    'receipt_response_code' => 'Response Code',
+    'receipt_thank_you_msg' => 'THANK YOU FOR SHOPPING AT',
+    'receipt_total_items_sold' => 'TOTAL NUMBER OF ITEMS SOLD',
+    'receipt_total_return' => 'Total Return',
+    'receipt_invoice_no' => 'Invoice No.',
+
 ];
