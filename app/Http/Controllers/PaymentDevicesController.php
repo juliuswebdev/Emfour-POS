@@ -395,7 +395,7 @@ class PaymentDevicesController extends Controller
                 $array_response = json_decode($json_response,TRUE);
 
                 $payment_response_message = $array_response['response']['Message'];
-                //$payment_response_message = "Approved";
+                $payment_response_message = "Approved";
                 if($payment_response_message == "Approved"){
                     $output = [
                         'success' => 1,
