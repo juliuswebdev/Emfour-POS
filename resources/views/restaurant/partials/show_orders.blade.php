@@ -9,6 +9,15 @@
 				</div>
 				<br>
 				<table class="table no-margin no-border table-slim">
+					<tr>
+						<th>@lang('lang_v1.service_staff')</th><td>
+							@if(isset($order->service_staff))
+							{{$order->service_staff->surname}} {{$order->service_staff->first_name}} {{$order->service_staff->last_name}}
+							@else
+							--
+							@endif
+						</td>
+					</tr>
             		<tr>
 						<th>@lang('contact.customer')</th><td>{{$order->customer_name}}</td>
 					</tr>

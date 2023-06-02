@@ -1565,5 +1565,6 @@ return [
     'confirm' => 'Confirm',
     'please_update_the_return_product' => 'Please update the return product.',
     'return_via_card' => 'Return via card',
-    'return_via_cash' => 'Return via cash'
+    'return_via_cash' => 'Return via cash',
+    'service_staff' => 'Service Staff'
 ];

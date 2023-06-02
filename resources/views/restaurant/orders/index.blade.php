@@ -7,7 +7,7 @@
 <section class="content min-height-90hv no-print">
     <div class="row">
         <div class="col-md-12 text-center">
-            <h3>@lang( 'restaurant.all_orders' ) @show_tooltip(__('lang_v1.tooltip_serviceorder'))</h3>
+            <h3>@lang( 'restaurant.orders' ) @show_tooltip(__('lang_v1.tooltip_serviceorder'))</h3>
         </div>
         <div class="col-sm-12">
             <button type="button" class="btn btn-sm btn-primary pull-right" id="refresh_orders"><i class="fas fa-sync"></i> @lang( 'restaurant.refresh' )</button>
