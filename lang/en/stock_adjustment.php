@@ -11,8 +11,8 @@ return [
     |
     */
 
-    'stock_adjustment' => 'Inventory Adjustment',
-    'stock_adjustments' => 'Inventory Adjustments',
+    'stock_adjustment' => 'Stock Adjustment',
+    'stock_adjustments' => 'Stock Adjustments',
     'list' => 'List Stock Adjustments',
     'add' => 'Add Stock Adjustment',
     'all_stock_adjustments' => 'All stock adjustments',

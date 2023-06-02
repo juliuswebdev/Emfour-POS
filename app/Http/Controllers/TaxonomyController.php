@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use App\Utils\ModuleUtil;
-use App\Utils\Util;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -15,17 +14,14 @@ class TaxonomyController extends Controller
      */
     protected $moduleUtil;
 
-    protected $commonUtil;
-
     /**
      * Constructor
      *
      * @param  ProductUtils  $product
      * @return void
      */
-    public function __construct(ModuleUtil $moduleUtil, Util $commonUtil)
+    public function __construct(ModuleUtil $moduleUtil)
     {
-        $this->commonUtil = $commonUtil;
         $this->moduleUtil = $moduleUtil;
     }
 
@@ -56,15 +52,9 @@ class TaxonomyController extends Controller
 
             $category = Category::where('business_id', $business_id)
                             ->where('category_type', $category_type)
-                            ->select(['name', 'short_code', 'description', 'id', 'parent_id', 'logo']);
+                            ->select(['name', 'short_code', 'description', 'id', 'parent_id']);
 
             return Datatables::of($category)
-                ->editColumn(
-                    'logo', function($row)
-                    {
-                        return '<img src="'.env('APP_URL').'/uploads/category_logos/'.$row->logo.'" style="width:40px;">';
-                    }
-                )
                 ->addColumn(
                     'action', function ($row) use ($can_edit, $can_delete, $category_type) {
                         $html = '';
@@ -88,7 +78,7 @@ class TaxonomyController extends Controller
                 })
                 ->removeColumn('id')
                 ->removeColumn('parent_id')
-                ->rawColumns(['action', 'logo'])
+                ->rawColumns(['action'])
                 ->make(true);
         }
 
@@ -143,16 +133,11 @@ class TaxonomyController extends Controller
         }
 
         try {
-            $input = $request->only(['name', 'short_code', 'category_type', 'description', 'logo']);
+            $input = $request->only(['name', 'short_code', 'category_type', 'description']);
             if (! empty($request->input('add_as_sub_cat')) && $request->input('add_as_sub_cat') == 1 && ! empty($request->input('parent_id'))) {
                 $input['parent_id'] = $request->input('parent_id');
             } else {
                 $input['parent_id'] = 0;
-            }
-            //upload logo
-            $logo_name = $this->commonUtil->uploadFile($request, 'category_logo', 'category_logos', 'image');
-            if (! empty($logo_name)) {
-                $input['logo'] = $logo_name;
             }
             $input['business_id'] = $request->session()->get('user.business_id');
             $input['created_by'] = $request->session()->get('user.id');
@@ -240,12 +225,6 @@ class TaxonomyController extends Controller
 
                 if ($category->category_type == 'product' && ! auth()->user()->can('category.update')) {
                     abort(403, 'Unauthorized action.');
-                }
-
-                //upload logo
-                $logo_name = $this->commonUtil->uploadFile($request, 'category_logo', 'category_logos', 'image');
-                if (! empty($logo_name)) {
-                    $category->logo = $logo_name;
                 }
 
                 $category->name = $input['name'];

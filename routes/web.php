@@ -49,7 +49,6 @@ use App\Http\Controllers\SellController;
 use App\Http\Controllers\SellingPriceGroupController;
 use App\Http\Controllers\SellPosController;
 use App\Http\Controllers\SellReturnController;
-use App\Http\Controllers\InventoryCountController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\TaxonomyController;
@@ -60,7 +59,6 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationTemplateController;
 use App\Http\Controllers\WarrantyController;
-use App\Http\Controllers\PaymentDevicesController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -76,24 +74,12 @@ use Illuminate\Support\Facades\Route;
 
 include_once 'install_r.php';
 
-Route::get('/generate-migration', function() {
-    $exitCode = Artisan::call('migrate');
-    return '<h1>php artisan migrate</h1>';
-});
-
 Route::middleware(['setData'])->group(function () {
     Route::get('/', function () {
-        return view('welcome');
+        return view('auth.login');
     });
 
     Auth::routes();
-
-    Route::get('/booking/public/{slug}', [Restaurant\BookingController::class, 'getPublicBooking'])->name('booking.getPublicBooking');
-    //Route::get('/booking/public/{slug}/{booking_id}/', [Restaurant\BookingController::class, 'getPublicBookingCheckin'])->name('booking.getPublicBookingCheckin');
-    Route::put('/booking/public/{slug}/{booking_id}/update', [Restaurant\BookingController::class, 'getPublicBookingCheckinUpdate'])->name('booking.getPublicBookingCheckinUpdate');
-    Route::get('/booking/public/{slug}/checkin', [Restaurant\BookingController::class, 'getPublicBookingCheckin'])->name('booking.getPublicBookingCheckin');
-    Route::post('/booking/public/store', [Restaurant\BookingController::class, 'postPublicBooking'])->name('booking.postPublicBooking');
-    Route::post('bookings/get-bookings/{slug}', [Restaurant\BookingController::class, 'getBookings']);
 
     Route::get('/business/register', [BusinessController::class, 'getRegister'])->name('business.getRegister');
     Route::post('/business/register', [BusinessController::class, 'postRegister'])->name('business.postRegister');
@@ -113,7 +99,6 @@ Route::middleware(['setData'])->group(function () {
 
 //Routes for authenticated users only
 Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin'])->group(function () {
-
     Route::get('pos/payment/{id}', [SellPosController::class, 'edit'])->name('edit-pos-payment');
     Route::get('service-staff-availability', [SellPosController::class, 'showServiceStaffAvailibility']);
     Route::get('pause-resume-service-staff-timer/{user_id}', [SellPosController::class, 'pauseResumeServiceStaffTimer']);
@@ -141,9 +126,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/user/profile', [UserController::class, 'getProfile'])->name('user.getProfile');
     Route::post('/user/update', [UserController::class, 'updateProfile'])->name('user.updateProfile');
     Route::post('/user/update-password', [UserController::class, 'updatePassword'])->name('user.updatePassword');
-
-    Route::post('/user/check-pin', [Restaurant\OrderController::class, 'userCheckPin']);
-    Route::post('/user/check-has-pin', [Restaurant\OrderController::class, 'userCheckHasPin']);
 
     Route::resource('brands', BrandController::class);
 
@@ -177,7 +159,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/products/download-excel', [ProductController::class, 'downloadExcel']);
 
     Route::get('/products/stock-history/{id}', [ProductController::class, 'productStockHistory']);
-    Route::get('/products/sub-unit-inventory/{id}', [ProductController::class, 'showSubUnitInventory']);
     Route::get('/delete-media/{media_id}', [ProductController::class, 'deleteMedia']);
     Route::post('/products/mass-deactivate', [ProductController::class, 'massDeactivate']);
     Route::get('/products/activate/{id}', [ProductController::class, 'activate']);
@@ -353,15 +334,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/stock-adjustments/get_product_row', [StockAdjustmentController::class, 'getProductRow']);
     Route::resource('stock-adjustments', StockAdjustmentController::class);
 
-    Route::get('/inventory-count', [InventoryCountController::class, 'inventory_count'])->name('inventory_count');
-    Route::post('/inventory-count/store', [InventoryCountController::class, 'store']);
-    Route::get('/inventory-count/{id}/qty-adjustment', [InventoryCountController::class, 'qty_adjustment']);
-    Route::get('/inventory-count/download-initial-file/{id}', [InventoryCountController::class, 'download_initial_file']);
-    Route::post('/inventory-count/upload-final-file/{id}', [InventoryCountController::class, 'upload_final_file']);
-    Route::post('/inventory-count/freeze-count/{id}', [InventoryCountController::class, 'freeze_count']);
-    Route::get('/inventory-count/{id}', [InventoryCountController::class, 'view_inventory_count']);
-    Route::post('/inventory-count/post-count/{id}', [InventoryCountController::class, 'post_count']);
-
     Route::get('/cash-register/register-details', [CashRegisterController::class, 'getRegisterDetails']);
     Route::get('/cash-register/close-register/{id?}', [CashRegisterController::class, 'getCloseRegister']);
     Route::post('/cash-register/close-register', [CashRegisterController::class, 'postCloseRegister']);
@@ -448,13 +420,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     //Restaurant module
     Route::prefix('modules')->group(function () {
         Route::resource('tables', Restaurant\TableController::class);
-        Route::resource('payment-devices', PaymentDevicesController::class);
-        Route::get('payment-devices-list/{location_id}', [PaymentDevicesController::class, 'list']);
-        Route::post('set-user-payment-device', [PaymentDevicesController::class, 'selectDefault']);
-
-        //Temp XML Receiver
-        Route::get('payment-xml-response', [PaymentDevicesController::class, 'paymentXmlResponse']);
-
         Route::resource('modifiers', Restaurant\ModifierSetsController::class);
 
         //Map modifier to products
@@ -465,26 +430,19 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/add-selected-modifiers', [Restaurant\ProductModifierSetController::class, 'add_selected_modifiers']);
 
         Route::get('/kitchen', [Restaurant\KitchenController::class, 'index']);
-        Route::get('/kitchen/cook-progress/{stage}/{id}/{product_id}', [Restaurant\KitchenController::class, 'updateCookProgress']);
-       
         Route::get('/kitchen/mark-as-cooked/{id}', [Restaurant\KitchenController::class, 'markAsCooked']);
         Route::post('/refresh-orders-list', [Restaurant\KitchenController::class, 'refreshOrdersList']);
         Route::post('/refresh-line-orders-list', [Restaurant\KitchenController::class, 'refreshLineOrdersList']);
 
         Route::get('/orders', [Restaurant\OrderController::class, 'index']);
-        Route::get('/orders/update-served/{stage}/{id}/{product_id}', [Restaurant\OrderController::class, 'updateServed']);
-       
         Route::get('/orders/mark-as-served/{id}', [Restaurant\OrderController::class, 'markAsServed']);
         Route::get('/data/get-pos-details', [Restaurant\DataController::class, 'getPosDetails']);
         Route::get('/orders/mark-line-order-as-served/{id}', [Restaurant\OrderController::class, 'markLineOrderAsServed']);
         Route::get('/print-line-order', [Restaurant\OrderController::class, 'printLineOrder']);
-        Route::get('/orders/list/{res_line_order_status}', [Restaurant\OrderController::class, 'searchOrderByStatus']);
     });
 
     Route::get('bookings/get-todays-bookings', [Restaurant\BookingController::class, 'getTodaysBookings']);
     Route::resource('bookings', Restaurant\BookingController::class);
-
-    
 
     Route::resource('types-of-service', TypesOfServiceController::class);
     Route::get('sells/edit-shipping/{id}', [SellController::class, 'editShipping']);

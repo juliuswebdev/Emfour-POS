@@ -25,6 +25,7 @@
 	@if(count($brands) > 1)
 		&nbsp;
 		{!! Form::select('size', $brands, null, ['id' => 'product_brand', 'class' => 'select2', 'name' => null, 'style' => 'width:45% !important']) !!}
+		
 	@endif
 
 	

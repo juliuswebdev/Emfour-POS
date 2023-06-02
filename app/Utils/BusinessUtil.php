@@ -15,7 +15,6 @@ use App\Unit;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
-use Str;
 
 class BusinessUtil extends Util
 {
@@ -119,26 +118,13 @@ class BusinessUtil extends Util
 
         //Add Default Unit for new business
         $unit = [
-            [
-                'business_id' => $business_id,
-                'actual_name' => 'Pieces',
-                'short_name' => 'Pc(s)',
-                'allow_decimal' => 0,
-                'created_by' => $user_id,
-                "created_at" =>  \Carbon\Carbon::now(), # new \Datetime()
-                "updated_at" => \Carbon\Carbon::now(),
-            ],
-            [
-                'business_id' => $business_id,
-                'actual_name' => 'Pound',
-                'short_name' => 'Pound(s)',
-                'allow_decimal' => 1,
-                'created_by' => $user_id,
-                "created_at" =>  \Carbon\Carbon::now(), # new \Datetime()
-                "updated_at" => \Carbon\Carbon::now(),
-            ],
+            'business_id' => $business_id,
+            'actual_name' => 'Pieces',
+            'short_name' => 'Pc(s)',
+            'allow_decimal' => 0,
+            'created_by' => $user_id,
         ];
-        Unit::insert($unit);
+        Unit::create($unit);
 
         //Create default notification templates
         $notification_templates = NotificationTemplate::defaultNotificationTemplates($business_id);
@@ -160,8 +146,7 @@ class BusinessUtil extends Util
         ->orderBy('country')
         ->pluck('country', 'country');
 
-        return $countries;
-    }
+        return $countries;}
 
     /**
      * Gives a list of all currencies
@@ -239,22 +224,6 @@ class BusinessUtil extends Util
         $business_details['enable_inline_tax'] = 0;
 
         $business = Business::create_business($business_details);
-
-        // Add Slug
-        $slug_check = Business::find($business->id);
-        if($slug_check) {
-
-            $slug = Str::slug($business->name);
-            
-            $has_slug = Business::where('slug', $slug)->first();
-            if($has_slug) {
-                $slug_check->slug = $slug.'-'.$business->id;
-            } else {
-                $slug_check->slug = $slug;
-            }
-            $slug_check->save();
-
-        }
 
         return $business;
     }

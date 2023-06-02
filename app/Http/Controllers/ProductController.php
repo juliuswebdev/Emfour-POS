@@ -442,7 +442,7 @@ class ProductController extends Controller
         }
         try {
             $business_id = $request->session()->get('user.business_id');
-            $form_fields = ['name', 'brand_id', 'unit_id', 'category_id', 'tax', 'type', 'barcode_type', 'sku', 'upc', 'alert_quantity', 'tax_type', 'weight', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_description', 'sub_unit_ids', 'preparation_time_in_minutes'];
+            $form_fields = ['name', 'brand_id', 'unit_id', 'category_id', 'tax', 'type', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_description', 'sub_unit_ids', 'preparation_time_in_minutes'];
 
             $module_form_fields = $this->moduleUtil->getModuleFormField('product_form_fields');
             if (! empty($module_form_fields)) {
@@ -671,7 +671,7 @@ class ProductController extends Controller
 
         try {
             $business_id = $request->session()->get('user.business_id');
-            $product_details = $request->only(['name', 'brand_id', 'unit_id', 'category_id', 'tax', 'barcode_type', 'sku', 'upc', 'alert_quantity', 'tax_type', 'weight', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_description', 'sub_unit_ids', 'preparation_time_in_minutes']);
+            $product_details = $request->only(['name', 'brand_id', 'unit_id', 'category_id', 'tax', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_description', 'sub_unit_ids', 'preparation_time_in_minutes']);
 
             DB::beginTransaction();
 
@@ -694,7 +694,6 @@ class ProductController extends Controller
             $product->tax = $product_details['tax'];
             $product->barcode_type = $product_details['barcode_type'];
             $product->sku = $product_details['sku'];
-            $product->upc = $product_details['upc'];
             $product->alert_quantity = ! empty($product_details['alert_quantity']) ? $this->productUtil->num_uf($product_details['alert_quantity']) : $product_details['alert_quantity'];
             $product->tax_type = $product_details['tax_type'];
             $product->weight = $product_details['weight'];
@@ -712,12 +711,6 @@ class ProductController extends Controller
                 $product->enable_stock = 1;
             } else {
                 $product->enable_stock = 0;
-            }
-
-            if (! empty($request->input('weighing_sale')) && $request->input('weighing_sale') == 1) {
-                $product->weighing_sale = 1;
-            } else {
-                $product->weighing_sale = 0;
             }
 
             $product->not_for_selling = (! empty($request->input('not_for_selling')) && $request->input('not_for_selling') == 1) ? 1 : 0;
@@ -1025,7 +1018,6 @@ class ProductController extends Controller
             exit;
         }
     }
-
 
     /**
      * Get product form parts.
@@ -2281,6 +2273,7 @@ class ProductController extends Controller
 
         //Get all business locations
         $business_locations = BusinessLocation::forDropdown($business_id);
+
         return view('product.stock_history')
                 ->with(compact('product', 'business_locations'));
     }
@@ -2337,50 +2330,5 @@ class ProductController extends Controller
         $filename = 'products-export-'.\Carbon::now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(new ProductsExport, $filename);
-    }
-
-    public function showSubUnitInventory($id)
-    {
-        if (! auth()->user()->can('product.view')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $business_id = request()->session()->get('user.business_id');
-
-
-        if (request()->ajax()) {
-
-            //for ajax call $id is variation id else it is product id
-            $stock_details = $this->productUtil->getVariationStockDetails($business_id, $id, request()->input('location_id'));
-            $stock_history = $this->productUtil->getVariationStockHistory($business_id, $id, request()->input('location_id'));
-
-            //if mismach found update stock in variation location details
-            if (isset($stock_history[0]) && (float) $stock_details['current_stock'] != (float) $stock_history[0]['stock']) {
-                VariationLocationDetails::where('variation_id',
-                                            $id)
-                                    ->where('location_id', request()->input('location_id'))
-                                    ->update(['qty_available' => $stock_history[0]['stock']]);
-                $stock_details['current_stock'] = $stock_history[0]['stock'];
-            }
-
-            $variation = Variation::where('id', $id)->with(['product'])->first();
-
-            $sub_unit = $variation->product->sub_unit_ids ?? [];
-       
-            $units = Unit::whereIn('id', $sub_unit)->select('id', 'actual_name', 'base_unit_multiplier', 'short_name')->get();
-
-            return view('product.sub-unit-details')
-                ->with(compact('stock_details', 'units'));
-        }
-
-        $product = Product::where('business_id', $business_id)
-        ->with(['variations', 'variations.product_variation'])
-        ->findOrFail($id);
-
-        //Get all business locations
-        $business_locations = BusinessLocation::forDropdown($business_id);
-
-        return view('product.sub-unit')
-                ->with(compact('product', 'business_locations'));
     }
 }

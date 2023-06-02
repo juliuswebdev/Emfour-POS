@@ -138,17 +138,6 @@
                 {!! Form::select('quantity_precision', [0 =>0, 1=>1, 2=>2, 3=>3,4=>4], $business->quantity_precision, ['class' => 'form-control select2', 'required']); !!}
             </div>
         </div>
-        <div class="col-sm-4">
-            <div class="form-group">
-           
-                {!! Form::label('card_charge', __('lang_v1.card_charge_percent') . ':') !!}
-                @if(auth()->user()->can('superadmin'))
-                {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control']); !!}
-                @else
-                {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control', 'readonly' => 'true']); !!}
-                @endif
-            </div>
-        </div>
     </div>
      {{-- code --}}
     <div class="row hide">

@@ -1,4 +1,3 @@
-
 <table style="width:100%;">
 	<thead>
 		<tr>
@@ -533,20 +532,9 @@
 				@foreach($receipt_details->payments as $payment)
 					<tr>
 						<td>{{$payment['method']}}</td>
-						@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
-							<td class="text-right" >{{$payment['original_amount']}}</td>
-						@else
-							<td class="text-right" >{{$payment['amount']}}</td>
-						@endif
-						<td class="text-right">{{$payment['date']}}</td>
+						<td>{{$payment['amount']}}</td>
+						<td>{{$payment['date']}}</td>
 					</tr>
-					@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
-					<tr>
-						<td>@lang('lang_v1.card_charge') {{$payment['card_charge_percent']}}%</td>
-						<td class="text-right">{{$payment['card_charge_amount']}}</td>
-						<td class="text-right">{{$payment['date']}}</td>
-					</tr>
-					@endif
 				@endforeach
 			@endif
 		</table>
@@ -735,7 +723,6 @@
         @endif
     @endif
 </div>
-
 
 @if(!empty($receipt_details->additional_notes))
 	<div class="row ">

@@ -54,7 +54,6 @@ use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
 use App\Variation;
 use App\Warranty;
-use App\PaymentDevice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -158,7 +157,7 @@ class SellPosController extends Controller
     public function create()
     {
         $business_id = request()->session()->get('user.business_id');
-        
+
         if (! (auth()->user()->can('superadmin') || auth()->user()->can('sell.create') || ($this->moduleUtil->hasThePermissionInSubscription($business_id, 'repair_module') && auth()->user()->can('repair.create')))) {
             abort(403, 'Unauthorized action.');
         }
@@ -261,14 +260,6 @@ class SellPosController extends Controller
         //Added check because $users is of no use if enable_contact_assign if false
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
 
-        //Check Payment Devices
-        if(auth()->user()->default_payment_device != 0){
-            $payment_device = PaymentDevice::select('id', 'name')->where('id', auth()->user()->default_payment_device)->first();
-        }else{
-            $payment_device = null;
-        }
-
-
         return view('sale_pos.create')
             ->with(compact(
                 'edit_discount',
@@ -301,8 +292,7 @@ class SellPosController extends Controller
                 'invoice_schemes',
                 'default_invoice_schemes',
                 'invoice_layouts',
-                'users',
-                'payment_device'
+                'users'
             ));
     }
 
@@ -328,7 +318,7 @@ class SellPosController extends Controller
             return redirect()->action([\App\Http\Controllers\CashRegisterController::class, 'create']);
         }
 
-        // try {
+        try {
             $input = $request->except('_token');
 
             $input['is_quotation'] = 0;
@@ -369,7 +359,6 @@ class SellPosController extends Controller
             if (! empty($input['products'])) {
                 $business_id = $request->session()->get('user.business_id');
 
-
                 //Check if subscribed or not, then check for users quota
                 if (! $this->moduleUtil->isSubscribed($business_id)) {
                     return $this->moduleUtil->expiredResponse();
@@ -382,31 +371,7 @@ class SellPosController extends Controller
                 $discount = ['discount_type' => $input['discount_type'],
                     'discount_amount' => $input['discount_amount'],
                 ];
-
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
-
-                // Card Charge J
-                $business = Business::find($business_id);
-                $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
-                $input_final_total_temp = 0;
-                $invoice_total_total_before_tax_temp = 0;
-                $invoice_total_final_total_temp = 0;
-                foreach($input['payment'] as $payment) {
-                    if(isset($payment['method'])) {
-                        if($payment['method']  == 'card'){
-                            $input_final_total_temp = $input_final_total_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
-                            $invoice_total_total_before_tax_temp = $invoice_total_total_before_tax_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
-                            $invoice_total_final_total_temp = $invoice_total_final_total_temp + ($payment['amount'] + ($payment['amount'] * $card_charge));
-                        } else {
-                            $input_final_total_temp = $input_final_total_temp + $payment['amount'];
-                            $invoice_total_total_before_tax_temp = $invoice_total_total_before_tax_temp + $payment['amount'];
-                            $invoice_total_final_total_temp = $invoice_total_final_total_temp + $payment['amount'];
-                        }
-                    }
-                }
-                $input['final_total'] = $input_final_total_temp;
-                $invoice_total['total_before_tax'] = $invoice_total_total_before_tax_temp;
-                $invoice_total['final_total'] = $invoice_total_final_total_temp;
 
                 DB::beginTransaction();
 
@@ -510,9 +475,8 @@ class SellPosController extends Controller
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
-                
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
-                
+
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
 
@@ -623,32 +587,7 @@ class SellPosController extends Controller
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
                 $this->transactionUtil->activityLog($transaction, 'added');
-                
-                
-                if(isset($input['payment'][0]['method'])){
-                    if($input['payment'][0]['method'] == "card"){
-                        //Make Payment through card
-                        $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
-                        $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
-                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id);
-                        if($response_of_payment['success'] == 0){
-                            //Payment Failed Rollback Transaction
-                            DB::rollback();
-                            $output = [
-                                'success' => 0,
-                                'msg' => $response_of_payment['msg']
-                            ];
-                            return $output;
-                        }else{
-                            //Store Payment Response
-                            $payment_response_json = json_encode($response_of_payment['data'], true);
-                            TransactionPayment::where('transaction_id', $transaction->id)
-                                                ->where('business_id', $business_id)
-                                                ->update(['payment_collect_response' => $payment_response_json]);
-                        }
-                    }
-                }
-                
+
                 DB::commit();
 
                 if ($request->input('is_save_and_print') == 1) {
@@ -696,22 +635,22 @@ class SellPosController extends Controller
                     'msg' => trans('messages.something_went_wrong'),
                 ];
             }
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
-        //     $msg = trans('messages.something_went_wrong');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $msg = trans('messages.something_went_wrong');
 
-        //     if (get_class($e) == \App\Exceptions\PurchaseSellMismatch::class) {
-        //         $msg = $e->getMessage();
-        //     }
-        //     if (get_class($e) == \App\Exceptions\AdvanceBalanceNotAvailable::class) {
-        //         $msg = $e->getMessage();
-        //     }
+            if (get_class($e) == \App\Exceptions\PurchaseSellMismatch::class) {
+                $msg = $e->getMessage();
+            }
+            if (get_class($e) == \App\Exceptions\AdvanceBalanceNotAvailable::class) {
+                $msg = $e->getMessage();
+            }
 
-        //     $output = ['success' => 0,
-        //         'msg' => $msg,
-        //     ];
-        // }
+            $output = ['success' => 0,
+                'msg' => $msg,
+            ];
+        }
 
         if (! $is_direct_sale) {
             return $output;
@@ -792,7 +731,7 @@ class SellPosController extends Controller
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-        $output['receipt_details'] = $receipt_details;
+
         $currency_details = [
             'symbol' => $business_details->currency_symbol,
             'thousand_separator' => $business_details->thousand_separator,
@@ -1129,13 +1068,6 @@ class SellPosController extends Controller
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
         $only_payment = request()->segment(2) == 'payment';
 
-        //Check Payment Devices
-        if(auth()->user()->default_payment_device != 0){
-            $payment_device = PaymentDevice::select('id', 'name')->where('id', auth()->user()->default_payment_device)->first();
-        }else{
-            $payment_device = null;
-        }
-
         return view('sale_pos.edit')
             ->with(compact('business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
@@ -1143,7 +1075,7 @@ class SellPosController extends Controller
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
             'shipping_statuses', 'warranties', 'sub_type', 'pos_module_data', 'invoice_schemes',
             'default_invoice_schemes', 'invoice_layouts', 'featured_products', 'customer_due',
-            'users', 'only_payment', 'payment_device'));
+            'users', 'only_payment'));
     }
 
     /**
@@ -2209,7 +2141,7 @@ class SellPosController extends Controller
             $payment_link = $this->transactionUtil->getInvoicePaymentLink($transaction->id, $transaction->business_id);
 
             $paid_amount = $this->transactionUtil->getTotalPaid($transaction->id);
-            $total_payable = ($transaction->final_total - $paid_amount);
+            $total_payable = $transaction->final_total - $paid_amount;
 
             $pay_function = 'pay_'.$request->gateway;
 
@@ -2232,8 +2164,6 @@ class SellPosController extends Controller
                     'business_id' => $transaction->business_id,
                     'payment_ref_no' => $payment_ref_no,
                 ];
-
-
 
                 $tp = TransactionPayment::create($data);
 

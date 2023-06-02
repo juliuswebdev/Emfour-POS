@@ -70,6 +70,7 @@
                 if (willDelete) {
                     var href = $(this).data('href');
                     var data = $(this).serialize();
+
                     $.ajax({
                         method: "DELETE",
                         url: href,

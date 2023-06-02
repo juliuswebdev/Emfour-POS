@@ -98,15 +98,15 @@ class BusinessController extends Controller
         }
 
         $accounting_methods = $this->businessUtil->allAccountingMethods();
-        $countries = $this->businessUtil->allCountries();
+	$countries = $this->businessUtil->allCountries();
         $package_id = request()->package;
 
         $system_settings = System::getProperties(['superadmin_enable_register_tc', 'superadmin_register_tc'], true);
 
         return view('business.register', compact(
+	    'countries',
             'currencies',
             'timezone_list',
-            'countries',
             'months',
             'accounting_methods',
             'package_id',
@@ -289,6 +289,7 @@ class BusinessController extends Controller
         $business = Business::where('id', $business_id)->first();
 
         $currencies = $this->businessUtil->allCurrencies();
+	$countries = $this->businessUtil->allCountries();
         $tax_details = TaxRate::forBusinessDropdown($business_id);
         $tax_rates = $tax_details['tax_rates'];
 
@@ -336,7 +337,7 @@ class BusinessController extends Controller
 
         $payment_types = $this->moduleUtil->payment_types(null, false, $business_id);
 
-        return view('business.settings', compact('business', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types'));
+        return view('business.settings', compact('business', 'countries', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types'));
     }
 
     /**
@@ -365,12 +366,8 @@ class BusinessController extends Controller
                 'redeem_amount_per_unit_rp', 'min_order_total_for_redeem',
                 'min_redeem_point', 'max_redeem_point', 'rp_expiry_period',
                 'rp_expiry_type', 'custom_labels', 'weighing_scale_setting',
-                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge']);
+                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', ]);
 
-            if(!auth()->user()->can('superadmin')) {
-                unset($business_details['card_charge']);
-            }
-                
             if (! empty($request->input('enable_rp')) && $request->input('enable_rp') == 1) {
                 $business_details['enable_rp'] = 1;
             } else {

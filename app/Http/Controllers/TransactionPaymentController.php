@@ -100,7 +100,6 @@ class TransactionPaymentController extends Controller
                     $prefix_type = 'expense_payment';
                 }
 
-                
                 DB::beginTransaction();
 
                 $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
@@ -118,7 +117,6 @@ class TransactionPaymentController extends Controller
                 }
 
                 if (! empty($inputs['amount'])) {
-
                     $tp = TransactionPayment::create($inputs);
 
                     if (! empty($request->input('denominations'))) {

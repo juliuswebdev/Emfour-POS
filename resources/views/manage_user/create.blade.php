@@ -97,21 +97,12 @@
       </div>
     </div>
       <div class="clearfix"></div>
-      
-        <div class="col-md-4">
-          <div class="form-group">
-            {!! Form::label('sale_return_9_digit_pin', __( 'business.sale_return_pin' ) . ':*') !!}
-            {!! Form::password('sale_return_pin', ['class' => 'form-control', 'minlength' => '9', 'maxlenght' => '9', 'required', 'placeholder' => __( 'business.sale_return_pin' ) ]); !!}
-          </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          {!! Form::label('role', __( 'user.role' ) . ':*') !!} @show_tooltip(__('lang_v1.admin_role_location_permission_help'))
+            {!! Form::select('role', $roles, null, ['class' => 'form-control select2']); !!}
         </div>
-
-
-        <div class="col-md-4">
-          <div class="form-group">
-            {!! Form::label('role', __( 'user.role' ) . ':*') !!} @show_tooltip(__('lang_v1.admin_role_location_permission_help'))
-              {!! Form::select('role', $roles, null, ['class' => 'form-control select2']); !!}
-          </div>
-        </div>
+      </div>
       <div class="clearfix"></div>
       <div class="col-md-3">
           <h4>@lang( 'role.access_locations' ) @show_tooltip(__('tooltip.access_locations_permission'))</h4>

@@ -4,59 +4,32 @@
 @endif
 </div>
 <div class="row">
+	@if(!empty($categories))
+		<div class="col-md-4" id="product_category_div">
+			<select class="select2" id="product_category" style="width:100% !important">
+
+				<option value="all">@lang('lang_v1.all_category')</option>
+
+				@foreach($categories as $category)
+					<option value="{{$category['id']}}">{{$category['name']}}</option>
+				@endforeach
+
+				@foreach($categories as $category)
+					@if(!empty($category['sub_categories']))
+						<optgroup label="{{$category['name']}}">
+							@foreach($category['sub_categories'] as $sc)
+								<i class="fa fa-minus"></i> <option value="{{$sc['id']}}">{{$sc['name']}}</option>
+							@endforeach
+						</optgroup>
+					@endif
+				@endforeach
+			</select>
+		</div>
+	@endif
 
 	@if(count($brands) > 1)
 		<div class="col-sm-4" id="product_brand_div">
 			{!! Form::select('size', $brands, null, ['id' => 'product_brand', 'class' => 'select2', 'name' => null, 'style' => 'width:100% !important']) !!}
-		</div>
-	@endif
-
-	@if(!empty($categories))
-		<div class="col-md-12" id="product_category_div">
-			<h4>@lang('lang_v1.categories')</h4>
-			<div class="cat-parent-area">
-				<div class="cat-container">
-					<input type="radio" name="category_id" value="all" id="cat-parent-0" data-id="0" checked>
-					<label for="cat-parent-0">
-						<div class="cat_image">
-						@if(!empty(Session::get('business.logo')))
-							<img src="{{ asset( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo">
-						@else
-							<img src="{{ asset('img') }}/default.png" alt="Color-Correction">
-						@endif
-						</div>
-						<span>@lang('lang_v1.all_category')</span>
-					</label>
-				</div>
-				@foreach($categories as $category)
-					<div class="cat-container">
-						<input type="radio" name="category_id" value="{{$category['id']}}" id="cat-parent-{{$category['id']}}" class="cat_parent" data-id="{{$category['id']}}">
-						<label for="cat-parent-{{$category['id']}}">
-							<div class="cat_image">
-								<img src=" {{ env('APP_URL')}}/uploads/category_logos/{{$category['logo']}} ">
-							</div>
-							<span>{{$category['name']}}</span>
-						</label>
-					</div>
-				@endforeach
-			</div>
-			<div class="cat-sub-area">
-				@foreach($categories as $category)
-					@if(!empty($category['sub_categories']))
-							@foreach($category['sub_categories'] as $sc)
-								<div class="cat-container">
-									<input type="radio" name="category_id" value="{{$sc['id']}}" id="cat-child-{{$sc['id']}}" class="cat_parent_{{$sc['parent_id']}}">
-									<label for="cat-child-{{$sc['id']}}">
-										<div class="cat_image">
-											<img src=" {{ env('APP_URL')}}/uploads/category_logos/{{$sc['logo']}} ">
-										</div> 
-										<span>{{$sc['name']}}</span>
-									</label>
-								</div>
-							@endforeach
-					@endif
-				@endforeach
-			</div>
 		</div>
 	@endif
 

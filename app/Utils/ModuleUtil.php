@@ -495,7 +495,6 @@ class ModuleUtil extends Util
             'types_of_service' => ['name' => __('lang_v1.types_of_service'),
                 'tooltip' => __('lang_v1.types_of_service_help_long'),
             ],
-            'quotation' => ['name' => __('lang_v1.quotation')]
         ];
     }
 

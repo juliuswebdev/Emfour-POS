@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Restaurant;
 
 use App\TransactionSellLine;
 use App\Utils\RestaurantUtil;
-use App\Utils\BusinessUtil;
-
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,8 +18,6 @@ class KitchenController extends Controller
 
     protected $restUtil;
 
-    protected $businessUtil;
-
     /**
      * Constructor
      *
@@ -29,11 +25,10 @@ class KitchenController extends Controller
      * @param  RestaurantUtil  $restUtil
      * @return void
      */
-    public function __construct(Util $commonUtil, RestaurantUtil $restUtil, BusinessUtil $businessUtil)
+    public function __construct(Util $commonUtil, RestaurantUtil $restUtil)
     {
         $this->commonUtil = $commonUtil;
         $this->restUtil = $restUtil;
-        $this->businessUtil = $businessUtil;
     }
 
     /**
@@ -49,41 +44,9 @@ class KitchenController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received']);
-        //dd($orders);
 
-        $business_details = $this->businessUtil->getDetails($business_id);
-        return view('restaurant.kitchen.index', compact('orders', 'business_details'));
+        return view('restaurant.kitchen.index', compact('orders'));
     }
-
-    
-    /**
-     * function use for update the cooking timestamp in cook start end cook end column.
-     *
-     * @return json $output
-     */
-    public function updateCookProgress($stage, $id, $product_id){
-        try {
-            $business_id = request()->session()->get('user.business_id');
-            $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
-                        ->where('t.business_id', $business_id)
-                        ->where('transaction_id', $id)
-                        ->where('product_id', $product_id)
-                        ->update([$stage => date('Y-m-d H:i:s')]);
-
-            $output = [
-                'success' => 1,
-                'msg' => __('lang_v1.cooking_state_update_message'),
-            ];
-        } catch (\Exception $e) {
-            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
-            $output = ['success' => 0,
-                'msg' => trans('messages.something_went_wrong'),
-            ];
-        }
-
-        return $output;
-    }
-
 
     /**
      * Marks an order as cooked
@@ -147,8 +110,8 @@ class KitchenController extends Controller
         }
 
         $orders = $this->restUtil->getAllOrders($business_id, $filter);
-        $business_details = $this->businessUtil->getDetails($business_id);
-        return view('restaurant.partials.show_orders', compact('orders', 'orders_for', 'business_details'));
+
+        return view('restaurant.partials.show_orders', compact('orders', 'orders_for'));
     }
 
     /**

@@ -10,31 +10,6 @@
         <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
         <li class="active">Here</li>
     </ol> -->
-    <br>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="row">
-                <div class="col-md-10">
-                    <label>Customer Public Link:</label>
-                    <div class="public-link">
-                        <textarea class="form-control" id="copy-clipboard-link-customer">{{ route('booking.getPublicBooking', $business->slug) }}</textarea>
-                        <a href="#" class="copy-clipboard-btn" onclick="copyToClipboard('#copy-clipboard-link-customer')"><i class="fa fas fa-copy"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="row">
-                <div class="col-md-10">
-                    <label>Checkin Public Link:</label>
-                    <div class="public-link">
-                        <textarea class="form-control" id="copy-clipboard-link-checkin">{{ route('booking.getPublicBookingCheckin', $business->slug) }}</textarea>
-                        <a href="#" class="copy-clipboard-btn" onclick="copyToClipboard('#copy-clipboard-link-checkin')"><i class="fa fas fa-copy"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </section>
 
 <!-- Main content -->
@@ -53,14 +28,6 @@
     </div>
     <br>
     <div class="row">
-        <div class="col-md-6">
-            @include('restaurant.booking.checkin')
-        </div>
-        <div class="col-md-6">
-            @include('restaurant.booking.checkout')
-        </div>
-    </div>
-    <div class="row">
         <div class="col-sm-12">
             <div class="box box-primary">
                 <div class="box-header with-border">
@@ -71,16 +38,12 @@
                     <table class="table table-bordered table-condensed" id="todays_bookings_table">
                         <thead>
                         <tr>
-                            <th>@lang('restaurant.ref_no')</th>
                             <th>@lang('contact.customer')</th>
                             <th>@lang('restaurant.booking_starts')</th>
                             <th>@lang('restaurant.booking_ends')</th>
-                            <th>@lang('restaurant.time')</th>
                             <th>@lang('restaurant.table')</th>
                             <th>@lang('messages.location')</th>
                             <th>@lang('restaurant.service_staff')</th>
-                            <th>@lang('restaurant.status')</th>
-                            <th>@lang('restaurant.actions')</th>
                         </tr>
                         </thead>
                     </table>
@@ -110,17 +73,11 @@
             <div class="box box-solid">
                 <div class="box-body">
                     <!-- the events -->
-                    <div class="external-event bg-light-blue text-center" style="position: relative;">
+                    <div class="external-event bg-yellow text-center" style="position: relative;">
                         <small>@lang('lang_v1.waiting')</small>
                     </div>
-                    <div class="external-event bg-blue text-center" style="position: relative;">
+                    <div class="external-event bg-light-blue text-center" style="position: relative;">
                         <small>@lang('restaurant.booked')</small>
-                    </div>
-                    <div class="external-event bg-yellow text-center" style="position: relative;">
-                        <small>@lang('restaurant.checkin')</small>
-                    </div>
-                    <div class="external-event bg-gray text-center" style="position: relative;">
-                        <small>@lang('restaurant.checkout')</small>
                     </div>
                     <div class="external-event bg-green text-center" style="position: relative;">
                         <small>@lang('restaurant.completed')</small>
@@ -149,73 +106,11 @@
 </div>
 
 @endsection
+
 @section('javascript')
-    <script type="text/javascript" src="{{ asset('js/bookings.js') }}"></script>
+    
     <script type="text/javascript">
-
         $(document).ready(function(){
-
-            $('.search-check').submit(function(e){
-                e.preventDefault();
-                var data = $(this).serialize();
-                $.ajax({
-                    context: this,
-                    method: "POST",
-                    url: $(this).attr("action"),
-                    data: data,
-                    success: function(result) {
-                        if( $(this).find('input[name="from"]').val() ==  'booked' ) {
-                            $('#checkin_result').html(result);
-                        }
-                        if( $(this).find('input[name="from"]').val() ==  'checkin' ) {
-                            $('#checkout_result').html(result);
-                        }
-                        $('.btn-search').removeAttr('disabled');
-                    }
-                });
-            });
-
-
-            $(document).on('submit', 'form.check_booking_form', function(e){
-                e.preventDefault();
-                var data = $(this).serialize();
-                $.ajax({
-                    context: this,
-                    method: "PUT",
-                    url: $(this).attr("action"),
-                    dataType: "json",
-                    data: data,
-                    beforeSend: function(xhr) {
-                        __disable_submit_button($(this).find('button[type="submit"]'));
-                    },
-                    success: function(result){
-                        if(result.success == true) {
-                            $('#checkin_result').html('');
-                            $('#checkout_result').html('');
-                            $('input[name="search_query"]').val('');
-                            toastr.success(result.msg);
-                            reload_calendar();
-                            todays_bookings_table.ajax.reload();
-                            $(this).find('button[type="submit"]').attr('disabled', false);
-
-                            var booking_status = $(this).find('input[name="booking_status"]').val();
-                            var booking_product_ids = $(this).find('input[name="booking_product_ids"]').val();
-                            var booking_ref_no = $(this).find('input[name="booking_ref_no"]').val();
-
-                            if(  booking_status == 'checkout' ) {
-                                var url = '{{ route('pos.create') }}?booking_status=checkout&booking_product_ids='+booking_product_ids+'&ref_no='+booking_ref_no;
-                                window.open(url, '_blank').focus();
-                            }
-                            
-                        } else {
-                            toastr.error(result.msg);
-                        }
-                    }
-                });
-            });
-
-
-
             clickCount = 0;
             $('#calendar').fullCalendar({
                 header: {
@@ -355,16 +250,12 @@
                                 }
                             },
                             columns: [
-                                {data: 'ref_no' },
                                 {data: 'customer'},
                                 {data: 'booking_start', name: 'booking_start'},
                                 {data: 'booking_end', name: 'booking_end'},
-                                {data: 'time'},
                                 {data: 'table'},
                                 {data: 'location'},
-                                {data: 'correspondent'},
-                                {data: 'status'},
-                                {data: 'actions'}
+                                {data: 'waiter'},
                             ]
                         });
             $('button#add_new_booking_btn').click( function(){

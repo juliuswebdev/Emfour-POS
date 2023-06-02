@@ -23,10 +23,6 @@
         {!! Form::label('name', $name_label . ':*') !!}
           {!! Form::text('name', null, ['class' => 'form-control', 'required', 'placeholder' => $name_label]); !!}
       </div>
-      <div class="form-group">
-          {!! Form::label('category_logo', __('lang_v1.category_logo') . ':') !!}
-          {!! Form::file('category_logo', ['accept' => 'image/*']); !!}
-      </div>
       @if($cat_code_enabled)
       <div class="form-group">
         {!! Form::label('short_code', $cat_code_label . ':') !!}

@@ -31,15 +31,12 @@
 				<td>
 					@if(auth()->user()->can('sell.update') || auth()->user()->can('direct_sell.update'))
 					<a href="{{action([\App\Http\Controllers\SellPosController::class, 'edit'], [$transaction->id]).$subtype}}">
-	    				<i class="fas fa-pen text-muted" style="padding-left: 20px; padding-right: 20px" aria-hidden="true" title="{{__('lang_v1.click_to_edit')}}"></i>
+	    				<i class="fas fa-pen text-muted" aria-hidden="true" title="{{__('lang_v1.click_to_edit')}}"></i>
 	    			</a>
 	    			@endif
-
-					{{--
 	    			@if(auth()->user()->can('sell.delete') || auth()->user()->can('direct_sell.delete'))
 	    			<a href="{{action([\App\Http\Controllers\SellPosController::class, 'destroy'], [$transaction->id])}}" class="delete-sale" style="padding-left: 20px; padding-right: 20px"><i class="fa fa-trash text-danger" title="{{__('lang_v1.click_to_delete')}}"></i></a>
 	    			@endif
-					--}}
 
 					@if(!auth()->user()->can('sell.update') && auth()->user()->can('edit_pos_payment'))
 						<a href="{{route('edit-pos-payment', ['id' => $transaction->id])}}" 

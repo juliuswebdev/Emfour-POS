@@ -767,21 +767,6 @@ class TransactionUtil extends Util
                         }
                     }
 
-                    // Card Charge J
-                    $business_id = $transaction->business_id;
-                    if($payment['method']  == 'card'){
-                        $business = Business::find($business_id);
-                        $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
-
-                        $card_charge_amount = ($payment_data['amount'] * $card_charge);
-
-                        $payment_data['original_amount'] = $payment_data['amount'];
-                        $payment_data['card_charge_amount'] = $card_charge_amount;
-                        $payment_data['card_charge_percent'] = $business->card_charge;
-                        $payment_data['amount'] = $payment_data['amount'] + $card_charge_amount; 
-
-                    }
-                    
                     $payments_formatted[] = new TransactionPayment($payment_data);
 
                     if (! empty($payment['denominations'])) {
@@ -1523,9 +1508,6 @@ class TransactionUtil extends Util
                                 ['method' => $method.(! empty($value['card_transaction_number']) ? (', Transaction Number:'.$value['card_transaction_number']) : ''),
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
-                                    'card_charge_amount' => isset($value['card_charge_amount']) ? $this->num_f($value['card_charge_amount'], $show_currency, $business_details) : '',
-                                    'card_charge_percent' => isset($value['card_charge_percent']) ? $value['card_charge_percent'] : '',
-                                    'original_amount' => isset($value['original_amount']) ? $this->num_f($value['original_amount'], $show_currency, $business_details) : ''
                                 ];
                         } elseif ($value['method'] == 'cheque') {
                             $output['payments'][] =
@@ -3221,9 +3203,8 @@ class TransactionUtil extends Util
             $query = Transaction::join('purchase_lines AS PL', 'transactions.id', '=', 'PL.transaction_id')
                 ->where('transactions.business_id', $business['id'])
                 ->where('transactions.location_id', $business['location_id'])
-                ->whereIn('transactions.type', 
-                    ['purchase', 'purchase_transfer',
-                    'opening_stock', 'production_purchase','physical_count_adjustment'])
+                ->whereIn('transactions.type', ['purchase', 'purchase_transfer',
+                    'opening_stock', 'production_purchase', ])
                 ->where('transactions.status', 'received')
                 ->whereRaw("( $qty_sum_query ) < PL.quantity")
                 ->where('PL.product_id', $line->product_id)
@@ -3281,6 +3262,7 @@ class TransactionUtil extends Util
                     $qty_selling = $qty_selling - $row->quantity_available;
                     $qty_allocated = $row->quantity_available;
                 }
+
                 //Check for sell mapping or stock adjsutment mapping
                 if ($mapping_type == 'stock_adjustment') {
                     //Mapping of stock adjustment
@@ -3330,7 +3312,7 @@ class TransactionUtil extends Util
                     break;
                 }
             }
-           
+
             if (! ($qty_selling == 0 || is_null($qty_selling))) {
                 //If overselling not allowed through exception else create mapping with blank purchase_line_id
                 if (! $allow_overselling) {

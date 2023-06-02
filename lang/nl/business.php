@@ -3,7 +3,6 @@
  return [
      'register_and_get_started_in_minutes' => 'Registreren en aan de slag in minuten',
      'business_name' => 'Bedrijfsnaam',
-     'business_type' => 'Soort bedrijf',
      'start_date' => 'Begin datum',
      'currency' => 'Valuta',
      'currency_placeholder' => 'Selecteer valuta',

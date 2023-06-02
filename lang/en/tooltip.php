@@ -33,8 +33,6 @@ return [
 
     'sku' => "Unique product id or Stock Keeping Unit <br><br>Keep it blank to automatically generate sku.<br><small class='text-muted'>You can modify sku prefix in Business settings.</small>",
 
-    'enable_weighing_sale' => 'Enable or disable weighing sale for a product',
-
     'enable_stock' => "Enable or disable stock management for a product. <br><br><small class='text-muted'>Stock Management should be disable mostly for services. Example: Hair-Cutting, Repairing, etc.</small>",
 
     'alert_quantity' => "Get alert when product stock reaches or goes below the specified quantity.<br><br><small class='text-muted'>Products with low stock will be displayed in dashboard - Product Stock Alert section.</small>",

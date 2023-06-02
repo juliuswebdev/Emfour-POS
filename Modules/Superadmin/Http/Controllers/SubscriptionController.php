@@ -53,9 +53,7 @@ class SubscriptionController extends BaseController
         $business_id = request()->session()->get('user.business_id');
 
         //Get active subscription and upcoming subscriptions.
-      
         $active = Subscription::active_subscription($business_id);
-       
 
         $nexts = Subscription::upcoming_subscriptions($business_id);
         $waiting = Subscription::waiting_approval($business_id);

@@ -83,8 +83,6 @@
 
 @include('sale_pos.partials.weighing_scale_modal')
 
-@include('restaurant.orders.checkout-modal')
-
 @stop
 
 @section('javascript')

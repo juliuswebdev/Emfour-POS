@@ -12,7 +12,6 @@ return [
     */
     'register_and_get_started_in_minutes' => 'Daftar dan Mulai dalam hitungan menit',
     'business_name' => 'Nama Bisnis',
-    'business_type' => 'Jenis Bisnis',
     'start_date' => 'Tanggal Mulai',
     'currency' => 'Mata Uang',
     'currency_placeholder' => 'Pilih Mata Uang',

@@ -40,11 +40,6 @@ class Booking extends Model
         return $this->belongsTo(\App\BusinessLocation::class, 'location_id');
     }
 
-    public function booking_details()
-    {
-        return $this->hasOne(\App\Restaurant\BookingDetail::class, 'booking_id');
-    }
-
     public function business()
     {
         return $this->belongsTo(\App\Business::class, 'business_id');

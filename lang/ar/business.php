@@ -3,7 +3,6 @@
  return [
      'register_and_get_started_in_minutes' => 'سجل وابدأ في دقائق',
      'business_name' => 'اسم النشاط',
-     'business_type' => 'نوع العمل',
      'start_date' => 'تاريخ البدء',
      'currency' => 'العملة',
      'currency_placeholder' => 'اختر العملة',

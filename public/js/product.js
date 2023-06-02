@@ -1,39 +1,6 @@
 //This file contains all functions used products tab
 
 $(document).ready(function() {
-
-    var original_option = $('#unit_id').select2("val");
-    $(document).on('ifChecked', 'input#weighing_sale', function() {
-        var option = 0;
-        $('#unit_id option').each(function(){
-            if($(this).text() == 'Pound (Pound(s))') {
-                option = ($(this).attr('value'));
-            }
-        });
-        if (option == 0) {
-            $('.quick_add_unit').trigger('click');
-            setTimeout(function() {
-                $('#quick_add_unit_form #actual_name').val('Pound');
-                $('#quick_add_unit_form #short_name').val('Pound(s)');
-                $('#quick_add_unit_form #allow_decimal').val(1);
-            },1000);
-            
-        }
-        $('#unit_id').select2("val", option);
-    });
-    $(document).on('ifUnchecked', 'input#weighing_sale', function() {
-        $('#unit_id').select2("val", original_option);
-    });
-    $(document).on('change', 'select#unit_id', function() {
-        console.log($(this).find("option:selected").text());
-        if($(this).find("option:selected").text() != 'Pound (Pound(s))') {
-            $('#weighing_sale').iCheck('uncheck');
-        }
-        
-    });
-
-
-
     $(document).on('ifChecked', 'input#enable_stock', function() {
         $('div#alert_quantity_div').show();
         $('div#quick_product_opening_stock_div').show();

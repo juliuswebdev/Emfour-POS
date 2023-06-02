@@ -116,25 +116,8 @@
               </div>
             </div>
 
-            <div class="col-sm-4">
-              <div class="form-group">
-              {!! Form::label('upc', __('inventory_count.upc_code') . ':') !!}
-                {!! Form::text('upc', $product->upc, ['class' => 'form-control',
-                  'placeholder' => __('inventory_count.upc_code')]); !!}
-              </div>
-            </div>
-        
-
             <div class="clearfix"></div>
-            <div class="col-sm-4">
-              <div class="form-group">
-              <br>
-                <label>
-                {!! Form::checkbox('weighing_sale', 1, $product->weighing_sale, ['class' => 'input-icheck', 'id' => 'weighing_sale']); !!} 
-                <strong>@lang('product.weighing_sale')</strong>
-                </label>@show_tooltip(__('tooltip.enable_weighing_sale'))
-              </div>
-            </div>
+            
             <div class="col-sm-4">
               <div class="form-group">
               <br>

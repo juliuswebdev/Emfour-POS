@@ -28,8 +28,8 @@ class TableController extends Controller
             $tables = ResTable::where('res_tables.business_id', $business_id)
                         ->join('business_locations AS BL', 'res_tables.location_id', '=', 'BL.id')
                         ->select(['res_tables.name as name', 'BL.name as location',
-                            'res_tables.description', 'res_tables.id as id', ]);
-       
+                            'res_tables.description', 'res_tables.id', ]);
+
             return Datatables::of($tables)
                 ->addColumn(
                     'action',

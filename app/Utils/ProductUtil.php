@@ -493,7 +493,6 @@ class ProductUtil extends Util
             'p.category_id',
             'p.tax as tax_id',
             'p.enable_stock',
-            'p.weighing_sale',
             'p.enable_sr_no',
             'p.type as product_type',
             'p.name as product_actual_name',
@@ -1660,7 +1659,6 @@ class ProductUtil extends Util
                 'products.name',
                 'products.type',
                 'products.enable_stock',
-                'products.weighing_sale',
                 'variations.id as variation_id',
                 'variations.name as variation',
                 'VLD.qty_available',
@@ -1880,7 +1878,6 @@ class ProductUtil extends Util
                         'p.type',
                         'p.sku',
                         'p.id as product_id',
-                        'units.actual_name as actual_name',
                         'units.short_name as unit',
                         'u.short_name as second_unit',
                         'pv.name as product_variation',
@@ -1917,7 +1914,6 @@ class ProductUtil extends Util
         $output = [
             'variation' => $product_name,
             'unit' => $purchase_details->unit,
-            'actual_name' => $purchase_details->actual_name,
             'second_unit' => $purchase_details->second_unit,
             'total_purchase' => $purchase_details->total_purchase,
             'total_purchase_return' => $purchase_details->total_purchase_return,
@@ -1935,7 +1931,6 @@ class ProductUtil extends Util
 
     public function getVariationStockHistory($business_id, $variation_id, $location_id)
     {
-
         $stock_history = Transaction::leftjoin('transaction_sell_lines as sl',
             'sl.transaction_id', '=', 'transactions.id')
                                 ->leftjoin('purchase_lines as pl',
@@ -1956,7 +1951,7 @@ class ProductUtil extends Util
                                         ->orWhere('rpl.variation_id', $variation_id)
                                         ->orWhere('rsl.variation_id', $variation_id);
                                 })
-                                ->whereIn('transactions.type', ['sell', 'purchase', 'physical_count_adjustment','stock_adjustment', 'opening_stock', 'sell_transfer', 'purchase_transfer', 'production_purchase', 'purchase_return', 'sell_return', 'production_sell'])
+                                ->whereIn('transactions.type', ['sell', 'purchase', 'stock_adjustment', 'opening_stock', 'sell_transfer', 'purchase_transfer', 'production_purchase', 'purchase_return', 'sell_return', 'production_sell'])
                                 ->select(
                                     'transactions.id as transaction_id',
                                     'transactions.type as transaction_type',
@@ -1977,10 +1972,8 @@ class ProductUtil extends Util
                                     'pl.secondary_unit_quantity as purchase_secondary_unit_quantity',
                                     'sl.secondary_unit_quantity as sell_secondary_unit_quantity'
                                 )
-                                ->orderBy('transactions.created_at', 'asc')
+                                ->orderBy('transactions.transaction_date', 'asc')
                                 ->get();
-        
-
 
         $stock_history_array = [];
         $stock = 0;
@@ -2025,17 +2018,6 @@ class ProductUtil extends Util
                     'purchase_secondary_unit_quantity' => ! empty($stock_line->purchase_secondary_unit_quantity) ? $this->roundQuantity($stock_line->purchase_secondary_unit_quantity) : 0,
                     'stock_in_second_unit' => $this->roundQuantity($stock_in_second_unit),
                 ]);
-            } elseif ($stock_line->transaction_type == 'physical_count_adjustment') {
-                $quantity_change = $stock_line->stock_adjusted;
-                $stock = $quantity_change;
-                $stock_history_array[] = array_merge($temp_array, [
-                    'quantity_change' => $quantity_change,
-                    'stock' => $this->roundQuantity($stock),
-                    'type' => 'physical_count_adjustment',
-                    'type_label' => "Physical Count Adjustment",
-                    'ref_no' => $stock_line->ref_no,
-                    'stock_in_second_unit' => $this->roundQuantity($stock_in_second_unit),
-                ]);    
             } elseif ($stock_line->transaction_type == 'stock_adjustment') {
                 $quantity_change = -1 * $stock_line->stock_adjusted;
                 $stock += $quantity_change;

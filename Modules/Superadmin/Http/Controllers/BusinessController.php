@@ -6,7 +6,6 @@ use App\Business;
 use App\Product;
 use App\Transaction;
 use App\User;
-use App\BusinessType;
 use App\Utils\BusinessUtil;
 use App\Utils\ModuleUtil;
 use App\VariationLocationDetails;
@@ -59,12 +58,10 @@ class BusinessController extends BaseController
             })
                             ->leftjoin('packages as p', 's.package_id', '=', 'p.id')
                             ->leftjoin('business_locations as bl', 'business.id', '=', 'bl.business_id')
-                            ->leftjoin('business_types as bt', 'business.business_type_id', '=', 'bt.id')
                             ->leftjoin('users as u', 'u.id', '=', 'business.owner_id')
                             ->leftjoin('users as creator', 'creator.id', '=', 'business.created_by')
                             ->select(
                                     'business.id',
-                                    'bt.title',
                                     'business.name',
                                     DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as owner_name"),
                                     'u.email as owner_email',
@@ -243,20 +240,16 @@ class BusinessController extends BaseController
 
         $packages = Package::active()->orderby('sort_order')->pluck('name', 'id');
         $gateways = $this->_payment_gateways();
-        $countries = $this->businessUtil->allCountries();
-        $business_types = BusinessType::select('id', 'title')->pluck('title', 'id')->toArray();
 
         return view('superadmin::business.create')
             ->with(compact(
-                'countries',
                 'currencies',
                 'timezone_list',
                 'accounting_methods',
                 'months',
                 'is_admin',
                 'packages',
-                'gateways',
-                'business_types'
+                'gateways'
             ));
     }
 
@@ -281,7 +274,7 @@ class BusinessController extends BaseController
 
             $user = User::create_user($owner_details);
 
-            $business_details = $request->only(['name', 'business_type_id', 'start_date', 'currency_id', 'tax_label_1', 'tax_number_1', 'tax_label_2', 'tax_number_2', 'time_zone', 'accounting_method', 'fy_start_month']);
+            $business_details = $request->only(['name', 'start_date', 'currency_id', 'tax_label_1', 'tax_number_1', 'tax_label_2', 'tax_number_2', 'time_zone', 'accounting_method', 'fy_start_month']);
 
             $business_location = $request->only(['name', 'country', 'state', 'city', 'zip_code', 'landmark', 'website', 'mobile', 'alternate_number']);
 
@@ -359,8 +352,8 @@ class BusinessController extends BaseController
             abort(403, 'Unauthorized action.');
         }
 
-        $business = Business::with(['currency', 'locations', 'subscriptions', 'owner', 'business_type'])->find($business_id);
-        
+        $business = Business::with(['currency', 'locations', 'subscriptions', 'owner'])->find($business_id);
+
         $created_id = $business->created_by;
 
         $created_by = ! empty($created_id) ? User::find($created_id) : null;

@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-xl no-print" role="documentxx">
+<div class="modal-dialog modal-xl no-print" role="document">
   <div class="modal-content">
     <div class="modal-header">
     <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -236,13 +236,6 @@
                 <td><span class="display_currency" data-currency_symbol="true">{{ $payment_line->amount }}</span></td>
                 <td>
                   {{ $payment_types[$payment_line->method] ?? $payment_line->method }}
-
-                  @if($payment_types[$payment_line->method] == 'Card')
-                  <br>
-                  <small>{{ __('lang_v1.card_charge') }} {{ $payment_line->card_charge_percent }}%: </small>
-                  <span class="display_currency pull-right" data-currency_symbol="true">{{ $payment_line->card_charge_amount }}</span>
-                  @endif
-
                   @if($payment_line->is_return == 1)
                     <br/>
                     ( {{ __('lang_v1.change_return') }} )
@@ -382,8 +375,7 @@
     </div>
     <div class="row">
       <div class="col-sm-6">
-        <!-- business_type_id = 1 for restaurant -->
-        <strong>{{ ($business_details->business_type_id == 1) ? __('lang_v1.form_label_send_to_kitchen') : __( 'sale.sell_note')}}:</strong><br>
+        <strong>{{ __( 'sale.sell_note')}}:</strong><br>
         <p class="well well-sm no-shadow bg-gray">
           @if($sell->additional_notes)
             {!! nl2br($sell->additional_notes) !!}

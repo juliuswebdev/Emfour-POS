@@ -31,7 +31,7 @@
         {{ config('app.name', 'ultimatePOS') }}
     </div>
     <p class="tagline">
-        {{ env('APP_TITLE', '') }}
+     {{ env('APP_TITLE', '') }}
     </p>
 @endsection
             

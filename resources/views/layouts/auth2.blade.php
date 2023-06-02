@@ -67,7 +67,7 @@
                     @else
                     <a href="{{ route('business.getRegister') }}">Register</a>
                     @endif                
-		        </div>
+		</div>
                 <!-- <div class="col-md-9 col-xs-8" style="text-align: right;padding-top: 10px;"> -->
                     <!-- @if(!($request->segment(1) == 'business' && $request->segment(2) == 'register')) -->
                         <!-- Register Url -->

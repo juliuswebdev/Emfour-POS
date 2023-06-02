@@ -99,14 +99,6 @@
                   
                 </div>
             </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                {!! Form::label('sale_return_9_digit_pin', __( 'business.sale_return_pin' ) . ':') !!}
-                {!! Form::password('sale_return_pin', ['class' => 'form-control', 'minlength' => '9', 'maxlenght' => '9', 'placeholder' => __( 'business.sale_return_pin' ) ]); !!}
-                <p class="help-block">@lang('user.leave_sale_return_pin_blank')</p>
-              </div>
-            </div>
-
             </div>
             <div class="clearfix"></div>
             <div class="col-md-6">
