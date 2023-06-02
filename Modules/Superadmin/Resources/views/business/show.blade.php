@@ -138,6 +138,33 @@
         </div>
     </div>
 
+    <div class="box box-solid">
+        <div class="box-header">
+            <h3 class="box-title">@lang('business.business_settings')</h3>
+        </div>
+        <div class="box-body">
+            {!! Form::open(['url' => action('\Modules\Superadmin\Http\Controllers\BusinessController@updateSettings', $business->id), 'method' => 'put' ]) !!}
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                    
+                            {!! Form::label('card_charge', __('lang_v1.card_charge_percent') . ':') !!}
+                            @if(auth()->user()->can('superadmin'))
+                            {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control']); !!}
+                            @else
+                            {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control', 'readonly' => 'true']); !!}
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    @lang('messages.update')
+                </button>
+                
+            {!! Form::close() !!}
+        </div>
+    </div>
+
     <div class="box">
         <div class="box-header">
             <h3 class="box-title">

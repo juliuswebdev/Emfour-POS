@@ -570,5 +570,13 @@ class BusinessController extends BaseController
         return redirect()->back();
     }
 
+    public function updateSettings(Request $request, $id)
+    {
+        $business = Business::find($id);
+        $business->card_charge = $request->input('card_charge');
+        $business->update();
+        return redirect()->back();
+    }
+
 
 }
