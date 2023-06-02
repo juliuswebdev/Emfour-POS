@@ -2352,7 +2352,6 @@ class ProductController extends Controller
 
             //for ajax call $id is variation id else it is product id
             $stock_details = $this->productUtil->getVariationStockDetails($business_id, $id, request()->input('location_id'));
-            $stock_history = $this->productUtil->getVariationStockHistory($business_id, $id, request()->input('location_id'));
 
             //if mismach found update stock in variation location details
             if (isset($stock_history[0]) && (float) $stock_details['current_stock'] != (float) $stock_history[0]['stock']) {
@@ -2365,8 +2364,7 @@ class ProductController extends Controller
 
             $variation = Variation::where('id', $id)->with(['product'])->first();
 
-            $sub_unit = $variation->product->sub_unit_ids ?? [];
-       
+            $sub_unit = $variation->product->sub_unit_ids;
             $units = Unit::whereIn('id', $sub_unit)->select('id', 'actual_name', 'base_unit_multiplier', 'short_name')->get();
 
             return view('product.sub-unit-details')
