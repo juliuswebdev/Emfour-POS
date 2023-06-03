@@ -308,8 +308,13 @@
         <!--custom fields-->
         <div class="col-sm-3">
           <div class="form-group">
-            {!! Form::label('product_custom_field1',  $product_custom_field1 . ':') !!}
-            {!! Form::text('product_custom_field1', $product->product_custom_field1, ['class' => 'form-control', 'placeholder' => $product_custom_field1]); !!}
+            @if($business->business_type_id == 1)
+              {!! Form::label('product_custom_field_1_label', __('restaurant.is_kitchen')); !!}<br>
+              <input type="checkbox" class="input-icheck" name="product_custom_field1" @if($product->product_custom_field1 == 1) checked @endif value="1">
+            @else
+              {!! Form::label('product_custom_field1',  $product_custom_field1 . ':') !!}
+              {!! Form::text('product_custom_field1', $product->product_custom_field1, ['class' => 'form-control', 'placeholder' => $product_custom_field1]); !!}
+            @endif
           </div>
         </div>
 

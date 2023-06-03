@@ -287,6 +287,7 @@ class TransactionUtil extends Util
         $combo_lines = [];
         $products_modified_combo = [];
         foreach ($products as $product) {
+
             $multiplier = 1;
             if (isset($product['sub_unit_id']) && $product['sub_unit_id'] == $product['product_unit_id']) {
                 unset($product['sub_unit_id']);
@@ -324,8 +325,13 @@ class TransactionUtil extends Util
                                         'unit_price_inc_tax' => $this_price,
                                         'parent_sell_line_id' => $product['transaction_sell_lines_id'],
                                         'children_type' => 'modifier',
+                                        'cook_start' => ($product['product_custom_field1'] == 1) ? null : date('yyyy-mm-dd h:i:s'), 
+                                        'cook_end' => ($product['product_custom_field1'] == 1) ? null : date('yyyy-mm-dd h:i:s'),
+                                        'served_at' => ($product['product_custom_field1'] == 1) ? null : date('yyyy-mm-dd h:i:s'),
+                                        'res_line_order_status' => ($product['product_custom_field1'] == 1) ? null : 'ready'
                                     ]);
                                 }
+                                
                             }
                         }
                     }
@@ -378,6 +384,10 @@ class TransactionUtil extends Util
                     'res_line_order_status' => ! empty($product['res_service_staff_id']) ? 'received' : null,
                     'so_line_id' => ! empty($product['so_line_id']) ? $product['so_line_id'] : null,
                     'secondary_unit_quantity' => ! empty($product['secondary_unit_quantity']) ? $this->num_uf($product['secondary_unit_quantity']) : 0,
+                    'cook_start' => ($product['product_custom_field1'] == 1) ? null : date('yyyy-mm-dd h:i:s'), 
+                    'cook_end' => ($product['product_custom_field1'] == 1) ? null : date('yyyy-mm-dd h:i:s'),
+                    'served_at' => ($product['product_custom_field1'] == 1) ? null : date('yyyy-mm-dd h:i:s'),
+                    'res_line_order_status' => ($product['product_custom_field1'] == 1) ? null : 'ready'
                 ];
 
                 foreach ($extra_line_parameters as $key => $value) {

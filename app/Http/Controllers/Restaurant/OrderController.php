@@ -260,7 +260,7 @@ class OrderController extends Controller
     {
         $user_id = $request->input('user_id');
         $user = User::where('id', $user_id)->first();
-        if($user->sale_return_pin) {
+        if(isset($user->sale_return_pin)) {
             $output = [
                 'success' => true
             ];

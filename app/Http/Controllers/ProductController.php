@@ -64,6 +64,7 @@ class ProductController extends Controller
             abort(403, 'Unauthorized action.');
         }
         $business_id = request()->session()->get('user.business_id');
+        $business = Business::find($business_id);
         $selling_price_group_count = SellingPriceGroup::countSellingPriceGroups($business_id);
         $is_woocommerce = $this->moduleUtil->isModuleInstalled('Woocommerce');
 
@@ -294,6 +295,16 @@ class ProductController extends Controller
                     })
                     ->orWhere('products.sku', 'like', "%{$keyword}%");
                 })
+                ->editColumn(
+                    'product_custom_field1',
+                    function($row) {
+                        if($row->product_custom_field1 == 1) {
+                            return 'Yes';
+                        } else {
+                            return 'No';
+                        }
+                    }
+                )
                 ->setRowAttr([
                     'data-href' => function ($row) {
                         if (auth()->user()->can('product.view')) {
@@ -333,6 +344,7 @@ class ProductController extends Controller
 
         return view('product.index')
             ->with(compact(
+                'business',
                 'rack_enabled',
                 'categories',
                 'brands',
@@ -358,6 +370,8 @@ class ProductController extends Controller
         }
 
         $business_id = request()->session()->get('user.business_id');
+
+        $business = Business::find($business_id);
 
         //Check if subscribed or not, then check for products quota
         if (! $this->moduleUtil->isSubscribed($business_id)) {
@@ -417,7 +431,7 @@ class ProductController extends Controller
         $pos_module_data = $this->moduleUtil->getModuleData('get_product_screen_top_view');
 
         return view('product.create')
-            ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'barcode_default', 'business_locations', 'duplicate_product', 'sub_categories', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data'));
+            ->with(compact('business', 'categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'barcode_default', 'business_locations', 'duplicate_product', 'sub_categories', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data'));
     }
 
     private function product_types()
@@ -607,6 +621,7 @@ class ProductController extends Controller
         }
 
         $business_id = request()->session()->get('user.business_id');
+        $business = Business::find($business_id);
         $categories = Category::forDropdown($business_id, 'product');
         $brands = Brands::forDropdown($business_id);
 
@@ -653,7 +668,7 @@ class ProductController extends Controller
         $alert_quantity = ! is_null($product->alert_quantity) ? $this->productUtil->num_f($product->alert_quantity, false, null, true) : null;
 
         return view('product.edit')
-                ->with(compact('categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'alert_quantity'));
+                ->with(compact('business', 'categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'alert_quantity'));
     }
 
     /**
@@ -698,7 +713,7 @@ class ProductController extends Controller
             $product->alert_quantity = ! empty($product_details['alert_quantity']) ? $this->productUtil->num_uf($product_details['alert_quantity']) : $product_details['alert_quantity'];
             $product->tax_type = $product_details['tax_type'];
             $product->weight = $product_details['weight'];
-            $product->product_custom_field1 = $product_details['product_custom_field1'];
+            $product->product_custom_field1 = isset($product_details['product_custom_field1']) ?? '';
             $product->product_custom_field2 = $product_details['product_custom_field2'];
             $product->product_custom_field3 = $product_details['product_custom_field3'];
             $product->product_custom_field4 = $product_details['product_custom_field4'];

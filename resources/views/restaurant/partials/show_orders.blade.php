@@ -71,6 +71,10 @@
 							@endphp
 						@endif
 						
+						@php
+							$product = \App\Product::where('id', $row->product->id)->select('product_custom_field1')->first()
+						@endphp
+						@if($product->product_custom_field1 == 1)
 						<tr>
 							<td>
 								@php
@@ -186,6 +190,7 @@
 								
 							</td>
 						</tr>
+						@endif
 						@endforeach
 					</table>
 				</div>

@@ -282,8 +282,13 @@
         <div class="clearfix"></div>
         <div class="col-sm-3">
           <div class="form-group">
-            {!! Form::label('product_custom_field1',  $product_custom_field1 . ':') !!}
-            {!! Form::text('product_custom_field1', !empty($duplicate_product->product_custom_field1) ? $duplicate_product->product_custom_field1 : null, ['class' => 'form-control', 'placeholder' => $product_custom_field1]); !!}
+            @if($business->business_type_id == 1)
+              {!! Form::label('product_custom_field_1_label', __('restaurant.is_kitchen')); !!}<br>
+              <input type="checkbox" class="input-icheck" name="product_custom_field1" checked value="1">
+            @else
+              {!! Form::label('product_custom_field1',  $product_custom_field1 . ':') !!}
+              {!! Form::text('product_custom_field1', !empty($duplicate_product->product_custom_field1) ? $duplicate_product->product_custom_field1 : null, ['class' => 'form-control', 'placeholder' => $product_custom_field1]); !!}
+            @endif
           </div>
         </div>
 

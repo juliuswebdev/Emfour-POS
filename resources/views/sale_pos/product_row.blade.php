@@ -189,7 +189,10 @@
 		@endif
 
 		<input type="hidden" name="products[{{$row_count}}][product_id]" class="form-control product_id" value="{{$product->product_id}}">
-
+		@php
+			$product_is_kitchen = \App\Product::where('id', $product->product_id)->select('product_custom_field1')->first()
+		@endphp
+		<input type="hidden" name="products[{{$row_count}}][product_custom_field1]" value="{{ $product_is_kitchen->product_custom_field1 ?? '' }}">
 		<input type="hidden" value="{{$product->variation_id}}" 
 			name="products[{{$row_count}}][variation_id]" class="row_variation_id">
 

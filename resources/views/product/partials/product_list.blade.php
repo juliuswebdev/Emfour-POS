@@ -28,7 +28,13 @@
             <th>@lang('product.brand')</th>
             <th>@lang('product.tax')</th>
             <th>@lang('product.sku')</th>
-            <th>{{ $custom_labels['product']['custom_field_1'] ?? __('lang_v1.product_custom_field1') }}</th>
+            <th>
+                @if($business->business_type_id == 1)
+                    @lang('restaurant.is_kitchen')
+                @else
+                {{ $custom_labels['product']['custom_field_1'] ?? __('lang_v1.product_custom_field1') }}
+                @endif
+            </th>
             <th>{{ $custom_labels['product']['custom_field_2'] ?? __('lang_v1.product_custom_field2') }}</th>
             <th>{{ $custom_labels['product']['custom_field_3'] ?? __('lang_v1.product_custom_field3') }}</th>
             <th>{{ $custom_labels['product']['custom_field_4'] ?? __('lang_v1.product_custom_field4') }}</th>

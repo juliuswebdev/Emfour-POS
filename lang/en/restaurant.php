@@ -107,5 +107,5 @@ return [
     'customer_note' => 'Customer note',
     'table_report' => 'Table Report',
     'service_staff_report' => 'Service Staff Report',
-
+    'is_kitchen' => 'Is Kitchen?'
 ];
