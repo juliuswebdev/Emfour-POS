@@ -143,9 +143,13 @@ class KitchenController extends Controller
         if ($orders_for == 'kitchen') {
             $filter['line_order_status'] = 'received';
         } elseif ($orders_for == 'waiter') {
-            $filter['waiter_id'] = $service_staff_id;
+            if(!empty($request->input('service_staff_id'))) {
+                $filter['waiter_id'] = $request->input('service_staff_id');
+            } else {
+                $filter['waiter_id'] = $service_staff_id;
+            }
         }
-
+        
         $orders = $this->restUtil->getAllOrders($business_id, $filter);
         $business_details = $this->businessUtil->getDetails($business_id);
         return view('restaurant.partials.show_orders', compact('orders', 'orders_for', 'business_details'));

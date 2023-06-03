@@ -112,6 +112,9 @@ function refresh_orders() {
     var service_staff_id = '';
     if ($('select#service_staff_id').val()) {
         service_staff_id = $('select#service_staff_id').val();
+    } else {
+        const urlParams = new URL(window.location.href).searchParams;
+        service_staff_id = urlParams.get('service_staff');
     }
     $.ajax({
         method: 'POST',
