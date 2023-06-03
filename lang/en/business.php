@@ -110,7 +110,7 @@ return [
     'your_device_is_offline' => 'Your device is offline, Please turn on the device.',
     'digits_pin' => 'Digits Pin',
     'sucess_pin' => 'Success',
-    'invalid_pin' => 'Inalid Pin',
+    'invalid_pin' => 'Invalid Pin',
     'user_no_pin' => 'User doesn\'t have PIN',
     'sale_return_pin' => 'Sale Return Pin'
 ];
