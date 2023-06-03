@@ -4,10 +4,10 @@
 @endphp
 <div class="row">
 	<div class="pos-form-actions">
-		<div class="col-md-12">
-
+		
+		<div class="col-md-7">
 			@if(!$is_mobile)
-			<div class="bg-navy pos-total text-white de-total-amount">
+			<div class="pos-total de-total-amount">
 				<div>
 					<span class="text">@lang('sale.total_payable')</span>
 				</div>
@@ -17,8 +17,8 @@
 				</div>
 			</div>
 			@endif
-
 		</div>
+		
 
 		@if(request()->get('sale-return') == 1)
 		<div class="col-md-12 wrapper-of-sale-return" style="display:none;">
