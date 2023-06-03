@@ -1320,26 +1320,12 @@ $(document).ready(function() {
     }
 
     //Show product list.
+
+    /*
     $('#product_category_div .cat-parent-area label').click(function() {
         var parent_id = $(this).parent().find('input').val();
         $('#product_category_div .cat-sub-area .cat-container').css({'display':'none'});
         $('#product_category_div .cat-sub-area .cat_parent_'+parent_id).parent().css({'display':'inline-block'});
-
-        //Add Back Button
-        /*
-        var length = $('.cat-sub-area').find('.cat_parent_'+parent_id).length;
-
-        $('.subcate-back-event').remove();
-        if(length != 0){
-            var back_btn = '<div class="subcate-back-event col-md-12"><a class="pos-subcat-back-btn" href="javascript:;">Bank</a></div>';
-            $(back_btn).insertAfter("#product_category_div");
-            $('#product_category_div').find('h4:eq(0)').hide();
-            $('.cat-parent-area').hide();
-        }else{
-            $('#product_category_div').find('h4:eq(0)').show();
-            $('.cat-parent-area').show();
-        }    
-        */   
     });
 
 
@@ -1349,10 +1335,6 @@ $(document).ready(function() {
         $('#product_category_div .cat-sub-area label').parent().removeClass('active');
         $(this).parent().addClass('active').siblings().removeClass('active');
     });
-
-
-    
-
 
     var product_category_select = $('input[name="category_id"]:checked').attr('value');
     var product_brand_select = $('select#product_brand').val();
@@ -1383,6 +1365,43 @@ $(document).ready(function() {
         }
         get_featured_products();
     });
+    */
+
+
+    //Show product list / New update onchange category event
+    var product_category_select = $('select#product_category').val();
+    var product_brand_select = $('select#product_brand').val();
+    if(product_category_select == 'all' || product_brand_select == 'all') {
+        product_category_select = 99999999999999;
+        product_brand_select = 99999999999999;
+    }
+    get_product_suggestion_list(
+        product_category_select,
+        product_brand_select,
+        $('input#location_id').val(),
+        null,
+        is_enabled_stock,
+        device_model_id
+    );
+    $('select#product_category, select#product_brand, select#select_location_id').on('change', function(e) {
+        $('input#suggestion_page').val(1);
+        var location_id = $('input#location_id').val();
+        if (location_id != '' || location_id != undefined) {
+            get_product_suggestion_list(
+                $('select#product_category').val(),
+                $('select#product_brand').val(),
+                $('input#location_id').val(),
+                null
+            );
+        }
+
+        get_featured_products();
+    });
+
+
+
+
+
 
     $(document).on('click', 'div.product_box', function() {
         //Check if location is not set then show error message.
@@ -1698,62 +1717,13 @@ function get_product_suggestion_list(category_id, brand_id, location_id, url = n
         },
         dataType: 'html',
         success: function(result) {
-            
-            /*
-            var length = $('.cat-sub-area').find('.cat_parent_'+category_id).length;
-            
-            $('.subcate-back-event').remove();
-            if(length != 0){
-                var back_btn = '<div class="subcate-back-event col-md-12"><a class="pos-subcat-back-btn" href="javascript:;">Bank</a></div>';
-                $(back_btn).insertAfter("#product_category_div");
-                $('#product_category_div').find('h4:eq(0)').hide();
-                $('.cat-parent-area').hide();
-            }else{
-                $('.cate-back-event').remove();
-                if(result != ""){
-                    var is_exit_data = result.includes("no_products_found");
-                    if(is_exit_data == false){
-                        var back_btn = '<div class="cate-back-event col-md-12"><a class="pos-cat-back-btn" href="javascript:;">Bank</a></div>';
-                        $(back_btn).insertAfter("#product_category_div");
-                        $('#product_category_div').find('h4:eq(0)').hide();
-
-                        $('.cat-parent-area').hide();
-                    }
-                }
-            }  
-            */
-
-
-
-            
-
+          
             $('div#product_list_body').html('');
             $('div#product_list_body').append(result);
             $('#suggestion_page_loader').fadeOut(700);
         },
     });
 }
-
-
-//Category back button handeler
-$('body').on('click', '.pos-cat-back-btn', function() {
-    $('.cat-parent-area').show();
-    $('#product_category_div').find('h4:eq(0)').show();
-    $('.cat-parent-area').find('div.active').click();
-    $(this).remove();
-    $('.product_list_body').remove();
-});
-
-$('body').on('click', '.pos-subcat-back-btn', function() {
-    $('.cat-parent-area').show();
-    $('#product_category_div').find('h4:eq(0)').show();
-    $('.cat-parent-area').find('div.active').click();
-    $('.cat-sub-area').find('.cat-container').css({'display':'none'});
-    $(this).remove();
-    $('.product_list_body').remove();
-});
-
-
 
 
 //Get recent transactions

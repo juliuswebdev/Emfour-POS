@@ -699,20 +699,24 @@ background-image: linear-gradient(to right, #3c3c4e, #245b80);
 
 .de-total-amount{
   display: flex !important;
-  margin: 10px 0px 20px 0px !important;
+  /* margin: 10px 0px 20px 0px !important;
   padding: 25px !important;
   width: 20%;
-  flex-direction: row;
+  flex-direction: row; */
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 .de-total-amount.pos-total span.text{
-  width: 100%;
-  font-size: 24px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #000;
+  width: 100% !important;
 }
 .de-total-amount.pos-total span.number{
-  font-size: 40px;
-  padding-left: 20px;
+  font-size: 16px;
+  padding-left: 15px;
+  color: #000;
+  font-weight: 900;
 }
 button#pos-cancel{
   padding: 9px 10px 5px 10px;
@@ -724,4 +728,12 @@ button#pos-cancel{
 
 .modal-backdrop #card-payment-close{
   margin-top: 10px;
+}
+
+.pos-form-actions .pos-total {
+  display: block;
+  padding: 0px !important;
+  vertical-align: unset;
+  margin-left: 0px !important;
+  margin-right: 0px !important;
 }

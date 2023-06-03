@@ -79,9 +79,11 @@
             <strong><i class="fa fa-calculator fa-lg" aria-hidden="true"></i></strong>
       </button>
 
+      {{--
       <button type="button" class="btn btn-danger btn-flat m-6 btn-xs m-5 pull-right popover-default" id="return_sale" title="@lang('lang_v1.sell_return')" data-toggle="popover" data-trigger="click" data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang("sale.invoice_no")" id="send_for_sell_return_invoice_no"></div><div class="w-100 text-center"><button type="button" class="btn btn-danger" id="send_for_sell_return">@lang("lang_v1.send")</button></div>' data-html="true" data-placement="bottom">
             <strong><i class="fas fa-undo fa-lg"></i></strong>
       </button>
+      --}}
 
       <button type="button" title="{{ __('lang_v1.full_screen') }}" class="btn btn-primary btn-flat m-6 hidden-xs btn-xs m-5 pull-right" id="full_screen">
             <strong><i class="fa fa-window-maximize fa-lg"></i></strong>
