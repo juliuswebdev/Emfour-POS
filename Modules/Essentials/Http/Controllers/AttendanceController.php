@@ -366,28 +366,47 @@ class AttendanceController extends Controller
         try {
             $type = $request->input('type');
 
-            if ($type == 'clock_in') {
-                $data = [
-                    'business_id' => $business_id,
-                    'user_id' => auth()->user()->id,
-                    'clock_in_time' => \Carbon::now(),
-                    'clock_in_note' => $request->input('clock_in_note'),
-                    'ip_address' => $this->moduleUtil->getUserIpAddr(),
-                    'clock_in_location' => $request->input('clock_in_out_location'),
+            $user_id = $request->session()->get('user.id');
+            $user = User::find($user_id);
+            $input_user_pin = $request->input('user_pin');
+
+            if($input_user_pin == $user->sale_return_pin) {
+
+                if ($type == 'clock_in') {
+
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => auth()->user()->id,
+                        'clock_in_time' => \Carbon::now(),
+                        'clock_in_note' => $request->input('clock_in_note'),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        'clock_in_location' => $request->input('clock_in_out_location'),
+                    ];
+
+                    $output = $this->essentialsUtil->clockin($data, $settings);
+                    $output['msg'] = $user->surname .' '. $user->first_name .' '. $user->last_name . ' ' . __('essentials::lang.clock_in_success_past');
+                } elseif ($type == 'clock_out') {
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => auth()->user()->id,
+                        'clock_out_time' => \Carbon::now(),
+                        'clock_out_note' => $request->input('clock_out_note'),
+                        'clock_out_location' => $request->input('clock_in_out_location'),
+                    ];
+
+                    $output = $this->essentialsUtil->clockout($data, $settings);
+                    $output['msg'] = $user->surname .' '. $user->first_name .' '. $user->last_name . ' ' . __('essentials::lang.clock_out_success_past');
+                }
+
+            } else {
+
+                $output = ['success' => false,
+                    'msg' => __('business.invalid_pin'),
+                    'type' => $type,
                 ];
 
-                $output = $this->essentialsUtil->clockin($data, $settings);
-            } elseif ($type == 'clock_out') {
-                $data = [
-                    'business_id' => $business_id,
-                    'user_id' => auth()->user()->id,
-                    'clock_out_time' => \Carbon::now(),
-                    'clock_out_note' => $request->input('clock_out_note'),
-                    'clock_out_location' => $request->input('clock_in_out_location'),
-                ];
-
-                $output = $this->essentialsUtil->clockout($data, $settings);
             }
+
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 

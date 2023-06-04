@@ -43,8 +43,68 @@
 
           @if(!empty($transaction->location_id)) {{$transaction->location->name}} @endif &nbsp; <span class="curr_datetime">{{ @format_datetime('now') }}</span> <i class="fa fa-keyboard hover-q text-muted" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="@include('sale_pos.partials.keyboard_shortcuts_details')" data-html="true" data-trigger="hover" data-original-title="" title=""></i>
         </p>
+        @if($__is_essentials_enabled && $is_employee_allowed)
+          <button 
+            type="button" 
+            class="btn bg-green btn-flat 
+            pull-left m-8 btn-sm mt-0
+            clock_in_btn
+            @if(!empty($clock_in))
+                disabled
+              @endif
+            "
+            @if(!empty($clock_in))
+                disabled
+              @endif
+              data-type="clock_in"
+              data-toggle="tooltip"
+              data-placement="bottom"
+              title="@lang('essentials::lang.clock_in')" >
+            <i class="fas fa-arrow-circle-down"></i>&nbsp;&nbsp;@lang('essentials::lang.clock_in')
+          </button>
+
+          <button 
+            type="button" 
+            class="btn bg-yellow btn-flat pull-left m-8 
+            btn-sm mt-0 clock_out_btn
+            @if(empty($clock_in))
+                disabled
+              @endif
+            " 
+            @if(empty($clock_in))
+                disabled
+              @endif	
+              data-type="clock_out"
+              data-toggle="tooltip"
+              data-placement="bottom"
+              data-html="true"
+              title="@lang('essentials::lang.clock_out') @if(!empty($clock_in))
+                            <br>
+                            <small>
+                              <b>@lang('essentials::lang.clocked_in_at'):</b> {{@format_datetime($clock_in->clock_in_time)}}
+                            </small>
+                            <br>
+                            <small><b>@lang('essentials::lang.shift'):</b> {{ucfirst($clock_in->shift_name)}}</small>
+                            @if(!empty($clock_in->start_time) && !empty($clock_in->end_time))
+                              <br>
+                              <small>
+                                <b>@lang('restaurant.start_time'):</b> {{@format_time($clock_in->start_time)}}<br>
+                                <b>@lang('restaurant.end_time'):</b> {{@format_time($clock_in->end_time)}}
+                              </small>
+                            @endif
+                        @endif" 
+              >
+              <i class="fas fa-hourglass-half"></i>&nbsp;&nbsp;@lang('essentials::lang.clock_out')
+          </button>
+        @endif
       </div>
+
+
+
+
+
     </div>
+
     <div class="col-md-6">
 
       {{--

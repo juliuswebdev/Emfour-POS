@@ -3309,3 +3309,82 @@ $(document).on('hidden.bs.modal', '.view_modal', function(){
     }
     service_staff_availability_interval = null;
 });
+
+$(document).on('click', '.clock_in_btn:not(:disabled), .clock_out_btn:not(:disabled)', function() {
+    var type = $(this).data('type');
+    if (type == 'clock_in') {
+        $('#clock_in_clock_out_modal').find('#clock_in_text').removeClass('hide');
+        $('#clock_in_clock_out_modal').find('#clock_out_text').addClass('hide');
+        $('#clock_in_clock_out_modal').find('.clock_in_note').removeClass('hide');
+        $('#clock_in_clock_out_modal').find('.clock_out_note').addClass('hide');
+    } else if (type == 'clock_out') {
+        $('#clock_in_clock_out_modal').find('#clock_in_text').addClass('hide');
+        $('#clock_in_clock_out_modal').find('#clock_out_text').removeClass('hide');
+        $('#clock_in_clock_out_modal').find('.clock_in_note').addClass('hide');
+        $('#clock_in_clock_out_modal').find('.clock_out_note').removeClass('hide');
+    }
+    $('#clock_in_clock_out_modal').find('input#type').val(type);
+
+    $('#clock_in_clock_out_modal').modal('show');
+
+});
+
+$(document).on('submit', 'form#clock_in_clock_out_form', function(e) {
+    e.preventDefault();
+    $(this).find('button[type="submit"]').attr('disabled', true);
+    var data = $(this).serialize();
+
+    $.ajax({
+        method: $(this).attr('method'),
+        url: $(this).attr('action'),
+        dataType: 'json',
+        data: data,
+        success: function(result) {
+            if (result.success == true) {
+                $('div#clock_in_clock_out_modal').modal('hide');
+
+                var shift_details = document.createElement("div");
+                if (result.current_shift) {
+                    shift_details.innerHTML = result.current_shift;
+                }
+
+                // swal({
+                //     title: result.msg,
+                //     content: shift_details,
+                //     icon: 'success'
+                // });
+                toastr.success(result.msg);
+
+                if (typeof attendance_table !== 'undefined') {
+                    attendance_table.ajax.reload();
+                }
+                if (result.type == 'clock_in') {
+                    $('.clock_in_btn').attr('disabled', 'disabled');
+                    $('.clock_in_btn').addClass('disabled');
+                    $('.clock_out_btn').attr('disabled',false);
+                    $('.clock_out_btn').removeClass('disabled');
+                } else if(result.type == 'clock_out') {
+                    $('.clock_out_btn').attr('disabled', 'disabled');
+                    $('.clock_out_btn').addClass('disabled');
+                    $('.clock_in_btn').attr('disabled',false);
+                    $('.clock_in_btn').removeClass('disabled');
+                }
+            } else {
+                var shift_details = document.createElement("p");
+                if (result.shift_details) {
+                    shift_details.innerHTML = result.shift_details;
+                }
+
+                // swal({
+                //     title: result.msg,
+                //     content: shift_details,
+                //     icon: 'error'
+                // })
+                toastr.error(result.msg);
+
+            }
+            $('#clock_in_clock_out_form')[0].reset();
+            $('#clock_in_clock_out_form').find('button[type="submit"]').removeAttr('disabled');
+        },
+    });
+});

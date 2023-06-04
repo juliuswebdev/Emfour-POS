@@ -52,7 +52,7 @@ return [
     'view_message' => 'Nachricht ansehen',
     'essentials_module' => 'Essentials Module',
     'new_message_notification' => 'Sie haben neue Nachrichten von :sender',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'Typ verlassen',
     'all_leave_types' => 'Alle Urlaubstypen',
     'max_leave_count' => 'Max Leave Count',

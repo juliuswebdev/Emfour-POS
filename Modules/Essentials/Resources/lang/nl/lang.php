@@ -52,7 +52,7 @@ return [
     'view_message' => 'Bekijk bericht',
     'essentials_module' => 'Essentials Module',
     'new_message_notification' => 'Je hebt nieuwe berichten van :sender',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'Verloftype',
     'all_leave_types' => 'Alle soorten verlof',
     'max_leave_count' => 'Max. Aantal verlof',

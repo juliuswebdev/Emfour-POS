@@ -51,7 +51,7 @@ return [
     'view_message' => 'Ver mensaje',
     'essentials_module' => 'Módulo Essentials',
     'new_message_notification' => 'Tienes nuevos mensajes de :sender',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'Dejar tipo',
     'all_leave_types' => 'Todos los tipos de licencia',
     'max_leave_count' => 'Max Leave Count',

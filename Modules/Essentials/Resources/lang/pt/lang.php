@@ -53,7 +53,7 @@ return [
     'view_message' => 'Ver mensagem',
     'essentials_module' => 'Módulo Essentials',
     'new_message_notification' => 'Você tem novas mensagens de: remetente',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'Tipo de licença',
     'all_leave_types' => 'Todos os tipos de licença',
     'max_leave_count' => 'Contagem máxima de licenças',

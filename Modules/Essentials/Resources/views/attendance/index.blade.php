@@ -28,13 +28,13 @@
             <div class="col-md-12 text-center">
                 <button 
                     type="button" 
-                    class="btn btn-app bg-blue clock_in_btn
+                    class="btn btn-app bg-green clock_in_btn
                         @if(!empty($clock_in))
                             hide
                         @endif
                     "
                     data-type="clock_in"
-                    >
+                    style="background-color: #1e8659!important;">
                     <i class="fas fa-arrow-circle-down"></i> @lang('essentials::lang.clock_in')
                 </button>
             &nbsp;&nbsp;&nbsp;

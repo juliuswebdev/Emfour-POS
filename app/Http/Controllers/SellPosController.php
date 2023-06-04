@@ -64,6 +64,7 @@ use Stripe\Charge;
 use Stripe\Stripe;
 use Yajra\DataTables\Facades\DataTables;
 
+
 class SellPosController extends Controller
 {
     /**
@@ -267,10 +268,18 @@ class SellPosController extends Controller
         }else{
             $payment_device = null;
         }
-
-
+        $module_util = new ModuleUtil();
+        $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'essentials_module');
+        $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
+        $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
+                                ->where('user_id', auth()->user()->id)
+                                ->whereNull('clock_out_time')
+                                ->first();
         return view('sale_pos.create')
             ->with(compact(
+                'clock_in',
+                '__is_essentials_enabled',
+                'is_employee_allowed',
                 'edit_discount',
                 'edit_price',
                 'business_locations',

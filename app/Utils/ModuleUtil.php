@@ -64,24 +64,40 @@ class ModuleUtil extends Util
             }
         }
 
-        $data = [];
-        if (! empty($installed_modules)) {
-            foreach ($installed_modules as $module) {
-                $class = 'Modules\\'.$module['name'].'\Http\Controllers\DataController';
+        $business_id = auth()->user()->business_id;
+        $is_admin = $this->is_admin(auth()->user(), $business_id);
 
-                if (class_exists($class)) {
-                    $class_object = new $class();
-                    if (method_exists($class_object, $function_name)) {
-                        if (! empty($arguments)) {
-                            $data[$module['name']] = call_user_func([$class_object, $function_name], $arguments);
-                        } else {
-                            $data[$module['name']] = call_user_func([$class_object, $function_name]);
+        $data = [];
+        if($is_admin) {
+            if (! empty($installed_modules)) {
+                foreach ($installed_modules as $module) {
+                    $class = 'Modules\\'.$module['name'].'\Http\Controllers\DataController';
+                    if (class_exists($class)) {
+                        $class_object = new $class();
+                        if (method_exists($class_object, $function_name)) {
+                            if (! empty($arguments)) {
+                                $data[$module['name']] = call_user_func([$class_object, $function_name], $arguments);
+                            } else {
+                                $data[$module['name']] = call_user_func([$class_object, $function_name]);
+                            }
                         }
                     }
                 }
             }
+        } else {
+            $module = 'Essentials';
+            $class = 'Modules\\'.$module.'\Http\Controllers\DataController';
+            if (class_exists($class)) {
+                $class_object = new $class();
+                if (method_exists($class_object, $function_name)) {
+                    if (! empty($arguments)) {
+                        $data[$module] = call_user_func([$class_object, $function_name], $arguments);
+                    } else {
+                        $data[$module] = call_user_func([$class_object, $function_name]);
+                    }
+                }
+            }
         }
-
         return $data;
     }
 

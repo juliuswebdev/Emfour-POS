@@ -53,7 +53,7 @@ return [
     'view_message' => 'ເບິ່ງຂໍ້ຄວາມ',
     'essentials_module' => 'ໂມດູນທີ່ ຈຳ ເປັນ',
     'new_message_notification' => 'ທ່ານມີຂໍ້ຄວາມ ໃໝ່ ຈາກ :sender',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'ອອກຈາກປະເພດ',
     'all_leave_types' => 'ປະເພດໃບປະກາດທັງ ໝົດ',
     'max_leave_count' => 'ຈຳ ນວນເງິນຝາກສູງສຸດ',

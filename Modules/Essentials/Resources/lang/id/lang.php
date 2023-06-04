@@ -53,7 +53,7 @@ return[
     'view_message' => 'Lihat Pesan',
     'essentials_module' => 'Modul Essentials',
     'new_message_notification' => 'Anda memiliki pesan baru dari: pengirim',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'Tipe Cuti',
     'all_leave_types' => 'Semua jenis cuti',
     'max_leave_count' => 'Hitungan Cuti Maks',

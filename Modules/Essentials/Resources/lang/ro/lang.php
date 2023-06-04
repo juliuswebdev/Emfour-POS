@@ -53,7 +53,7 @@ return [
     'view_message' => 'Vizualizați mesajul',
     'essentials_module' => 'Modulul esențial',
     'new_message_notification' => 'Aveți mesaje noi de la :sender',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'Tip de ieșire',
     'all_leave_types' => 'Toate tipurile de concediu',
     'max_leave_count' => 'Numărul maxim de concedii',

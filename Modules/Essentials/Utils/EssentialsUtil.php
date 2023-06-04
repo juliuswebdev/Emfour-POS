@@ -122,7 +122,7 @@ class EssentialsUtil extends Util
             }
 
             //Check allocated shift time
-            if ((! empty($shift->start_time) && \Carbon::parse($shift->start_time)->between($clock_in_start, $clock_in_end)) || $shift->type == 'flexible_shift') {
+            if ((! empty($shift->start_time) && \Carbon::parse($shift->start_time)->between($clock_in_start, $clock_in_end)) || $shift->type == 'flexible_shift' || $shift->type == 'fixed_shift') {
                 return $shift->essentials_shift_id;
             }
         }
@@ -146,7 +146,7 @@ class EssentialsUtil extends Util
 
         $clock_out_end = empty($clock_out_time) ? \Carbon::now()->addMinutes($grace_after_checkout) : \Carbon::parse($clock_out_time)->addMinutes($grace_after_checkout);
 
-        if ((\Carbon::parse($shift->end_time)->between($clock_out_start, $clock_out_end)) || $shift->type == 'flexible_shift') {
+        if ((\Carbon::parse($shift->end_time)->between($clock_out_start, $clock_out_end)) || $shift->type == 'flexible_shift' || $shift->type == 'fixed_shift') {
             return true;
         } else {
             return false;

@@ -53,7 +53,7 @@ return[
     'view_message' => 'پیغام وګورئ',
     'essentials_module' => 'اړین ماډل',
     'new_message_notification' => 'تاسو لخوا نوي پیغامونه لرې: لیږونکي',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'د پرېښودلو ډول ',
     'all_leave_types' => 'د رخصتۍ ټول ډولونه',
     'max_leave_count' => 'د اعظمي رخصتۍ حساب',

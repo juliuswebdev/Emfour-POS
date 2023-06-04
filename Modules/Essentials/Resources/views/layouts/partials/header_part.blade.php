@@ -1,19 +1,21 @@
 @if($__is_essentials_enabled && $is_employee_allowed)
 	<button 
 		type="button" 
-		class="btn bg-blue btn-flat 
+		class="btn bg-green btn-flat 
 		pull-left m-8 btn-sm mt-10 
 		clock_in_btn
 		@if(!empty($clock_in))
-	    	hide
+	    	disabled
 	    @endif
 		"
+		@if(!empty($clock_in))
+	    	disabled
+	    @endif
 	    data-type="clock_in"
 	    data-toggle="tooltip"
 	    data-placement="bottom"
-	    title="@lang('essentials::lang.clock_in')" 
-	    >
-	    <i class="fas fa-arrow-circle-down"></i>
+	    title="@lang('essentials::lang.clock_in')" >
+		<i class="fas fa-arrow-circle-down"></i>&nbsp;&nbsp;@lang('essentials::lang.clock_in')
 	</button>
 
 	<button 
@@ -21,9 +23,12 @@
 		class="btn bg-yellow btn-flat pull-left m-8 
 		 btn-sm mt-10 clock_out_btn
 		@if(empty($clock_in))
-	    	hide
+	    	disabled
 	    @endif
-		" 	
+		" 
+		@if(empty($clock_in))
+	    	disabled
+	    @endif	
 	    data-type="clock_out"
 	    data-toggle="tooltip"
 	    data-placement="bottom"
@@ -44,6 +49,6 @@
                     @endif
                 @endif" 
 	    >
-	    <i class="fas fa-hourglass-half fa-spin"></i>
+	    <i class="fas fa-hourglass-half"></i>&nbsp;&nbsp;@lang('essentials::lang.clock_out')
 	</button>
 @endif

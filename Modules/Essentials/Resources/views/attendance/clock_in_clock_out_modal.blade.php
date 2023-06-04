@@ -15,6 +15,10 @@
 		      	<div class="form-group col-md-12">
 		      		<strong>@lang( 'essentials::lang.ip_address' ): {{$ip_address}}</strong>
 		      	</div>
+				<div class="form-group col-md-12">
+					{!! Form::label('pin', __('business.digits_pin') . ':') !!}
+                    <input type="password" name="user_pin" id="user_pin" class="form-control" placeholder="{{  __('business.digits_pin') }}" required>
+				</div>
 		      	<div class="form-group col-md-12 clock_in_note @if(!empty($clock_in)) hide @endif">
 		        	{!! Form::label('clock_in_note', __( 'essentials::lang.clock_in_note' ) . ':') !!}
 		        	{!! Form::textarea('clock_in_note', null, ['class' => 'form-control', 'placeholder' => __( 'essentials::lang.clock_in_note'), 'rows' => 3 ]); !!}

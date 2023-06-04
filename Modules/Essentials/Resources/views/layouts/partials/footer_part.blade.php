@@ -4,7 +4,7 @@
 <script type="text/javascript">
 	$(document).ready( function(){
         $('#essentials_dob').datepicker();
-		$('.clock_in_btn, .clock_out_btn').click( function() {
+		$(document).on('click', '.clock_in_btn:not(:disabled), .clock_out_btn:not(:disabled)', function() {
             var type = $(this).data('type');
             if (type == 'clock_in') {
                 $('#clock_in_clock_out_modal').find('#clock_in_text').removeClass('hide');
@@ -20,9 +20,9 @@
             $('#clock_in_clock_out_modal').find('input#type').val(type);
 
             $('#clock_in_clock_out_modal').modal('show');
+
         });
 	});
-
 	$(document).on('submit', 'form#clock_in_clock_out_form', function(e) {
         e.preventDefault();
         $(this).find('button[type="submit"]').attr('disabled', true);
@@ -42,21 +42,26 @@
                         shift_details.innerHTML = result.current_shift;
                     }
 
-                    swal({
-                        title: result.msg,
-                        content: shift_details,
-                        icon: 'success'
-                    });
+                    // swal({
+                    //     title: result.msg,
+                    //     content: shift_details,
+                    //     icon: 'success'
+                    // });
+                    toastr.success(result.msg);
 
                     if (typeof attendance_table !== 'undefined') {
                         attendance_table.ajax.reload();
                     }
                     if (result.type == 'clock_in') {
-                        $('.clock_in_btn').addClass('hide');
-                        $('.clock_out_btn').removeClass('hide');
+                        $('.clock_in_btn').attr('disabled', 'disabled');
+                        $('.clock_in_btn').addClass('disabled');
+                        $('.clock_out_btn').attr('disabled',false);
+                        $('.clock_out_btn').removeClass('disabled');
                     } else if(result.type == 'clock_out') {
-                        $('.clock_out_btn').addClass('hide');
-                        $('.clock_in_btn').removeClass('hide');
+                        $('.clock_out_btn').attr('disabled', 'disabled');
+                        $('.clock_out_btn').addClass('disabled');
+                        $('.clock_in_btn').attr('disabled',false);
+                        $('.clock_in_btn').removeClass('disabled');
                     }
                 } else {
                     var shift_details = document.createElement("p");
@@ -64,11 +69,13 @@
                         shift_details.innerHTML = result.shift_details;
                     }
 
-                    swal({
-                        title: result.msg,
-                        content: shift_details,
-                        icon: 'error'
-                    })
+                    // swal({
+                    //     title: result.msg,
+                    //     content: shift_details,
+                    //     icon: 'error'
+                    // })
+                    toastr.error(result.msg);
+
                 }
                 $('#clock_in_clock_out_form')[0].reset();
                 $('#clock_in_clock_out_form').find('button[type="submit"]').removeAttr('disabled');
