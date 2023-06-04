@@ -128,12 +128,25 @@ class OrderController extends Controller
      */
     public function updateServed($stage, $id, $product_id){
         try {
+
+            $res_line_order_status = null;
+            if($stage == 'cook_start') {
+                $res_line_order_status = 'cooking';
+            } else if($stage == 'cook_end') {
+                $res_line_order_status = 'cooked';
+            } else if($stage == 'served_at') {
+                $res_line_order_status = 'ready';
+            }
+
             $business_id = request()->session()->get('user.business_id');
             $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
                         ->where('t.business_id', $business_id)
                         ->where('transaction_id', $id)
                         ->where('product_id', $product_id)
-                        ->update([$stage => date('Y-m-d H:i:s')]);
+                        ->update([
+                            $stage => date('Y-m-d H:i:s'),
+                            'res_line_order_status' => $res_line_order_status
+                        ]);
 
             $output = [
                 'success' => 1,
