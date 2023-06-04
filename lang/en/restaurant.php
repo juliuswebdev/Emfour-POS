@@ -44,6 +44,7 @@ return [
         'received' => 'Received',
         'cooked' => 'Cooked',
         'served' => 'Served',
+        'ready' => 'Ready',
         '' => 'Received',
         'partial_cooked' => 'Partially Cooked',
         'partial_served' => 'Partially Served',
