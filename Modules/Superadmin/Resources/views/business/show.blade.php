@@ -167,43 +167,6 @@
 
     <div class="box">
         <div class="box-header">
-            <h3 class="box-title">
-            @lang('lang_v1.enable_disable_modules')
-            </h3>
-        </div>
-        <div class="box-body">
-                <div class="row">
-                {!! Form::open(['url' => action('\Modules\Superadmin\Http\Controllers\BusinessController@updateModules', $business->id), 'method' => 'put' ]) !!}
-                    @php
-                        $enabled_modules = $business->enabled_modules ?? [];
-                    @endphp
-                    @if(!empty($modules))
-                        @foreach($modules as $k => $v)
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <div class="checkbox" style="margin-top: 0">
-                                    <label>
-                                        {!! Form::checkbox('enabled_modules[]', $k,  in_array($k, $enabled_modules) , 
-                                        ['class' => 'input-icheck']); !!} {{$v['name']}}
-                                    </label>
-                                    @if(!empty($v['tooltip'])) @show_tooltip($v['tooltip']) @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                        <div class="col-sm-12">
-                            <button type="submit" class="btn btn-primary" style="margin-left: 15px;">
-                                @lang('messages.save')
-                            </button>
-                        </div>
-                    @endif
-                </div>
-                {!! Form::close() !!}
-        </div>
-    </div>
-
-    <div class="box">
-        <div class="box-header">
                 <h3 class="box-title">
                     <strong><i class="fa fa-map-marker margin-r-5"></i> 
                     @lang( 'superadmin::lang.business_location' )</strong>
@@ -309,6 +272,73 @@
             </div>
         @endcan
     @endcomponent
+
+    <div class="box">
+        <div class="box-header">
+            <h3 class="box-title">
+            @lang('lang_v1.enable_disable_modules')
+            </h3>
+        </div>
+        <div class="box-body">
+            
+                {!! Form::open(['url' => action('\Modules\Superadmin\Http\Controllers\BusinessController@updateModules', $business->id), 'method' => 'put' ]) !!}
+                    @php
+                        $enabled_modules = $business->enabled_modules ?? [];
+                    @endphp
+                    @if(!empty($modules))
+                        <div class="row">
+                            @foreach($modules as $k => $v)
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <div class="checkbox" style="margin-top: 0">
+                                        <label>
+                                            {!! Form::checkbox('enabled_modules[]', $k,  in_array($k, $enabled_modules) , 
+                                            ['class' => 'input-icheck']); !!} {{$v['name']}}
+                                        </label>
+                                        @if(!empty($v['tooltip'])) @show_tooltip($v['tooltip']) @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                    <div class="row">
+                    <div class="col-md-12"><hr></div>
+                    </div>
+
+                    @if(!empty($permissions))
+                        <div class="row">                    
+                            @foreach($permissions as $module => $module_permissions)
+                                @foreach($module_permissions as $permission)
+                                @php
+                                    $custom_permissions = json_decode($subscription->custom_permissions_super_admin, true);      
+                                    $value = isset($custom_permissions[$permission['name']]) ? $custom_permissions[$permission['name']] : false;
+                                @endphp
+                                <div class="col-sm-3">
+                                    <div class="checkbox">
+                                        <label>
+                                            {!! Form::checkbox("custom_permissions[$permission[name]]", 1, $value, ['class' => 'input-icheck']); !!}
+                                            {{$permission['label']}}
+                                        </label>
+                                    </div>
+                                </div>
+                                @endforeach
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if(!empty($modules) || !empty($permissions))
+                        <div class="col-sm-12">
+                            <button type="submit" class="btn btn-primary" style="margin: 20px 5px 0 0 ">
+                                @lang('messages.save')
+                            </button>
+                        </div>
+                    @endif
+
+                {!! Form::close() !!}
+
+        </div>
+    </div>
 
 @include('superadmin::business.update_password_modal')
 </section>
