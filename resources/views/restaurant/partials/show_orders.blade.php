@@ -72,21 +72,23 @@
 						@endif
 						
 						@php
-							$product = \App\Product::where('id', $row->product->id)->select('product_custom_field1')->first()
+							$product = \App\Product::where('id', $row->product->id)->select('product_custom_field1')->first();
 						@endphp
-						@if($product->product_custom_field1 == 1)
+						
+						@if($product->product_custom_field1 == 1 || $orders_for == 'waiter')
 						<tr>
 							<td>
 								@php
 									$product_desciption = ($row->product->product_description == null) ? '' : ' - '.$row->product->product_description;
-
 								@endphp
 								{{ $row->product->name.$product_desciption }}
 							</td>
 							<td>
 								{{ $row->quantity }}
 							</td>
+
 							<td>
+								@if($product->product_custom_field1 == 1)
 								<div>
 									<div class="status-inline-block">
 
@@ -112,13 +114,12 @@
 												{{ __('lang_v1.cooking') }}
 											</span>
 										</a>
-										@if($row->cook_start != null)
-											<br><span class="fs-12">&nbsp;{{ $row->display_cook_start_time }}</span>
-										@endif
+				
+										<br><span class="fs-12">@if($row->cook_start != null){{ $row->display_cook_start_time }} @else &nbsp; @endif</span>
+
 									</div>
 
 									<div class="smt-5px smb-5px status-inline-block">
-
 										@if($row->cook_end == null && $row->cook_start == null)
 											@php
 												$ready_btn_bg = "bg-black";
@@ -145,9 +146,9 @@
 											<span class="label kit-fix-w-label {{ $ready_btn_bg }}"
 											>{{ __('lang_v1.ready') }} </span>
 										</a>
-										@if($row->cook_end != null)
-											<br><span class="fs-12">&nbsp;{{ $row->display_cook_end_time }}</span>
-										@endif
+										
+											<br><span class="fs-12">@if($row->cook_end != null) {{ $row->display_cook_end_time }} @else &nbsp; @endif</span>
+										
 									</div>
 									
 									@if($orders_for == 'waiter' && $order->res_order_status != 'served')
@@ -179,15 +180,15 @@
 											<span class="label kit-fix-w-label {{ $serve_btn_bg }}">{{ __('lang_v1.served') }} </span>
 										</a>
 
-										@if($row->served_at != null)
-											<br><span class="fs-12">&nbsp;{{ $row->display_served_time }}</span>
-										@endif
-
+										<br><span class="fs-12">@if($row->served_at != null){{ $row->display_served_time }} @else &nbsp; @endif</span>
+					
 									</div>
 									@endif
 
 								</div>
-								
+								@else
+									--
+								@endif
 							</td>
 						</tr>
 						@endif
