@@ -152,8 +152,8 @@
 											
 										</div>
 									@else
-									<div class="status-inline-block" style="width: 60px; height: 41.5px;">--</div>
-									<div class="smt-5px smb-5px status-inline-block" style="width: 60px; height: 41.5px;">--</div>
+									<div class="status-inline-block" style="width: 60px; height: 41.5px; vertical-align: top;">--</div>
+									<div class="smt-5px smb-5px status-inline-block" style="width: 60px; height: 41.5px; vertical-align: top;">--</div>
 									@endif
 									
 									@if($orders_for == 'waiter' && $order->res_order_status != 'served')
@@ -169,7 +169,7 @@
 												$serve_btn_bg = "bg-black";
 												$serve_clickable = false;
 											@endphp
-										@elseif($row->served_at != null && $row->res_line_order_status == "cooked")
+										@elseif($row->served_at != null && ($row->res_line_order_status == "cooked" || $row->res_line_order_status == "ready"))
 											@php
 												$serve_btn_bg = "bg-green";
 												$serve_clickable = false;
