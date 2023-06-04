@@ -88,68 +88,73 @@
 							</td>
 
 							<td>
-								@if($product->product_custom_field1 == 1)
+								
 								<div>
-									<div class="status-inline-block">
+									@if($product->product_custom_field1 == 1)
+										<div class="status-inline-block">
 
-										@if($row->cook_start == null && $row->cook_end == null)
-											@php
-												$cooking_btn_bg = "bg-black";
-												$cooking_clickable = true;
-											@endphp
-										@elseif($row->cook_start != null && $row->cook_end == null)
-											@php
-												$cooking_btn_bg = "bg-green";
-												$cooking_clickable = false;
-											@endphp
-										@else
-											@php
-												$cooking_btn_bg = "bg-grey";
-												$cooking_clickable = false;
-											@endphp
-										@endif
-										
-										<a href="javascript:;" data-href="{{ ($cooking_clickable) ? action([\App\Http\Controllers\Restaurant\KitchenController::class, 'updateCookProgress'], ['cook_start', $order->id, $row->product_id]) : '' }}" class="{{ ($cooking_clickable) ? 'btn-cooking-stage' : ''}}">
-											<span class="label kit-fix-w-label {{ $cooking_btn_bg }} ">
-												{{ __('lang_v1.cooking') }}
-											</span>
-										</a>
-				
-										<br><span class="fs-12">@if($row->cook_start != null){{ $row->display_cook_start_time }} @else &nbsp; @endif</span>
+											@if($row->cook_start == null && $row->cook_end == null)
+												@php
+													$cooking_btn_bg = "bg-black";
+													$cooking_clickable = true;
+												@endphp
+											@elseif($row->cook_start != null && $row->cook_end == null)
+												@php
+													$cooking_btn_bg = "bg-green";
+													$cooking_clickable = false;
+												@endphp
+											@else
+												@php
+													$cooking_btn_bg = "bg-grey";
+													$cooking_clickable = false;
+												@endphp
+											@endif
+											
+											<a href="javascript:;" data-href="{{ ($cooking_clickable) ? action([\App\Http\Controllers\Restaurant\KitchenController::class, 'updateCookProgress'], ['cook_start', $order->id, $row->product_id]) : '' }}" class="{{ ($cooking_clickable) ? 'btn-cooking-stage' : ''}}">
+												<span class="label kit-fix-w-label {{ $cooking_btn_bg }} ">
+													{{ __('lang_v1.cooking') }}
+												</span>
+											</a>
+					
+											<br><span class="fs-12">@if($row->cook_start != null){{ $row->display_cook_start_time }} @else &nbsp; @endif</span>
 
-									</div>
+										</div>
 
-									<div class="smt-5px smb-5px status-inline-block">
-										@if($row->cook_end == null && $row->cook_start == null)
-											@php
-												$ready_btn_bg = "bg-black";
-												$ready_clickable = ($row->cook_start == null) ? false : true;
-											@endphp
-										@elseif($row->cook_start != null && $row->cook_end == null)
-											@php
-												$ready_btn_bg = "bg-black";
-												$ready_clickable = true;
-											@endphp
-										@elseif($row->cook_end != null && $row->served_at == null)
-											@php
-												$ready_btn_bg = "bg-green";
-												$ready_clickable = false;
-											@endphp
-										@else
-											@php
-												$ready_btn_bg = "bg-grey";
-												$ready_clickable = false;
-											@endphp
-										@endif
+										<div class="smt-5px smb-5px status-inline-block">
+											@if($row->cook_end == null && $row->cook_start == null)
+												@php
+													$ready_btn_bg = "bg-black";
+													$ready_clickable = ($row->cook_start == null) ? false : true;
+												@endphp
+											@elseif($row->cook_start != null && $row->cook_end == null)
+												@php
+													$ready_btn_bg = "bg-black";
+													$ready_clickable = true;
+												@endphp
+											@elseif($row->cook_end != null && $row->served_at == null)
+												@php
+													$ready_btn_bg = "bg-green";
+													$ready_clickable = false;
+												@endphp
+											@else
+												@php
+													$ready_btn_bg = "bg-grey";
+													$ready_clickable = false;
+												@endphp
+											@endif
 
-										<a href="javascript:;" data-href="{{ ($ready_clickable) ? action([\App\Http\Controllers\Restaurant\KitchenController::class, 'updateCookProgress'], ['cook_end', $order->id, $row->product_id]) : '' }}" class="{{ ($ready_clickable) ? 'btn-cooking-stage' : ''}}">
-											<span class="label kit-fix-w-label {{ $ready_btn_bg }}"
-											>{{ __('lang_v1.ready') }} </span>
-										</a>
-										
-											<br><span class="fs-12">@if($row->cook_end != null) {{ $row->display_cook_end_time }} @else &nbsp; @endif</span>
-										
-									</div>
+											<a href="javascript:;" data-href="{{ ($ready_clickable) ? action([\App\Http\Controllers\Restaurant\KitchenController::class, 'updateCookProgress'], ['cook_end', $order->id, $row->product_id]) : '' }}" class="{{ ($ready_clickable) ? 'btn-cooking-stage' : ''}}">
+												<span class="label kit-fix-w-label {{ $ready_btn_bg }}"
+												>{{ __('lang_v1.ready') }} </span>
+											</a>
+											
+												<br><span class="fs-12">@if($row->cook_end != null) {{ $row->display_cook_end_time }} @else &nbsp; @endif</span>
+											
+										</div>
+									@else
+									<div class="status-inline-block" style="width: 60px; height: 41.5px;">--</div>
+									<div class="smt-5px smb-5px status-inline-block" style="width: 60px; height: 41.5px;">--</div>
+									@endif
 									
 									@if($orders_for == 'waiter' && $order->res_order_status != 'served')
 									<div class="smt-5px smb-5px status-inline-block">
@@ -186,9 +191,7 @@
 									@endif
 
 								</div>
-								@else
-									--
-								@endif
+								
 							</td>
 						</tr>
 						@endif
@@ -205,9 +208,7 @@
             	<a href="#" class="btn btn-flat small-box-footer bg-red mark_as_cooked_btn" data-href="{{action([\App\Http\Controllers\Restaurant\KitchenController::class, 'markAsCooked'], [$order->id])}}"><i class="fa fa-check-square-o"></i> {{ __('lang_v1.mark_as_completed') }}</a>
 				@endif
             @elseif($orders_for == 'waiter' && $order->res_order_status != 'served')
-				
 				<a href="javascript:;" class="btn btn-flat small-box-footer {{ $served_btn_bg }} {{ ($served_clickable) ? 'mark_as_served_btn' : '' }} " data-href="{{ ($served_clickable) ? action([\App\Http\Controllers\Restaurant\OrderController::class, 'markAsServed'], [$order->id]) : '' }}"><i class="fa fa-check-square-o"></i>  {{ __('lang_v1.mark_as_completed') }} </a>
-				
             @else
             	<div class="small-box-footer bg-gray">&nbsp;</div>
             @endif
