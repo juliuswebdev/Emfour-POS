@@ -183,23 +183,51 @@ class PackagesController extends Controller
             $package->save();
 
             if (! empty($request->input('update_subscriptions'))) {
-                $package_details = [
-                    'location_count' => $package->location_count,
-                    'user_count' => $package->user_count,
-                    'product_count' => $package->product_count,
-                    'invoice_count' => $package->invoice_count,
-                    'name' => $package->name,
-                ];
-                if (! empty($package->custom_permissions)) {
-                    foreach ($package->custom_permissions as $name => $value) {
-                        $package_details[$name] = $value;
+
+                $subscriptions = Subscription::where('package_id', $package->id)
+                ->whereDate('end_date', '>=', \Carbon::now())->get();
+
+                foreach($subscriptions as $subscription) {
+                    $package_details = [
+                        'location_count' => $package->location_count,
+                        'user_count' => $package->user_count,
+                        'product_count' => $package->product_count,
+                        'invoice_count' => $package->invoice_count,
+                        'name' => $package->name,
+                    ];
+                    if (! empty($package->custom_permissions)) {
+                        foreach ($package->custom_permissions as $name => $value) {
+                            $package_details[$name] = $value;
+                        }
                     }
                 }
 
-                //Update subscription package details
                 $subscriptions = Subscription::where('package_id', $package->id)
-                                            ->whereDate('end_date', '>=', \Carbon::now())
-                                            ->update(['package_details' => json_encode($package_details)]);
+                            ->whereDate('end_date', '>=', \Carbon::now())
+                            ->update([
+                                'package_details' => json_encode($package_details),
+                                ''
+                            ]);
+
+
+
+                // $package_details = [
+                //     'location_count' => $package->location_count,
+                //     'user_count' => $package->user_count,
+                //     'product_count' => $package->product_count,
+                //     'invoice_count' => $package->invoice_count,
+                //     'name' => $package->name,
+                // ];
+                // if (! empty($package->custom_permissions)) {
+                //     foreach ($package->custom_permissions as $name => $value) {
+                //         $package_details[$name] = $value;
+                //     }
+                // }
+
+                // //Update subscription package details
+                // $subscriptions = Subscription::where('package_id', $package->id)
+                //                             ->whereDate('end_date', '>=', \Carbon::now())
+                //                             ->update(['package_details' => json_encode($package_details)]);
             }
 
             $output = ['success' => 1, 'msg' => __('lang_v1.success')];

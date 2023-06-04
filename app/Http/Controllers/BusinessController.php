@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use Modules\Superadmin\Entities\Subscription;
+use Modules\Superadmin\Entities\Package;
 use App\BusinessType;
 
 class BusinessController extends Controller
@@ -338,7 +340,12 @@ class BusinessController extends Controller
 
         $payment_types = $this->moduleUtil->payment_types(null, false, $business_id);
 
-        return view('business.settings', compact('business', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types'));
+        $permissions = $this->moduleUtil->getModuleData('superadmin_package', true);
+
+        $subscription = Subscription::where('business_id', $business_id)->first();
+        $package = Package::find($subscription->package_id);
+
+        return view('business.settings', compact('package', 'permissions', 'subscription', 'business', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types'));
     }
 
     /**
@@ -367,12 +374,12 @@ class BusinessController extends Controller
                 'redeem_amount_per_unit_rp', 'min_order_total_for_redeem',
                 'min_redeem_point', 'max_redeem_point', 'rp_expiry_period',
                 'rp_expiry_type', 'custom_labels', 'weighing_scale_setting',
-                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge']);
+                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge', 'custom_permissions']);
 
             if(!auth()->user()->can('superadmin')) {
                 unset($business_details['card_charge']);
             }
-                
+
             if (! empty($request->input('enable_rp')) && $request->input('enable_rp') == 1) {
                 $business_details['enable_rp'] = 1;
             } else {
@@ -431,7 +438,27 @@ class BusinessController extends Controller
             }
 
             $business_id = request()->session()->get('user.business_id');
-            $business = Business::where('id', $business_id)->first();
+            $business = Business::find($business_id);
+
+            $subscription = Subscription::where('business_id', $business_id)->first();
+  
+            $package = Package::find($subscription->package_id);
+    
+            $package_details_arr = [
+                'location_count' => $package->location_count,
+                'user_count' => $package->user_count,
+                'product_count' => $package->product_count,
+                'invoice_count' => $package->invoice_count,
+                'name' => $package->name,
+            ];
+
+            $custom_permissions = $business_details['custom_permissions'] ?? [];
+    
+            $package_details = array_merge($package_details_arr, $custom_permissions);
+    
+            $subscription->package_details = $package_details;
+            $subscription->custom_permissions_business_admin = $custom_permissions;
+            $subscription->update();
 
             //Update business settings
             if (! empty($business_details['logo'])) {
