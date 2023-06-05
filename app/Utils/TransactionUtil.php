@@ -310,6 +310,7 @@ class TransactionUtil extends Util
                                 $edit_modifier = TransactionSellLine::find($product['modifier_sell_line_id'][$key]);
                                 $edit_modifier->quantity = isset($product['modifier_quantity'][$key]) ? $product['modifier_quantity'][$key] : 1;
                                 $modifiers_formatted[] = $edit_modifier;
+
                                 //Dont delete modifier sell line if exists
                                 $edit_ids[] = $product['modifier_sell_line_id'][$key];
                             } else {
@@ -324,11 +325,10 @@ class TransactionUtil extends Util
                                         'unit_price' => $this_price,
                                         'unit_price_inc_tax' => $this_price,
                                         'parent_sell_line_id' => $product['transaction_sell_lines_id'],
-                                        'children_type' => 'modifier',
-                                        'cook_start' => ($product['product_custom_field1'] == 1) ? null : date('Y-m-d H:i:s'), 
-                                        'cook_end' => ($product['product_custom_field1'] == 1) ? null : date('Y-m-d H:i:s'),
-                                        // 'served_at' => ($product['product_custom_field1'] == 1) ? null : date('yyyy-mm-dd h:i:s'),
-                                        'res_line_order_status' => ($product['product_custom_field1'] == 1) ? null : 'ready'
+                                        'children_type' => 'modifieryy',
+                                        'cook_start' =>  date('Y-m-d H:i:s'), 
+                                        'cook_end' =>  date('Y-m-d H:i:s'),
+                                        'res_line_order_status' =>  'ready'
                                     ]);
                                 }
                                 
@@ -386,7 +386,6 @@ class TransactionUtil extends Util
                     'secondary_unit_quantity' => ! empty($product['secondary_unit_quantity']) ? $this->num_uf($product['secondary_unit_quantity']) : 0,
                     'cook_start' => ($product['product_custom_field1'] == 1) ? null : date('Y-m-d H:i:s'), 
                     'cook_end' => ($product['product_custom_field1'] == 1) ? null : date('Y-m-d H:i:s'),
-                    // 'served_at' => ($product['product_custom_field1'] == 1) ? null : date('yyyy-mm-dd h:i:s'),
                     'res_line_order_status' => ($product['product_custom_field1'] == 1) ? null : 'ready'
                 ];
 
@@ -415,6 +414,9 @@ class TransactionUtil extends Util
                                     'unit_price' => $this_price,
                                     'unit_price_inc_tax' => $this_price,
                                     'children_type' => 'modifier',
+                                    'cook_start' =>  date('Y-m-d H:i:s'), 
+                                    'cook_end' =>  date('Y-m-d H:i:s'),
+                                    'res_line_order_status' =>  'ready'
                                 ];
                             }
                         }
