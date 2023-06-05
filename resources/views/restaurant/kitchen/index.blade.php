@@ -22,9 +22,9 @@
                 @include('restaurant.partials.show_orders', array('orders_for' => 'kitchen', 'business_details' => $business_details))   
             </div>
         </div>
-        <div class="overlay hide">
+        <!-- <div class="overlay hide">
           <i class="fas fa-sync fa-spin"></i>
-        </div>
+        </div> -->
     </div>
 
 </section>

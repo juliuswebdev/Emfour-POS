@@ -61,9 +61,9 @@
         <div class="row" id="line_orders_div">
          @include('restaurant.partials.line_orders', array('orders_for' => 'waiter'))   
         </div>
-        <div class="overlay hide">
+        <!-- <div class="overlay hide">
           <i class="fas fa-sync fa-spin"></i>
-        </div>
+        </div> -->
     @endcomponent
 
     @component('components.widget', ['title' => __( 'restaurant.all_your_orders' )])
@@ -71,9 +71,9 @@
         <div class="row" id="orders_div">
          @include('restaurant.partials.show_orders', array('orders_for' => 'waiter'))   
         </div>
-        <div class="overlay hide">
+        <!-- <div class="overlay hide">
           <i class="fas fa-sync fa-spin"></i>
-        </div>
+        </div> -->
     @endcomponent
     </div>
 </section>

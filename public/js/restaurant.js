@@ -123,7 +123,7 @@ function refresh_orders() {
         dataType: 'html',
         success: function(data) {
             $('#orders_div').html(data);
-            $('.overlay').addClass('hide');
+            //$('.overlay').addClass('hide');
         },
     });
 
@@ -134,7 +134,7 @@ function refresh_orders() {
         dataType: 'html',
         success: function(data) {
             $('#line_orders_div').html(data);
-            $('.overlay').addClass('hide');
+            //$('.overlay').addClass('hide');
         },
     });
 }

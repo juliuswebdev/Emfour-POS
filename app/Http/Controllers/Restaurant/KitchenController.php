@@ -102,7 +102,8 @@ class KitchenController extends Controller
                         ->where('transaction_id', $id)
                         ->where(function ($q) {
                             $q->whereNull('res_line_order_status')
-                                ->orWhere('res_line_order_status', 'received');
+                                ->orWhere('res_line_order_status', 'received')
+                                ->orWhere('res_line_order_status', 'served');
                         })
                         ->update(['res_line_order_status' => 'cooked']);
 
