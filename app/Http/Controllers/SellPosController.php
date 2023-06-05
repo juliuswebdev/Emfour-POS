@@ -1217,9 +1217,15 @@ class SellPosController extends Controller
         }else{
             $payment_device = null;
         }
-
+        $module_util = new ModuleUtil();
+        $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'essentials_module');
+        $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
+        $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
+                                ->where('user_id', auth()->user()->id)
+                                ->whereNull('clock_out_time')
+                                ->first();
         return view('sale_pos.edit')
-            ->with(compact('business_details', 'taxes', 'payment_types', 'walk_in_customer',
+            ->with(compact('__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
             'commission_agent', 'categories', 'pos_settings', 'change_return', 'types', 'customer_groups',
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',

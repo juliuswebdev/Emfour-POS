@@ -64,8 +64,8 @@ class ModuleUtil extends Util
             }
         }
 
-        $business_id = auth()->user()->business_id;
-        $is_admin = $this->is_admin(auth()->user(), $business_id);
+        $business_id = auth()->user()->business_id ?? 0;
+        $is_admin = ($business_id) ? $this->is_admin(auth()->user(), $business_id) : false;
 
         $data = [];
         if($is_admin) {
