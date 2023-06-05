@@ -1343,7 +1343,9 @@ padding: 0 30px;
 
 .status-inline-block {
   display: inline-block;
+  vertical-align: top;
   margin-right: 5px;
+  margin-top: 0!important;
 }
 
 .status-inline-block .fs-12 {
