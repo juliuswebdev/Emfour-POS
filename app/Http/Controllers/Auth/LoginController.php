@@ -171,7 +171,11 @@ class LoginController extends Controller
         if(!$is_admin) {
             $clientIP = \Request::getClientIp(true);
             $user_locations = $user->permitted_locations($user->business_id);
-            $business_allowed_ips = BusinessAllowedIP::whereIn('location_id', $user_locations)->get();
+            if($user_locations == 'all') {
+                $business_allowed_ips = BusinessAllowedIP::where('business_id', $user->business_id)->get();
+            } else {
+                $business_allowed_ips = BusinessAllowedIP::whereIn('location_id', $user_locations)->get();
+            }
 
             $whitelist_ips = [];
             foreach($business_allowed_ips as $item) {
