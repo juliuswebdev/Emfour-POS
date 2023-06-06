@@ -432,7 +432,7 @@ class TransactionUtil extends Util
                 $this->updateSalesOrderLine($line['so_line_id'], $line['quantity'], 0);
             }
         }
-
+       
         if (! is_object($transaction)) {
             $transaction = Transaction::findOrFail($transaction);
         }
@@ -450,7 +450,7 @@ class TransactionUtil extends Util
 
             $this->deleteSellLines($deleted_lines, $location_id, $adjust_qty);
         }
-
+        
         $combo_lines = [];
 
         if (! empty($lines_formatted)) {

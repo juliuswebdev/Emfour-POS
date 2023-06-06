@@ -997,6 +997,7 @@ class SellPosController extends Controller
                         ->leftjoin('units', 'units.id', '=', 'p.unit_id')
                         ->leftjoin('units as u', 'p.secondary_unit_id', '=', 'u.id')
                         ->where('transaction_sell_lines.transaction_id', $id)
+                        ->where('transaction_sell_lines.is_available', 1)
                         ->with(['warranties'])
                         ->select(
                             DB::raw("IF(pv.is_dummy = 0, CONCAT(p.name, ' (', pv.name, ':',variations.name, ')'), p.name) AS product_name"),
@@ -1281,6 +1282,10 @@ class SellPosController extends Controller
 
                 $sales_order_ids = $transaction_before->sales_order_ids ?? [];
 
+
+                //Delete item if mark as not available
+                TransactionSellLine::where('transaction_id', $id)->where('is_available', 0)->delete();
+
                 //Add change return
                 $change_return = $this->dummyPaymentLine;
                 if (! empty($input['payment']['change_return'])) {
@@ -1422,7 +1427,7 @@ class SellPosController extends Controller
 
                     return $output;
                 }
-
+                
                 //Begin transaction
                 DB::beginTransaction();
 
@@ -1474,7 +1479,7 @@ class SellPosController extends Controller
 
                 //Update Sell lines
                 $deleted_lines = $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id'], true, $status_before);
-
+                
                 //Update update lines
                 $is_credit_sale = isset($input['is_credit_sale']) && $input['is_credit_sale'] == 1 ? true : false;
 

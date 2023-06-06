@@ -1578,5 +1578,8 @@ return [
     'receipt_total_items_sold' => 'TOTAL NUMBER OF ITEMS SOLD',
     'receipt_total_return' => 'Total Return',
     'receipt_invoice_no' => 'Invoice No.',
+    'not_available' => 'Not Available',
+    'item_has_been_removed' => 'Item has been removed.',
+    'item_mark_as_not_available' => 'Item mark as not available'
 
 ];

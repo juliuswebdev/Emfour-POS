@@ -80,6 +80,42 @@
                     }
                 });
             });
+
+
+            //Item removed from kitchen ui
+            $(document).on('click', 'a.btn-not-available', function(e){
+                e.preventDefault();
+                var href = $(this).data('href');
+                swal({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    buttons: [
+                        'No, cancel it!',
+                        'Yes, I am sure!'
+                    ],
+                    //dangerMode: true,
+                }).then(function(isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            method: "GET",
+                            url: href,
+                            dataType: "json",
+                            success: function(result){
+                                if(result.success == true){
+                                    toastr.success(result.msg);
+                                    $('#refresh_orders').click();
+                                } else {
+                                    toastr.error(result.msg);
+                                }
+                            }
+                        });
+                    }    
+                })
+                
+            });
+            
+
         });
     </script>
 @endsection
