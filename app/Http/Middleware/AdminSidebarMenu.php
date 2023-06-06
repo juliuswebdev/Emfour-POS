@@ -704,7 +704,7 @@ class AdminSidebarMenu
                 auth()->user()->can('access_package_subscriptions')) {
                 $menu->dropdown(
                     __('business.settings'),
-                    function ($sub) use ($enabled_modules) {
+                    function ($sub) use ($enabled_modules, $is_admin) {
                         if (auth()->user()->can('business_settings.access')) {
                             $sub->url(
                                 action([\App\Http\Controllers\BusinessController::class, 'getBusinessSettings']),
@@ -760,6 +760,14 @@ class AdminSidebarMenu
                                 action([\App\Http\Controllers\PaymentDevicesController::class, 'index']),
                                 __('payment_device.payment_devices'),
                                 ['icon' => 'fa fas fa-table', 'active' => request()->segment(1) == 'modules' && request()->segment(2) == 'payment-devices']
+                            );
+                        }
+
+                        if ($is_admin) {
+                            $sub->url(
+                                action([\App\Http\Controllers\BusinessAllowedIPController::class, 'index']),
+                                __('business_ip.business_ips'),
+                                ['icon' => 'fa fas fa-table', 'active' => request()->segment(1) == 'modules' && request()->segment(2) == 'business-ips']
                             );
                         }
 

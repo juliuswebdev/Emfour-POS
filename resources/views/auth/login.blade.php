@@ -51,6 +51,13 @@
                     </span>
                 @endif
             </div>
+            @if ( \Session::has('status') )
+                <div class="form-group has-error">
+                    <span class="help-block">
+                        <strong>{{ \Session::get('status')['msg'] }}</strong>
+                    </span>
+                </div>
+            @endif
             <div class="form-group">
                 <div class="checkbox icheck">
                     <label>

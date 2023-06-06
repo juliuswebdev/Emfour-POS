@@ -9,6 +9,7 @@ use App\Utils\ModuleUtil;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\User;
+use App\BusinessAllowedIP;
 
 class LoginController extends Controller
 {
@@ -128,6 +129,16 @@ class LoginController extends Controller
                     'status',
                     ['success' => 0, 'msg' => __('lang_v1.business_dont_have_crm_subscription')]
                 );
+
+        } else if( !$this->userAllowed($user) ) {
+
+            \Auth::logout();
+            return redirect('/login')
+                ->with(
+                    'status',
+                    ['success' => 0, 'msg' => __('lang_v1.user_ip_login_failed')]
+                );
+
         }
     }
 
@@ -143,5 +154,43 @@ class LoginController extends Controller
         }
 
         return '/home';
+    }
+
+    public function filterIP($ip) {
+        $ip_arr = explode('.', $ip);
+        array_pop($ip_arr);
+        $ip = implode('.', $ip_arr);
+        return $ip;
+    }
+
+    public function userAllowed($user) {
+ 
+        $is_admin = $this->moduleUtil->is_admin($user);
+        $allowed = false;
+
+        if(!$is_admin) {
+            $clientIP = \Request::getClientIp(true);
+            $user_locations = $user->permitted_locations($user->business_id);
+            $business_allowed_ips = BusinessAllowedIP::whereIn('location_id', $user_locations)->get();
+
+            $whitelist_ips = [];
+            foreach($business_allowed_ips as $item) {
+                $ip = $this->filterIP($item->ip_address);
+                array_push($whitelist_ips, $ip);
+            }
+
+            $client_ip = $this->filterIP($clientIP);
+
+            $allowed = false;
+
+            if(in_array($client_ip, $whitelist_ips)) {
+                $allowed = true;
+            }
+        } else {
+            $allowed = true;
+        }
+
+        return $allowed;
+
     }
 }

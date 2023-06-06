@@ -1029,6 +1029,7 @@ return [
     'password_updated_successfully' => 'Password updated successfully',
     'u_have_entered_wrong_password' => 'You have entered wrong password',
     'business_dont_have_crm_subscription' => "Business doesn't have Crm subscription",
+    'user_ip_login_failed' => 'User login IP not allowed', 
     'source' => 'Source',
     'life_stage' => 'Life Stage',
     'assigned_to' => 'Assigned to',

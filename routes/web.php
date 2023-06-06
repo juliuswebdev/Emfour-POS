@@ -61,6 +61,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationTemplateController;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\PaymentDevicesController;
+use App\Http\Controllers\BusinessAllowedIPController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -459,6 +460,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
         //Temp XML Receiver
         Route::get('payment-xml-response', [PaymentDevicesController::class, 'paymentXmlResponse']);
+
+        Route::resource('business-ips', BusinessAllowedIPController::class);
 
         Route::resource('modifiers', Restaurant\ModifierSetsController::class);
 
