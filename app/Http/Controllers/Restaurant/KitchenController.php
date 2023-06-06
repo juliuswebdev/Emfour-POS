@@ -49,8 +49,8 @@ class KitchenController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received']);
-        //dd($orders);
-
+            
+        
         $business_details = $this->businessUtil->getDetails($business_id);
         return view('restaurant.kitchen.index', compact('orders', 'business_details'));
     }
@@ -84,6 +84,34 @@ class KitchenController extends Controller
         return $output;
     }
 
+
+
+    /**c
+     * function use for update the flag of item available or not in kitchen.
+     *
+     * @return json $output
+     */
+    public function removeFromKitchen($id, $product_id){
+        try {
+            $business_id = request()->session()->get('user.business_id');
+            $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                        ->where('t.business_id', $business_id)
+                        ->where('transaction_id', $id)
+                        ->where('product_id', $product_id)
+                        ->update(['is_available' => 0]);
+            $output = [
+                'success' => 1,
+                'msg' => __('lang_v1.item_has_been_removed'),
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $output = ['success' => 0,
+                'msg' => trans('messages.something_went_wrong'),
+            ];
+        }
+
+        return $output;
+    }
 
     /**
      * Marks an order as cooked

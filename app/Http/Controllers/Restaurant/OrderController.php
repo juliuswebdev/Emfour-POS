@@ -105,6 +105,11 @@ class OrderController extends Controller
             }
 
             $query->update(['res_line_order_status' => 'served']);
+            
+            //Update the order status
+            Transaction::where('id', $id)->where('business_id', $business_id)->update([
+                'res_order_status' => 'served'
+            ]);
 
             $output = ['success' => 1,
                 'msg' => trans('restaurant.order_successfully_marked_served'),
@@ -272,7 +277,12 @@ class OrderController extends Controller
     public function userCheckHasPin(Request $request)
     {
         $user_id = $request->input('user_id');
-        $user = User::where('id', $user_id)->first();
+        if($user_id == null){
+            $user = User::where('id', auth()->user()->id)->first();
+        }else{
+            $user = User::where('id', $user_id)->first();
+        }
+       
         if(isset($user->sale_return_pin)) {
             $output = [
                 'success' => true
@@ -290,6 +300,9 @@ class OrderController extends Controller
     {
 
         $user_id = $request->input('user_id');
+        if($user_id == null){
+            $user_id = auth()->user()->id;
+        }
         $pin = $request->input('pin');
         $user = User::where('id', $user_id)->where('sale_return_pin', $pin)->first();
 

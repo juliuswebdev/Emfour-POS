@@ -473,6 +473,10 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/kitchen/cook-progress/{stage}/{id}/{product_id}', [Restaurant\KitchenController::class, 'updateCookProgress']);
        
         Route::get('/kitchen/mark-as-cooked/{id}', [Restaurant\KitchenController::class, 'markAsCooked']);
+
+        //Item Not available 
+        Route::get('/kitchen/remove-from-kitchen/{id}/{product_id}', [Restaurant\KitchenController::class, 'removeFromKitchen']);
+
         Route::post('/refresh-orders-list', [Restaurant\KitchenController::class, 'refreshOrdersList']);
         Route::post('/refresh-line-orders-list', [Restaurant\KitchenController::class, 'refreshLineOrdersList']);
 
