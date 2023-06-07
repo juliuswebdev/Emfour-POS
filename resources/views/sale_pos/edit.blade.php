@@ -15,8 +15,12 @@
 		$is_discount_enabled = $pos_settings['disable_discount'] != 1 ? true : false;
 		$is_rp_enabled = session('business.enable_rp') == 1 ? true : false;
 	@endphp
+
+	@if($transaction->payment_status != 'paid')
 	{!! Form::open(['url' => action([\App\Http\Controllers\SellPosController::class, 'update'], [$transaction->id]), 'method' => 'post', 'id' => 'edit_pos_sell_form' ]) !!}
 	{{ method_field('PUT') }}
+	@endif
+
 	<div class="row mb-12">
 		<div class="col-md-12">
 			<div class="row">
@@ -54,8 +58,21 @@
 			</div>
 		</div>
 	</div>
+
+	@if($transaction->payment_status == 'paid')
+		<div class="overlay2">
+			<span>
+				@lang('lang_v1.transaction_paid')<br>
+				<small><a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}">@lang('lang_v1.create_transaction')</a></small>
+			</span>
+		</div>
+	@endif
+
 	@include('sale_pos.partials.pos_form_actions', ['edit' => true])
+
+	@if($transaction->payment_status != 'paid')
 	{!! Form::close() !!}
+	@endif
 </section>
 
 <!-- This will be printed -->
@@ -226,6 +243,28 @@
 		.overlay {
 			background: rgba(255,255,255,0) !important;
 			cursor: not-allowed;
+		}
+		.overlay2 {
+			position: fixed;
+			background: rgba(0,0,0,.3)!important;
+			cursor: not-allowed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 9999;
+			width: 100%;
+			height: 100%;
+		}
+		.overlay2 span {
+			display: block;
+			position: absolute;
+			text-align: center;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #fff;
+			font-size: 200%;
+			width: 100%;
 		}
 	</style>
 	<!-- include module css -->

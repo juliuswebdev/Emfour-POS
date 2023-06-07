@@ -1032,7 +1032,7 @@ class SellPosController extends Controller
                             'transaction_sell_lines.res_service_staff_id',
                             'units.id as unit_id',
                             'transaction_sell_lines.sub_unit_id',
-
+                            'transaction_sell_lines.res_line_order_status as res_line_order_status',
                             //qty_available not added when negative to avoid max quanity getting decreased in edit and showing error in max quantity validation
                             DB::raw('IF(vld.qty_available > 0, vld.qty_available + transaction_sell_lines.quantity, transaction_sell_lines.quantity) AS qty_available')
                         )

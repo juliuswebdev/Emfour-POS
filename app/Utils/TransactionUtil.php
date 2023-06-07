@@ -381,12 +381,12 @@ class TransactionUtil extends Util
                     'sub_unit_id' => ! empty($product['sub_unit_id']) ? $product['sub_unit_id'] : null,
                     'discount_id' => ! empty($product['discount_id']) ? $product['discount_id'] : null,
                     'res_service_staff_id' => ! empty($product['res_service_staff_id']) ? $product['res_service_staff_id'] : null,
-                    'res_line_order_status' => ! empty($product['res_service_staff_id']) ? 'received' : null,
+                    //'res_line_order_status' => ! empty($product['res_service_staff_id']) ? 'received' : null,
                     'so_line_id' => ! empty($product['so_line_id']) ? $product['so_line_id'] : null,
                     'secondary_unit_quantity' => ! empty($product['secondary_unit_quantity']) ? $this->num_uf($product['secondary_unit_quantity']) : 0,
                     'cook_start' => ($product['product_custom_field1'] == 1) ? null : date('Y-m-d H:i:s'), 
                     'cook_end' => ($product['product_custom_field1'] == 1) ? null : date('Y-m-d H:i:s'),
-                    'res_line_order_status' => ($product['product_custom_field1'] == 1) ? null : 'ready'
+                    'res_line_order_status' => ($product['product_custom_field1'] == 1) ? 'kitchen' : 'ready'
                 ];
 
                 foreach ($extra_line_parameters as $key => $value) {
