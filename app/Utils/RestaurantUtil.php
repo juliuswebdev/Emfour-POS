@@ -8,6 +8,7 @@ use App\TransactionSellLine;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use Carbon;
 
 class RestaurantUtil extends Util
 {
@@ -37,8 +38,9 @@ class RestaurantUtil extends Util
                 ->where('transactions.business_id', $business_id)
                 ->where('transactions.type', 'sell')
                 ->where('transactions.status', 'final');
-        // ->where('transactions.res_order_status', '!=' ,'served');
-
+        //->where('transactions.res_order_status', '!=' ,'served');
+  
+        
         if (empty($filter['order_status'])) {
             $query->where(function ($q) {
                 $q->where('res_order_status', '!=', 'served')
@@ -46,41 +48,51 @@ class RestaurantUtil extends Util
             });
         }
 
-        //For new orders order_status is 'received'
-        if (! empty($filter['order_status']) && $filter['order_status'] == 'received') {
-            $query->whereNull('res_order_status');
-        }
+        // //For new orders order_status is 'received'
+        // if (! empty($filter['order_status']) && $filter['order_status'] == 'received') {
+        //     $query->whereNull('res_order_status');
+        // }
 
-        if (! empty($filter['line_order_status'])) {
-            if ($filter['line_order_status'] == 'received') {
-                $query->whereHas('sell_lines', function ($q) {
-                    $q->whereNull('res_line_order_status')
-                      ->orWhere('res_line_order_status', 'received');
-                }, '>=', 1);
-            }
+        // if (! empty($filter['line_order_status'])) {
+        //     if ($filter['line_order_status'] == 'received') {
+        //         $query->whereHas('sell_lines', function ($q) {
+        //             $q->whereNull('res_line_order_status')
+        //             ->orWhere('res_line_order_status', 'received');
+        //         }, '>=', 1);
+        //     }
 
-            if ($filter['line_order_status'] == 'cooked') {
-                $query->whereHas('sell_lines', function ($q) {
-                    $q->where('res_line_order_status', '!=', 'cooked');
-                }, '=', 0);
-            }
+        //     if ($filter['line_order_status'] == 'cooked') {
+        //         $query->whereHas('sell_lines', function ($q) {
+        //             $q->where('res_line_order_status', '!=', 'cooked');
+        //         }, '=', 0);
+        //     }
 
-            if ($filter['line_order_status'] == 'served') {
-                $query->whereHas('sell_lines', function ($q) {
-                    $q->where('res_line_order_status', '!=', 'served');
-                }, '=', 0);
-            }
-        }
+        //     if ($filter['line_order_status'] == 'served') {
+        //         $query->whereHas('sell_lines', function ($q) {
+        //             $q->where('res_line_order_status', '!=', 'served');
+        //         }, '=', 0);
+        //     }
+        // }
 
         if (! empty($filter['waiter_id'])) {
             if($filter['waiter_id'] != 'all') {
                 $query->where('transactions.res_waiter_id', $filter['waiter_id']);
             }
         }
+     
 
         $permitted_locations = auth()->user()->permitted_locations();
         if ($permitted_locations != 'all') {
             $query->whereIn('transactions.location_id', $permitted_locations);
+        }
+
+        if(! empty($filter['orders_for'])) {
+            if($filter['orders_for'] == 'waiter') {
+                $query->whereDate('transactions.created_at', Carbon::today())
+                ->orWhere('transactions.payment_status', 'due');
+            } else {
+                $query->where('transactions.res_order_status', null);
+            }
         }
 
         $orders = $query->select(
@@ -91,8 +103,8 @@ class RestaurantUtil extends Util
         )->with(['sell_lines'])
                 ->orderBy('created_at', 'desc')
                 ->get();
-
         return $orders;
+
     }
 
     public function service_staff_dropdown($business_id)

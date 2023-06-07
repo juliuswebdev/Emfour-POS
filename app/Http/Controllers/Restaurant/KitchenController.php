@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Restaurant;
 
 use App\TransactionSellLine;
+use App\Transaction;
 use App\Utils\RestaurantUtil;
 use App\Utils\BusinessUtil;
 
@@ -135,6 +136,11 @@ class KitchenController extends Controller
                         })
                         ->update(['res_line_order_status' => 'cooked']);
 
+            $t = Transaction::find($id);
+            $t->res_order_status = 'cooked';
+            $t->update();
+
+
             $output = ['success' => 1,
                 'msg' => trans('restaurant.order_successfully_marked_cooked'),
             ];
@@ -178,6 +184,7 @@ class KitchenController extends Controller
                 $filter['waiter_id'] = $service_staff_id;
             }
         }
+        $filter['orders_for'] = $orders_for;
         
         $orders = $this->restUtil->getAllOrders($business_id, $filter);
         $business_details = $this->businessUtil->getDetails($business_id);
@@ -209,6 +216,8 @@ class KitchenController extends Controller
         } elseif ($orders_for == 'waiter') {
             $filter['waiter_id'] = $service_staff_id;
         }
+
+        $filter['orders_for'] = $orders_for;
 
         $line_orders = $this->restUtil->getLineOrders($business_id, $filter);
 

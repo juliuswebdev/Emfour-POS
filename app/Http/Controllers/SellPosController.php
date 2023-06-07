@@ -1282,6 +1282,9 @@ class SellPosController extends Controller
 
                 $sales_order_ids = $transaction_before->sales_order_ids ?? [];
 
+                $t = Transaction::find($id);
+                $t->res_order_status = null;
+                $t->update();
 
                 //Delete item if mark as not available
                 TransactionSellLine::where('transaction_id', $id)->where('is_available', 0)->delete();

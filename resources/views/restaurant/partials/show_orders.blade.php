@@ -212,7 +212,7 @@
 												<div class="smt-5px smb-5px status-inline-block" style="width: 60px; height: 41.5px; vertical-align: top;">--</div>
 											@endif
 											
-											@if($orders_for == 'waiter' && $order->res_order_status != 'served')
+											@if($orders_for == 'waiter')
 												
 												@if($row->is_available == 1)
 
@@ -265,10 +265,11 @@
 				@else
             	<a href="#" class="btn btn-flat small-box-footer bg-red mark_as_cooked_btn" data-href="{{action([\App\Http\Controllers\Restaurant\KitchenController::class, 'markAsCooked'], [$order->id])}}"><i class="fa fa-check-square-o"></i> {{ __('lang_v1.mark_as_completed') }}</a>
 				@endif
-            @elseif($orders_for == 'waiter' && $order->res_order_status != 'served')
+            @elseif( $orders_for == 'waiter' && ($order->res_order_status != 'served') )
+
 				<a href="javascript:;" class="btn btn-flat small-box-footer {{ $served_btn_bg }} {{ ($served_clickable) ? 'mark_as_served_btn' : '' }} " data-href="{{ ($served_clickable) ? action([\App\Http\Controllers\Restaurant\OrderController::class, 'markAsServed'], [$order->id]) : '' }}"><i class="fa fa-check-square-o"></i>  {{ __('lang_v1.mark_as_completed') }} </a>
             @else
-            	<div class="small-box-footer bg-gray">&nbsp;</div>
+			<a href="javascript:;" class="btn btn-flat small-box-footer bg-grey  " data-href=""><i class="fa fa-check-square-o"></i>{{ __('lang_v1.mark_as_completed') }}</a>
             @endif
             	<a href="#" class="d-none btn btn-flat small-box-footer bg-info btn-modal" data-href="{{ action([\App\Http\Controllers\SellController::class, 'show'], [$order->id])}}" data-container=".view_modal">@lang('restaurant.order_details') <i class="fa fa-arrow-circle-right"></i></a>
          </div>
