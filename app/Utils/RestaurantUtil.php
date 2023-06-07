@@ -49,30 +49,30 @@ class RestaurantUtil extends Util
         }
 
         // //For new orders order_status is 'received'
-        // if (! empty($filter['order_status']) && $filter['order_status'] == 'received') {
-        //     $query->whereNull('res_order_status');
-        // }
+        if (! empty($filter['order_status']) && $filter['order_status'] == 'received') {
+            $query->whereNull('res_order_status');
+        }
 
-        // if (! empty($filter['line_order_status'])) {
-        //     if ($filter['line_order_status'] == 'received') {
-        //         $query->whereHas('sell_lines', function ($q) {
-        //             $q->whereNull('res_line_order_status')
-        //             ->orWhere('res_line_order_status', 'received');
-        //         }, '>=', 1);
-        //     }
+        if (! empty($filter['line_order_status'])) {
+            if ($filter['line_order_status'] == 'received') {
+                $query->whereHas('sell_lines', function ($q) {
+                    $q->whereNull('res_line_order_status')
+                    ->orWhere('res_line_order_status', 'received');
+                }, '>=', 1);
+            }
 
-        //     if ($filter['line_order_status'] == 'cooked') {
-        //         $query->whereHas('sell_lines', function ($q) {
-        //             $q->where('res_line_order_status', '!=', 'cooked');
-        //         }, '=', 0);
-        //     }
+            if ($filter['line_order_status'] == 'cooked') {
+                $query->whereHas('sell_lines', function ($q) {
+                    $q->where('res_line_order_status', '!=', 'cooked');
+                }, '=', 0);
+            }
 
-        //     if ($filter['line_order_status'] == 'served') {
-        //         $query->whereHas('sell_lines', function ($q) {
-        //             $q->where('res_line_order_status', '!=', 'served');
-        //         }, '=', 0);
-        //     }
-        // }
+            if ($filter['line_order_status'] == 'served') {
+                $query->whereHas('sell_lines', function ($q) {
+                    $q->where('res_line_order_status', '!=', 'served');
+                }, '=', 0);
+            }
+        }
 
         if (! empty($filter['waiter_id'])) {
             if($filter['waiter_id'] != 'all') {
