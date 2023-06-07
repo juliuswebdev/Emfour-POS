@@ -58,7 +58,17 @@
 							<th>{{ __('lang_v1.qty') }}</th>
 							<th>{{ __('lang_v1.state') }}</th>
 						</tr>
+						
 						@php
+						
+							foreach ($order->sell_lines as $key => $value) {
+								if (! empty($value->sub_unit_id)) {
+									$t = new \App\Utils\TransactionUtil;
+									$formated_sell_line = $t->recalculateSellLineTotals($business_details->id, $value);
+									$order->sell_lines[$key] = $formated_sell_line;
+								}
+							}
+
 							$mark_disabled = true;	
 							$served_btn_bg = "bg-red"; 
 							$served_clickable = true;
@@ -92,7 +102,7 @@
 							@endif
 							
 							@php
-								$product = \App\Product::where('id', $row->product_id)->select('product_custom_field1', 'type', 'name', 'product_description')->first();
+								$product = \App\Product::where('id', $row->product_id)->select('product_custom_field1', 'type', 'name', 'product_description', 'unit_id')->first();
 							@endphp
 							
 							@if($product->product_custom_field1 == 1 || $orders_for == 'waiter')
@@ -113,6 +123,18 @@
 									</td>
 									<td>
 										{{ $row->quantity }}
+								
+										@if($row->sub_unit_id)
+											@php 
+												$unit = \App\Unit::find($row->sub_unit_id);
+											@endphp
+											{{ $unit->short_name }}
+										@else
+											@php 
+												$unit = \App\Unit::find($product->unit_id);
+											@endphp
+											{{ $unit->short_name }}
+										@endif
 									</td>
 
 									<td>
