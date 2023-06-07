@@ -108,10 +108,8 @@
 							@if($product->product_custom_field1 == 1 || $orders_for == 'waiter')
 								<tr>
 									<td>
-										@php
-											$product_desciption = ($product->product_description == null) ? '' : ' - '.$product->product_description;
-										@endphp
-										{!! $product->name .''. $product_desciption !!}
+										
+										{!! $product->name !!}
 										@if(!empty($row->children))
 											@foreach($row->children as $children)
 											@php
