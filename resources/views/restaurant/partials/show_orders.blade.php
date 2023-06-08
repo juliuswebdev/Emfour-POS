@@ -120,7 +120,7 @@
 										@endif
 									</td>
 									<td>
-										{{ $row->quantity }}
+										<span class="display_currency" data-currency_symbol="false" data-is_quantity="true">{{ $row->quantity }}</span>
 								
 										@if($row->sub_unit_id)
 											@php 
@@ -286,10 +286,9 @@
             	<a href="#" class="btn btn-flat small-box-footer bg-red mark_as_cooked_btn" data-href="{{action([\App\Http\Controllers\Restaurant\KitchenController::class, 'markAsCooked'], [$order->id])}}"><i class="fa fa-check-square-o"></i> {{ __('lang_v1.mark_as_completed') }}</a>
 				@endif
             @elseif( $orders_for == 'waiter' && ($order->res_order_status != 'served') )
-
 				<a href="javascript:;" class="btn btn-flat small-box-footer {{ $served_btn_bg }} {{ ($served_clickable) ? 'mark_as_served_btn' : '' }} " data-href="{{ ($served_clickable) ? action([\App\Http\Controllers\Restaurant\OrderController::class, 'markAsServed'], [$order->id]) : '' }}"><i class="fa fa-check-square-o"></i>  {{ __('lang_v1.mark_as_completed') }} </a>
             @else
-			<a href="javascript:;" class="btn btn-flat small-box-footer bg-grey  " data-href=""><i class="fa fa-check-square-o"></i>{{ __('lang_v1.mark_as_completed') }}</a>
+				<a href="javascript:;" class="btn btn-flat small-box-footer bg-grey  " data-href=""><i class="fa fa-check-square-o"></i>{{ __('lang_v1.mark_as_completed') }}</a>
             @endif
             	<a href="#" class="d-none btn btn-flat small-box-footer bg-info btn-modal" data-href="{{ action([\App\Http\Controllers\SellController::class, 'show'], [$order->id])}}" data-container=".view_modal">@lang('restaurant.order_details') <i class="fa fa-arrow-circle-right"></i></a>
          </div>

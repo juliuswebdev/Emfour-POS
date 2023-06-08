@@ -38,70 +38,103 @@ class RestaurantUtil extends Util
                 ->where('transactions.business_id', $business_id)
                 ->where('transactions.type', 'sell')
                 ->where('transactions.status', 'final');
-        //->where('transactions.res_order_status', '!=' ,'served');
-  
-        
-        if (empty($filter['order_status'])) {
-            $query->where(function ($q) {
-                $q->where('res_order_status', '!=', 'served')
-                ->orWhereNull('res_order_status');
-            });
+                
+
+      
+        if(! empty($filter['orders_for'])) {
+            if($filter['orders_for'] == 'kitchen') {
+                $query->whereNull('res_order_status');
+            } else {
+                if (! empty($filter['waiter_id'])) {
+                    if($filter['waiter_id'] != 'all') {
+                        $query->where('transactions.res_waiter_id', '=', $filter['waiter_id']);
+                    }
+                }
+                $query
+                ->where('transactions.payment_status', 'due');
+            }
         }
+
+
+
+        //->where('transactions.res_order_status', '!=' ,'served');
+
+        // if (empty($filter['order_status'])) {
+        //     $query->where(function ($q) {
+        //         $q->where('res_order_status', '!=', 'served')
+        //         ->orWhereNull('res_order_status');
+        //     });
+        // }
 
         // //For new orders order_status is 'received'
-        if (! empty($filter['order_status']) && $filter['order_status'] == 'received') {
-            $query->whereNull('res_order_status');
-        }
+        // if (! empty($filter['order_status']) && $filter['order_status'] == 'received') {
+        //     $query->whereNull('res_order_status');
+        // }
 
-        if (! empty($filter['line_order_status'])) {
-            if ($filter['line_order_status'] == 'received') {
-                $query->whereHas('sell_lines', function ($q) {
-                    $q->whereNull('res_line_order_status')
-                    ->orWhere('res_line_order_status', 'received');
-                }, '>=', 1);
-            }
+        // if (! empty($filter['line_order_status'])) {
+        //     if ($filter['line_order_status'] == 'received') {
+        //         $query->whereHas('sell_lines', function ($q) {
+        //             $q->whereNull('res_line_order_status')
+        //             ->orWhere('res_line_order_status', 'received');
+        //         }, '>=', 1);
+        //     }
 
-            if ($filter['line_order_status'] == 'cooked') {
-                $query->whereHas('sell_lines', function ($q) {
-                    $q->where('res_line_order_status', '!=', 'cooked');
-                }, '=', 0);
-            }
+        //     if ($filter['line_order_status'] == 'cooked') {
+        //         $query->whereHas('sell_lines', function ($q) {
+        //             $q->where('res_line_order_status', '!=', 'cooked');
+        //         }, '=', 0);
+        //     }
 
-            if ($filter['line_order_status'] == 'served') {
-                $query->whereHas('sell_lines', function ($q) {
-                    $q->where('res_line_order_status', '!=', 'served');
-                }, '=', 0);
-            }
-        }
+        //     if ($filter['line_order_status'] == 'served') {
+        //         $query->whereHas('sell_lines', function ($q) {
+        //             $q->where('res_line_order_status', '!=', 'served');
+        //         }, '=', 0);
+        //     }
+        // }
 
-        if (! empty($filter['waiter_id'])) {
-            if($filter['waiter_id'] != 'all') {
-                $query->where('transactions.res_waiter_id', $filter['waiter_id']);
-            }
-        }
-     
+
+        // $permitted_locations = auth()->user()->permitted_locations();
+        // if ($permitted_locations != 'all') {
+        //     $query->whereIn('transactions.location_id', $permitted_locations);
+        // }
+
+        // if(! empty($filter['orders_for'])) {
+        //     if($filter['orders_for'] == 'waiter') {
+        //         if (! empty($filter['waiter_id'])) {
+        //             if($filter['waiter_id'] != 'all') {
+        //                 $query->where('transactions.res_waiter_id', '=', $filter['waiter_id'])
+        //                 ->orWhereDate('transactions.created_at', Carbon::today())
+        //                 ->where('transactions.payment_status', 'due');
+        //             } else {
+        //                 $query->whereDate('transactions.created_at', Carbon::today())
+        //                 ->orWhere('transactions.payment_status', 'due');
+        //             }
+        //         }
+        //     } else {
+        //         $query->whereNull('transactions.res_order_status');
+        //     }
+        // }
+
+        // if (! empty($filter['waiter_id'])) {
+        //     if($filter['waiter_id'] != 'all') {
+        //         $query->where('transactions.res_waiter_id', '=', $filter['waiter_id']);
+        //     }
+        // }
+
 
         $permitted_locations = auth()->user()->permitted_locations();
         if ($permitted_locations != 'all') {
             $query->whereIn('transactions.location_id', $permitted_locations);
         }
 
-        if(! empty($filter['orders_for'])) {
-            if($filter['orders_for'] == 'waiter') {
-                $query->whereDate('transactions.created_at', Carbon::today())
-                ->orWhere('transactions.payment_status', 'due');
-            } else {
-                $query->where('transactions.res_order_status', null);
-            }
-        }
-
-        $orders = $query->select(
+        $orders = $query->where('transactions.status', '<>', 'draft')
+            ->where('transactions.type', '<>', 'sell_return')->select(
             'transactions.*',
             'contacts.name as customer_name',
             'bl.name as business_location',
             'rt.name as table_name'
         )->with(['sell_lines'])
-                ->orderBy('created_at', 'desc')
+                ->orderBy('transactions.created_at', 'desc')
                 ->get();
         return $orders;
 

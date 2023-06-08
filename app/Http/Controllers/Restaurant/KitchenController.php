@@ -49,7 +49,7 @@ class KitchenController extends Controller
         // }
 
         $business_id = request()->session()->get('user.business_id');
-        $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received']);
+        $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received', 'orders_for' => 'kitchen']);
             
         
         $business_details = $this->businessUtil->getDetails($business_id);
