@@ -95,6 +95,7 @@ class EssentialsUtil extends Util
      */
     public function checkUserShift($user_id, $settings, $clock_in_time = null)
     {
+      
         $shift_id = null;
         $shift_date = ! empty($clock_in_time) ? \Carbon::parse($clock_in_time) : \Carbon::now();
         $shift_datetime = $shift_date->format('Y-m-d');
@@ -103,6 +104,7 @@ class EssentialsUtil extends Util
         $grace_after_checkin = ! empty($settings['grace_after_checkin']) ? (int) $settings['grace_after_checkin'] : 0;
         $clock_in_start = ! empty($clock_in_time) ? \Carbon::parse($clock_in_time)->subMinutes($grace_before_checkin) : \Carbon::now()->subMinutes($grace_before_checkin);
         $clock_in_end = ! empty($clock_in_time) ? \Carbon::parse($clock_in_time)->addMinutes($grace_after_checkin) : \Carbon::now()->addMinutes($grace_after_checkin);
+
 
         $user_shifts = EssentialsUserShift::join('essentials_shifts as s', 's.id', '=', 'essentials_user_shifts.essentials_shift_id')
                     ->where('user_id', $user_id)
@@ -121,12 +123,12 @@ class EssentialsUtil extends Util
                 continue;
             }
 
-            //Check allocated shift time
-            if ((! empty($shift->start_time) && \Carbon::parse($shift->start_time)->between($clock_in_start, $clock_in_end)) || $shift->type == 'flexible_shift' || $shift->type == 'fixed_shift') {
+
+            if ((! empty($shift->start_time) && \Carbon::parse($clock_in_start)->between($shift->start_time, $shift->end_time)) || $shift->type == 'flexible_shift') {
                 return $shift->essentials_shift_id;
             }
         }
-
+       
         return $shift_id;
     }
 
@@ -146,7 +148,7 @@ class EssentialsUtil extends Util
 
         $clock_out_end = empty($clock_out_time) ? \Carbon::now()->addMinutes($grace_after_checkout) : \Carbon::parse($clock_out_time)->addMinutes($grace_after_checkout);
 
-        if ((\Carbon::parse($shift->end_time)->between($clock_out_start, $clock_out_end)) || $shift->type == 'flexible_shift' || $shift->type == 'fixed_shift') {
+        if ((\Carbon::parse($shift->end_time)->between($clock_out_start, $clock_out_end)) || $shift->type == 'flexible_shift') {
             return true;
         } else {
             return false;
