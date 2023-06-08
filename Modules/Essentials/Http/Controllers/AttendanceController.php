@@ -384,7 +384,9 @@ class AttendanceController extends Controller
                     ];
 
                     $output = $this->essentialsUtil->clockin($data, $settings);
-                    $output['msg'] = $user->surname .' '. $user->first_name .' '. $user->last_name . ' ' . __('essentials::lang.clock_in_success_past');
+                    if($output['success']) {
+                        $output['msg'] = $user->surname .' '. $user->first_name .' '. $user->last_name . ' ' . __('essentials::lang.clock_in_success_past');
+                    }
                 } elseif ($type == 'clock_out') {
                     $data = [
                         'business_id' => $business_id,
@@ -395,7 +397,9 @@ class AttendanceController extends Controller
                     ];
 
                     $output = $this->essentialsUtil->clockout($data, $settings);
-                    $output['msg'] = $user->surname .' '. $user->first_name .' '. $user->last_name . ' ' . __('essentials::lang.clock_out_success_past');
+                    if($output['success']) {
+                        $output['msg'] = $user->surname .' '. $user->first_name .' '. $user->last_name . ' ' . __('essentials::lang.clock_out_success_past');
+                    }
                 }
 
             } else {
