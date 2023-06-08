@@ -69,12 +69,12 @@
                         shift_details.innerHTML = result.shift_details;
                     }
 
-                    // swal({
-                    //     title: result.msg,
-                    //     content: shift_details,
-                    //     icon: 'error'
-                    // })
-                    toastr.error(result.msg);
+                    swal({
+                        title: result.msg,
+                        content: shift_details,
+                        icon: 'error'
+                    })
+                    //toastr.error(result.msg);
 
                 }
                 $('#clock_in_clock_out_form')[0].reset();
