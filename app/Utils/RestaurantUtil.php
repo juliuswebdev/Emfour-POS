@@ -50,8 +50,19 @@ class RestaurantUtil extends Util
                         $query->where('transactions.res_waiter_id', '=', $filter['waiter_id']);
                     }
                 }
-                $query
-                ->where('transactions.payment_status', 'due');
+                
+                $today = Carbon::today();
+                $query->where('transactions.created_at', '>=', $today)
+                      ->orWhere('transactions.payment_status', 'due');
+
+
+                // $query->when($today >= 'transactions.created_at', function($q) {
+                //     return $q->where('transactions.payment_status', 'due');
+                // }, function($q) {
+                //     return $q->whereIn('transactions.payment_status', ['due', 'paid']);
+                // });
+
+                //$query->where('transactions.payment_status', 'due');
             }
         }
 
