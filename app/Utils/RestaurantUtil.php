@@ -48,12 +48,14 @@ class RestaurantUtil extends Util
                 if (! empty($filter['waiter_id'])) {
                     if($filter['waiter_id'] != 'all') {
                         $query->where('transactions.res_waiter_id', '=', $filter['waiter_id']);
+                    } else {
+                        $today = Carbon::today();
+                        $query->where('transactions.created_at', '>=', $today)
+                            ->orWhere('transactions.payment_status', 'due');
                     }
                 }
                 
-                $today = Carbon::today();
-                $query->where('transactions.created_at', '>=', $today)
-                      ->orWhere('transactions.payment_status', 'due');
+                
 
 
                 // $query->when($today >= 'transactions.created_at', function($q) {
