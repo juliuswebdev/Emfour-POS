@@ -22,6 +22,7 @@ class RestaurantUtil extends Util
      */
     public function getAllOrders($business_id, $filter = [])
     {
+	
         $query = Transaction::leftJoin('contacts', 'transactions.contact_id', '=', 'contacts.id')
                 ->leftjoin(
                     'business_locations AS bl',
@@ -40,16 +41,18 @@ class RestaurantUtil extends Util
                 ->where('transactions.status', 'final');
                 
 
-      
+        $today = Carbon::today();
         if(! empty($filter['orders_for'])) {
             if($filter['orders_for'] == 'kitchen') {
                 $query->whereNull('res_order_status');
             } else {
                 if (! empty($filter['waiter_id'])) {
                     if($filter['waiter_id'] != 'all') {
-                        $query->where('transactions.res_waiter_id', '=', $filter['waiter_id']);
+                        $query->where('transactions.res_waiter_id', '=', $filter['waiter_id'])
+                        ->where('transactions.created_at', '>=', $today)
+                        ->orWhere('transactions.payment_status', 'due')
+                        ->where('transactions.res_waiter_id', '=', $filter['waiter_id']);
                     } else {
-                        $today = Carbon::today();
                         $query->where('transactions.created_at', '>=', $today)
                             ->orWhere('transactions.payment_status', 'due');
                     }
