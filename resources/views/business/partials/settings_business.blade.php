@@ -207,4 +207,39 @@
             </div>
         </div>
     </div>
+
+    <!-- Gratuity Only for Restorant -->
+    @if($business->business_type_id == 1)
+
+        @if($business->gratuity_settings == null)
+            @php
+                $gratuity_label = "";
+                $gratuity_percentage = "0.00";
+            @endphp
+        @else
+            @php
+                $gratuity_settings = json_decode($business->gratuity_settings, true);
+                $gratuity_label = $gratuity_settings['label'];
+                $gratuity_percentage = $gratuity_settings['percentage'];
+            @endphp
+        @endif
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('name',__('lang_v1.gratuity_setting_label') . ':') !!}
+                    {!! Form::text('gratuity_setting_label', $gratuity_label, ['class' => 'form-control',
+                    'placeholder' => __('lang_v1.gratuity_setting_label')]); !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('name',__('lang_v1.gratuity_setting_percentage') . ':') !!}
+                    {!! Form::text('gratuity_setting_percentage', $gratuity_percentage, ['class' => 'form-control allow-decimal-number-only',
+                    'placeholder' => __('lang_v1.gratuity_setting_percentage')]); !!}
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>

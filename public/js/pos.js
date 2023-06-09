@@ -2025,7 +2025,24 @@ function calculate_billing_details(price_total) {
         $('#packing_charge_text').text(__currency_trans_from_en(packing_charge, false));
     }
 
-    var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense;
+    // Add gratuity setting
+    var gratuity_charges = 0;
+    if ($('.gratuity_wrapper').length > 0){
+        var gratuity_percentage = parseFloat($('.gratuity_wrapper').attr('data-percentage'));
+        var gratuity_charges = __calculate_amount('percentage', gratuity_percentage, price_total)
+        $('.gratuity_charges').text(parseFloat(gratuity_charges).toFixed(2));
+    }
+
+    // Tips added by input
+    var tips_amount = $('#tips_amount').val();
+    if(tips_amount != ""){
+        $('#tips_text').text(tips_amount);     
+        tips_amount = parseFloat(tips_amount);
+    }else{
+        $('#tips_text').text("0"); 
+    }
+    
+    var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense + gratuity_charges + tips_amount;
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
@@ -3388,3 +3405,38 @@ $(document).on('submit', 'form#clock_in_clock_out_form', function(e) {
         },
     });
 });
+
+
+// Use function for allow only decimal input
+$(".allow-decimal-number-only").on("keypress", function (evt) {
+    var $txtBox = $(this);
+    var charCode = (evt.which) ? evt.which : evt.keyCode
+    if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46)
+        return false;
+    else {
+        var len = $txtBox.val().length;
+        var index = $txtBox.val().indexOf('.');
+        if (index > 0 && charCode == 46) {
+          return false;
+        }
+        if (index > 0) {
+            var charAfterdot = (len + 1) - index;
+            if (charAfterdot > 3) {
+                return false;
+            }
+        }
+    }
+    return $txtBox; //for chaining
+});
+
+//Use function for open tips amount input modal in pos screen
+$('.tip_service_modal_btn').click(function(){
+    $('#tips-modal').modal('show'); 
+});
+
+//Function use for apply the tips on order
+$('.btn-submit-tips').click(function(){
+    pos_total_row();
+    $('#tips-modal').modal('hide'); 
+});
+

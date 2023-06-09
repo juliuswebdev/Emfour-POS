@@ -1582,5 +1582,11 @@ return [
     'item_has_been_removed' => 'Item has been removed.',
     'item_mark_as_not_available' => 'Item mark as not available',
     'transaction_paid' => 'The transaction is already paid!',
-    'create_transaction' => 'Create new transaction'
+    'create_transaction' => 'Create new transaction',
+    'gratuity_setting_label' => 'Gratuity Label',
+    'gratuity_setting_percentage' => 'Gratuity Percentage (%)',
+    'tips' => 'Tips',
+    'enter_tips_amount' => 'Enter Tips Amount',
+    'update' => 'Update',
+    'cancel' => 'Cancel',
 ];

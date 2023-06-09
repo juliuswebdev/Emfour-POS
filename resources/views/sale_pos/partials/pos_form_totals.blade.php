@@ -8,6 +8,40 @@
 					<b>@lang('sale.total'):</b> &nbsp;
 					<span class="price_total">0</span>
 				</td>
+				<!-- For restorant only -->
+				@if($business_details->business_type_id == 1) 
+					@if($business_details->gratuity_settings != null)
+						@php
+							$gratuity_settings = json_decode($business_details->gratuity_settings, true);
+						@endphp
+						@if($gratuity_settings['percentage'] > 0)
+							<td class="gratuity_wrapper" data-percentage="{{ $gratuity_settings['percentage'] }}">
+								<b>{{ $gratuity_settings['label'] }} ({{ $gratuity_settings['percentage'] }})%:</b> &nbsp;
+								<span class="gratuity_charges">
+									@if(empty($edit))
+									0.00
+									@else
+									{{ $transaction->gratuity_charge_amount }}
+									@endif
+								</span>
+							</td>
+						@endif
+					@endif
+
+					<td class="">
+						<b>@lang('lang_v1.tips')(+):</b>
+						<i class="fas fa-edit cursor-pointer tip_service_modal_btn"></i> 
+						<span id="tips_text">
+							@if(empty($edit))
+							0.00
+							@else
+							{{ sprintf('%0.2f', $transaction->tips_amount) }}
+							@endif
+						</span>
+					</td>
+				@endif
+
+				
 			</tr>
 			<tr>
 				<td>
@@ -92,6 +126,7 @@
 					<input type="hidden" name="round_off_amount" id="round_off_amount" value=0>
 				</td>
 				@endif
+
 			</tr>
 		</table>
 	</div>

@@ -291,6 +291,7 @@ class BusinessController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $business = Business::where('id', $business_id)->first();
+        
 
         $currencies = $this->businessUtil->allCurrencies();
         $tax_details = TaxRate::forBusinessDropdown($business_id);
@@ -490,6 +491,18 @@ class BusinessController extends Controller
             if($enabled_modules && auth()->user()->can('superadmin')) {
                 $business_details['enabled_modules'] = ! empty($enabled_modules) ? $enabled_modules : null;
             }
+
+
+            // Gratuity setting
+            if($business->business_type_id == 1){ 
+                if($request->has('gratuity_setting_label') || $request->has('gratuity_setting_percentage')){
+                    $business_details['gratuity_settings'] = json_encode(array(
+                        'label' => $request->gratuity_setting_label,
+                        'percentage' => $request->gratuity_setting_percentage
+                    ));
+                }
+            }
+
             $business->fill($business_details);
             $business->save();
 

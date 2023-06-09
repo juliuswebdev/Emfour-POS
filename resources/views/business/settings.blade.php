@@ -199,5 +199,35 @@
             },
         });
     });
+
+
+
+    // $('.allow-decimal-number-only').keyup(function () {
+    //     if (this.value != this.value.replace(/[^0-9\.]/g, '')) {
+    //         this.value = this.value.replace(/[^0-9\.]/g, '');
+    //     }
+    // });
+
+    $(".allow-decimal-number-only").on("keypress", function (evt) {
+        var $txtBox = $(this);
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46)
+            return false;
+        else {
+            var len = $txtBox.val().length;
+            var index = $txtBox.val().indexOf('.');
+            if (index > 0 && charCode == 46) {
+              return false;
+            }
+            if (index > 0) {
+                var charAfterdot = (len + 1) - index;
+                if (charAfterdot > 3) {
+                    return false;
+                }
+            }
+        }
+        return $txtBox; //for chaining
+    });
+
 </script>
 @endsection

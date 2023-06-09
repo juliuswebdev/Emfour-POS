@@ -139,7 +139,9 @@ class TransactionUtil extends Util
             'additional_expense_key_2' => ! empty($input['additional_expense_key_2']) ? $input['additional_expense_key_2'] : null,
             'additional_expense_key_3' => ! empty($input['additional_expense_key_3']) ? $input['additional_expense_key_3'] : null,
             'additional_expense_key_4' => ! empty($input['additional_expense_key_4']) ? $input['additional_expense_key_4'] : null,
-
+            'tips_amount' => isset($input['tips_amount']) ? $input['tips_amount'] : 0,
+            'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
+            'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
         ]);
 
         return $transaction;
@@ -255,6 +257,9 @@ class TransactionUtil extends Util
             'additional_expense_key_2' => ! empty($input['additional_expense_key_2']) ? $input['additional_expense_key_2'] : null,
             'additional_expense_key_3' => ! empty($input['additional_expense_key_3']) ? $input['additional_expense_key_3'] : null,
             'additional_expense_key_4' => ! empty($input['additional_expense_key_4']) ? $input['additional_expense_key_4'] : null,
+            'tips_amount' => isset($input['tips_amount']) ? $input['tips_amount'] : 0,
+            'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
+            'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
         ];
 
         if (! empty($input['transaction_date'])) {

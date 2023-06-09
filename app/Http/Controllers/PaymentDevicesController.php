@@ -13,6 +13,8 @@ use App\PaymentDeviceModel;
 use App\PaymentDevice;
 use App\BusinessLocation;
 use App\User;
+use App\TransactionPayment;
+
 use Illuminate\Support\Facades\Http;
 
 class PaymentDevicesController extends Controller
@@ -369,6 +371,7 @@ class PaymentDevicesController extends Controller
             //$amount = "1.10";
 
             $check_terminal = $this->checkTerminalIsActive($register_id);
+            //$check_terminal = "Online";
             if($check_terminal == "Online"){
             
                 $xml = '<request>
@@ -394,8 +397,13 @@ class PaymentDevicesController extends Controller
                 $json_response = json_encode($xml_response);
                 $array_response = json_decode($json_response,TRUE);
 
+                /*
+                $t = TransactionPayment::where('id', '210')->pluck('payment_collect_response')->first();
+                $array_response = json_decode($t, true);
                 $payment_response_message = $array_response['response']['Message'];
-                $payment_response_message = "Approved";
+                */
+                $payment_response_message = $array_response['response']['Message'];
+                //$payment_response_message = "Approved";
                 if($payment_response_message == "Approved"){
                     $output = [
                         'success' => 1,

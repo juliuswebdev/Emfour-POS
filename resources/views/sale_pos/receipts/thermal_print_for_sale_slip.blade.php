@@ -493,7 +493,7 @@
 			@endif
 			@if(empty($receipt_details->hide_price))
                 <div class="flex-box">
-                    <p class="left text-right sub-headings">
+                    <p class="sub-headings">
                     	{!! $receipt_details->subtotal_label !!}
                     </p>
                     <p class="width-50 text-right sub-headings">
@@ -501,10 +501,29 @@
                     </p>
                 </div>
 
+				<!-- Added Card Charges in Invoice -->
+				@if(!empty($receipt_details->payments))
+					@foreach($receipt_details->payments as $payment)
+						
+						@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
+							<div class="flex-box">
+								<p class="sub-headings">
+									@lang('lang_v1.card_charge') {{$payment['card_charge_percent']}}%
+								</p>
+								<p class="width-50 text-right sub-headings">
+									{{$payment['card_charge_amount']}}
+								</p>
+							</div>
+						@endif
+								
+					@endforeach
+				@endif
+
+
                 <!-- Shipping Charges -->
 				@if(!empty($receipt_details->shipping_charges))
 					<div class="flex-box">
-						<p class="left text-right">
+						<p class="sub-headings">
 							{!! $receipt_details->shipping_charges_label !!}
 						</p>
 						<p class="width-50 text-right">
@@ -515,7 +534,7 @@
 
 				@if(!empty($receipt_details->packing_charge))
 					<div class="flex-box">
-						<p class="left text-right">
+						<p class="sub-headings">
 							{!! $receipt_details->packing_charge_label !!}
 						</p>
 						<p class="width-50 text-right">
@@ -527,7 +546,7 @@
 				<!-- Discount -->
 				@if( !empty($receipt_details->discount) )
 					<div class="flex-box">
-						<p class="width-50 text-right">
+						<p class="sub-headings">
 							{!! $receipt_details->discount_label !!}
 						</p>
 
@@ -539,7 +558,7 @@
 
 				@if( !empty($receipt_details->total_line_discount) )
 					<div class="flex-box">
-						<p class="width-50 text-right">
+						<p class="sub-headings">
 							{!! $receipt_details->line_discount_label !!}
 						</p>
 
@@ -565,7 +584,7 @@
 
 				@if(!empty($receipt_details->reward_point_label) )
 					<div class="flex-box">
-						<p class="width-50 text-right">
+						<p class="sub-headings">
 							{!! $receipt_details->reward_point_label !!}
 						</p>
 
@@ -577,7 +596,7 @@
 
 				@if( !empty($receipt_details->tax) )
 					<div class="flex-box">
-						<p class="width-50 text-right">
+						<p class="sub-headings">
 							{!! $receipt_details->tax_label !!}
 						</p>
 						<p class="width-50 text-right">
@@ -588,7 +607,7 @@
 
 				@if( $receipt_details->round_off_amount > 0)
 					<div class="flex-box">
-						<p class="width-50 text-right">
+						<p class="sub-headings">
 							{!! $receipt_details->round_off_label !!} 
 						</p>
 						<p class="width-50 text-right">
@@ -609,7 +628,7 @@
                 --}}
 
                 <div class="flex-box">
-					<p class="width-50 text-right sub-headings">
+					<p class="sub-headings">
 						{!! $receipt_details->total_paid_label !!}
 					</p>
 					<p class="width-50 text-right sub-headings">
