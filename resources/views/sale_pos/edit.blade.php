@@ -58,8 +58,7 @@
 			</div>
 		</div>
 	</div>
-
-	@if($transaction->payment_status == 'paid')
+	@if(!isset($_GET['sale-return']) && $transaction->payment_status == 'paid')
 		<div class="overlay2">
 			<span>
 				@lang('lang_v1.transaction_paid')<br>
@@ -128,7 +127,7 @@
 	<!-- Sale Return -->
 	@if(request()->get('sale-return') == 1)
 	<script>
-		@if($transaction->payment_status == 'paid')
+		@if(!isset($_GET['sale-return']) && $transaction->payment_status == 'paid')
 		__page_leave_confirmation('#edit_pos_sell_form');
 		@endif
 		$(document).ready(function(){
