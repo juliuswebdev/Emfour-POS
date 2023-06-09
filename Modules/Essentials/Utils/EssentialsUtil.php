@@ -123,10 +123,20 @@ class EssentialsUtil extends Util
                 continue;
             }
 
+            //Check allocated shift time
 
-            if ((! empty($shift->start_time) && \Carbon::parse($clock_in_start)->between($shift->start_time, $shift->end_time)) || $shift->type == 'flexible_shift') {
+            // echo '$clock_in_time '. $clock_in_time.'<br>';
+            // echo '$clock_in_start '. $clock_in_start.'<br>';
+            // echo '$clock_in_end '. $clock_in_end.'<br>';
+            // dd(\Carbon::parse($shift->start_time));
+            // dd(\Carbon::parse($clock_in_start)->between($shift->start_time, $shift->end_time));
+            $clock_in_start = ! empty($shift->start_time) ? \Carbon::parse($shift->start_time)->subMinutes($grace_before_checkin) : \Carbon::now()->subMinutes($grace_before_checkin);
+            $clock_in_end = ! empty($shift->end_time) ? \Carbon::parse($shift->end_time)->addMinutes($grace_after_checkin) : \Carbon::now()->addMinutes($grace_after_checkin);
+    
+            if ((! empty($shift->start_time) && \Carbon::parse($clock_in_time)->between($clock_in_start, $clock_in_end)) || $shift->type == 'flexible_shift') {
                 return $shift->essentials_shift_id;
             }
+
         }
        
         return $shift_id;
@@ -144,11 +154,9 @@ class EssentialsUtil extends Util
 
         $grace_before_checkout = ! empty($settings['grace_before_checkout']) ? (int) $settings['grace_before_checkout'] : 0;
         $grace_after_checkout = ! empty($settings['grace_after_checkout']) ? (int) $settings['grace_after_checkout'] : 0;
-        $clock_out_start = empty($clock_out_time) ? \Carbon::now()->subMinutes($grace_before_checkout) : \Carbon::parse($clock_out_time)->subMinutes($grace_before_checkout);
-
-        $clock_out_end = empty($clock_out_time) ? \Carbon::now()->addMinutes($grace_after_checkout) : \Carbon::parse($clock_out_time)->addMinutes($grace_after_checkout);
-
-        if ((\Carbon::parse($shift->end_time)->between($clock_out_start, $clock_out_end)) || $shift->type == 'flexible_shift') {
+        $clock_out_start = empty($shift->start_time) ? \Carbon::now()->subMinutes($grace_before_checkout) : \Carbon::parse($shift->start_time)->subMinutes($grace_before_checkout);
+        $clock_out_end = empty($shift->end_time) ? \Carbon::now()->addMinutes($grace_after_checkout) : \Carbon::parse($shift->end_time)->addMinutes($grace_after_checkout);
+        if ((\Carbon::parse($clock_out_time)->between($clock_out_start, $clock_out_end)) || $shift->type == 'flexible_shift') {
             return true;
         } else {
             return false;
