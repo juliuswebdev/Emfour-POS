@@ -16,10 +16,10 @@
 		$is_rp_enabled = session('business.enable_rp') == 1 ? true : false;
 	@endphp
 
-	@if($transaction->payment_status != 'paid')
+
 	{!! Form::open(['url' => action([\App\Http\Controllers\SellPosController::class, 'update'], [$transaction->id]), 'method' => 'post', 'id' => 'edit_pos_sell_form' ]) !!}
 	{{ method_field('PUT') }}
-	@endif
+
 
 	<div class="row mb-12">
 		<div class="col-md-12">
@@ -58,8 +58,7 @@
 			</div>
 		</div>
 	</div>
-
-	@if($transaction->payment_status == 'paid')
+	@if(!isset($_GET['sale-return']) && $transaction->payment_status == 'paid')
 		<div class="overlay2">
 			<span>
 				@lang('lang_v1.transaction_paid')<br>
@@ -70,9 +69,9 @@
 
 	@include('sale_pos.partials.pos_form_actions', ['edit' => true])
 
-	@if($transaction->payment_status != 'paid')
+	
 	{!! Form::close() !!}
-	@endif
+
 </section>
 
 <!-- This will be printed -->
@@ -128,8 +127,11 @@
 	<!-- Sale Return -->
 	@if(request()->get('sale-return') == 1)
 	<script>
+		@if(!isset($_GET['sale-return']) && $transaction->payment_status == 'paid')
+		__page_leave_confirmation('#edit_pos_sell_form');
+		@endif
 		$(document).ready(function(){
-
+			
 			//Hide the html component on sale return
 			$('#product_brand_div').hide();
 			$('#product_category_div').hide();
@@ -191,6 +193,11 @@
 			//Close the card payment on return
 			$(document).on('click', '#card-payment-close', function(){
 				$('.modal-backdrop').remove();
+			});
+
+			$(document).on('click', '.overlay2 a', function(){
+				window.onbeforeunload = null;
+				$(window).off('beforeunload');
 			});
 			
 			

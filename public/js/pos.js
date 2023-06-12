@@ -3366,7 +3366,6 @@ $(document).on('submit', 'form#clock_in_clock_out_form', function(e) {
     e.preventDefault();
     $(this).find('button[type="submit"]').attr('disabled', true);
     var data = $(this).serialize();
-
     $.ajax({
         method: $(this).attr('method'),
         url: $(this).attr('action'),
@@ -3408,12 +3407,12 @@ $(document).on('submit', 'form#clock_in_clock_out_form', function(e) {
                     shift_details.innerHTML = result.shift_details;
                 }
 
-                // swal({
-                //     title: result.msg,
-                //     content: shift_details,
-                //     icon: 'error'
-                // })
-                toastr.error(result.msg);
+                swal({
+                    title: result.msg,
+                    content: shift_details,
+                    icon: 'error'
+                })
+                //toastr.error(result.msg);
 
             }
             $('#clock_in_clock_out_form')[0].reset();

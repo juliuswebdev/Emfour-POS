@@ -57,28 +57,27 @@ class OrderController extends Controller
         $line_orders = [];
         if ($this->restUtil->is_service_staff($user_id)) {
             $is_service_staff = true;
-            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => $user_id]);
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => $user_id, 'orders_for' => 'waiter']);
 
-            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => $user_id]);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => $user_id, 'orders_for' => 'waiter']);
         } elseif (! empty(request()->service_staff)) {
-            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => request()->service_staff]);
-            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => request()->service_staff]);
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => request()->service_staff, 'orders_for' => 'waiter']);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => request()->service_staff, 'orders_for' => 'waiter']);
 
         } else if ( empty(request()->service_staff) ) {
-            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => 'all']);
-            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => 'all']);
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => 'all', 'orders_for' => 'waiter']);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => 'all', 'orders_for' => 'waiter']);
 
         }
 
         if(request()->service_staff == 'all') {
-            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => 'all']);
-            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => 'all']);
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => 'all', 'orders_for' => 'waiter']);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => 'all', 'orders_for' => 'waiter']);
         }
 
         if (! $is_service_staff) {
             $service_staff = $this->restUtil->service_staff_dropdown($business_id);
         }
-
         return view('restaurant.orders.index', compact('orders', 'is_service_staff', 'service_staff', 'line_orders', 'business_details'));
     }
 
@@ -143,13 +142,19 @@ class OrderController extends Controller
                 $res_line_order_status = 'ready';
             }
 
+            $date = date('Y-m-d H:i:s');
+            if(in_array($stage, ['served_at_undo'])) {
+                $date = null;
+            }
+            $stage = str_replace('_undo', '', $stage);
+
             $business_id = request()->session()->get('user.business_id');
             $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
                         ->where('t.business_id', $business_id)
                         ->where('transaction_id', $id)
                         ->where('product_id', $product_id)
                         ->update([
-                            $stage => date('Y-m-d H:i:s'),
+                            $stage => $date,
                             'res_line_order_status' => $res_line_order_status
                         ]);
 

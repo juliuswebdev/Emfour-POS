@@ -49,7 +49,7 @@ class KitchenController extends Controller
         // }
 
         $business_id = request()->session()->get('user.business_id');
-        $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received']);
+        $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received', 'orders_for' => 'kitchen']);
             
         
         $business_details = $this->businessUtil->getDetails($business_id);
@@ -64,12 +64,19 @@ class KitchenController extends Controller
      */
     public function updateCookProgress($stage, $id, $product_id){
         try {
+
+            $date = date('Y-m-d H:i:s');
+            if(in_array($stage, ['cook_start_undo', 'cook_end_undo'])) {
+                $date = null;
+            }
+            $stage = str_replace('_undo', '', $stage);
+
             $business_id = request()->session()->get('user.business_id');
             $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
                         ->where('t.business_id', $business_id)
                         ->where('transaction_id', $id)
                         ->where('product_id', $product_id)
-                        ->update([$stage => date('Y-m-d H:i:s')]);
+                        ->update([$stage => $date]);
 
             $output = [
                 'success' => 1,
