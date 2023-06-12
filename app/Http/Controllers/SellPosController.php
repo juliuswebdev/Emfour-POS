@@ -336,7 +336,7 @@ class SellPosController extends Controller
         if (! $is_direct_sale && $this->cashRegisterUtil->countOpenedRegister() == 0) {
             return redirect()->action([\App\Http\Controllers\CashRegisterController::class, 'create']);
         }
-
+        
         // try {
             $input = $request->except('_token');
 
@@ -393,9 +393,29 @@ class SellPosController extends Controller
                 ];
 
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
-
-                // Card Charge J
+                
+                //Apply Service Charges
                 $business = Business::find($business_id);
+                if($business->business_type_id == 1){
+                    if($business->gratuity_settings != null){
+                        $gratuity_settings = json_decode($business->gratuity_settings, true);
+                        $gratuity_percentage = $gratuity_settings['percentage'];
+                        $gratuity_charge_amount = ($invoice_total['total_before_tax'] * $gratuity_percentage) / 100;
+                        $gratuity_charge_amount = sprintf('%0.2f', $gratuity_charge_amount);
+                        $input['gratuity_charge_percentage'] = $gratuity_percentage;
+                        $input['gratuity_charge_amount'] = $gratuity_charge_amount;
+                        $invoice_total['final_total'] = ($invoice_total['final_total'] + $gratuity_charge_amount);
+                    }
+                }
+
+                //Apply Tips
+                if($request->has('tips_amount') && $request->filled('tips_amount')){
+                    $input['tips_amount'] = $request->tips_amount;
+                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $request->tips_amount);
+                }
+
+                
+                // Card Charge J
                 $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
                 $input_final_total_temp = 0;
                 $invoice_total_total_before_tax_temp = 0;
@@ -416,6 +436,7 @@ class SellPosController extends Controller
                 $input['final_total'] = $input_final_total_temp;
                 $invoice_total['total_before_tax'] = $invoice_total_total_before_tax_temp;
                 $invoice_total['final_total'] = $invoice_total_final_total_temp;
+
 
                 DB::beginTransaction();
 
@@ -1329,6 +1350,26 @@ class SellPosController extends Controller
                     'discount_amount' => $input['discount_amount'],
                 ];
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+                
+                //Apply Gratuity
+                $business = Business::find($business_id);
+                if($business->business_type_id == 1){
+                    if($business->gratuity_settings != null){
+                        $gratuity_settings = json_decode($business->gratuity_settings, true);
+                        $gratuity_percentage = $gratuity_settings['percentage'];
+                        $gratuity_charge_amount = ($invoice_total['total_before_tax'] * $gratuity_percentage) / 100;
+                        $gratuity_charge_amount = sprintf('%0.2f', $gratuity_charge_amount);
+                        $input['gratuity_charge_percentage'] = $gratuity_percentage;
+                        $input['gratuity_charge_amount'] = $gratuity_charge_amount;
+                        $invoice_total['final_total'] = ($invoice_total['final_total'] + $gratuity_charge_amount);
+                    }
+                }
+
+                //Apply Tips
+                if($request->has('tips_amount') && $request->filled('tips_amount')){
+                    $input['tips_amount'] = $request->tips_amount;
+                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $request->tips_amount);
+                }
 
                 if (! empty($request->input('transaction_date'))) {
                     $input['transaction_date'] = $this->productUtil->uf_date($request->input('transaction_date'), true);

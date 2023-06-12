@@ -112,6 +112,7 @@
 
 @include('restaurant.orders.checkout-modal')
 
+
 @if($business_details->business_type_id == 2)		
 	<div class="modal fade in" tabindex="-1" role="dialog" id="booking-checkout">
 		<div class="modal-dialog" role="document">

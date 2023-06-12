@@ -22,6 +22,8 @@
 		<div class="row">
 		<div class="col-md-12"><hr></div>
 		</div>
+
+		{{--
 		@if(!empty($permissions))
 			@php
 				$custom_permissions_super_admin = $package->custom_permissions;
@@ -59,5 +61,5 @@
 				@endforeach
 			</div>
 		@endif
-
+		--}}
 </div>
