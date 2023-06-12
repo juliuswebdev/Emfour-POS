@@ -3514,10 +3514,12 @@ function filterProductByCategory(parent_id, category_id, total_subcatgory, level
                 $('button.back-event').attr('data-parent-id', parent_id);
             }
 
+            /*
             if(is_show_direct_product == 1){
                level = 2;
                $('button.back-event').attr('data-parent-id', category_id);
             }
+            */
 
             $('button.back-event').attr('data-category', category_id);
             $('button.back-event').attr('data-subcategory-count', total_subcatgory);
