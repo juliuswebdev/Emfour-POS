@@ -9334,6 +9334,9 @@ button#pos-cancel{
   max-height: 75vh !important;
   overflow-y: scroll !important;
 }
+.subcategory-box .category_box{
+  background: aliceblue;
+}
 /*!
  * FullCalendar v3.10.2
  * Docs & License: https://fullcalendar.io/

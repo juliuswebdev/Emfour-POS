@@ -3461,10 +3461,12 @@ $('body').on('click', '.category_box', function(){
     var category_id = $(this).data('id');
     var total_subcatgory = $(this).data('subcategory-count');
     var level = $(this).data('level');
-    filterProductByCategory(parent_id, category_id, total_subcatgory, level);
+    var is_show_direct_product = $(this).data('direct-product');
+    filterProductByCategory(parent_id, category_id, total_subcatgory, level, is_show_direct_product);
 });
 
-function filterProductByCategory(parent_id, category_id, total_subcatgory, level){
+//Common function for filter pos categories
+function filterProductByCategory(parent_id, category_id, total_subcatgory, level, is_show_direct_product){
     var location_id = $('input#location_id').val();
     var is_enabled_stock = null;
     if ($("#is_enabled_stock").length) {
@@ -3484,6 +3486,7 @@ function filterProductByCategory(parent_id, category_id, total_subcatgory, level
             category_id: category_id,
             location_id: location_id,
             is_enabled_stock: is_enabled_stock,
+            is_show_direct_product:is_show_direct_product
         },
         dataType: 'html',
         success: function(result) {
@@ -3498,8 +3501,6 @@ function filterProductByCategory(parent_id, category_id, total_subcatgory, level
             }
             $('button.back-event').removeClass('d-none');
             
-
-
             if($('div#product_list_body .subcategory-wrapper').length != 0){
                 var subcategory_html = $('div#product_list_body .subcategory-wrapper').html();
                 $('div#subcategory-list-wrapper').html('');
@@ -3513,6 +3514,11 @@ function filterProductByCategory(parent_id, category_id, total_subcatgory, level
                 $('button.back-event').attr('data-parent-id', parent_id);
             }
 
+            if(is_show_direct_product == 1){
+               level = 2;
+               $('button.back-event').attr('data-parent-id', category_id);
+            }
+
             $('button.back-event').attr('data-category', category_id);
             $('button.back-event').attr('data-subcategory-count', total_subcatgory);
             $('button.back-event').attr('data-level', level);
@@ -3523,7 +3529,6 @@ function filterProductByCategory(parent_id, category_id, total_subcatgory, level
 }
 
 //POS Category Back Button Event
-//$('.back-btn-wrapper button').click(function(){
 $('body').on('click', '.back-btn-wrapper button', function(){
     $('div#product_list_body').html('');
     $('div#subcategory-list-wrapper').hide();

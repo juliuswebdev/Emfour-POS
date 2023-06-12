@@ -2262,6 +2262,7 @@ class SellPosController extends Controller
             $category_id = $request->get('category_id');
             $brand_id = $request->get('brand_id');
             $location_id = $request->get('location_id');
+            $is_show_direct_product = $request->get('is_show_direct_product');
 
             $check_qty = false;
             $business_id = $request->session()->get('user.business_id');
@@ -2361,9 +2362,16 @@ class SellPosController extends Controller
 
             $show_prices = ! empty($pos_settings['show_pricing_on_product_sugesstion']);
 
-            $subcategories = Category::where('parent_id', $category_id)->where('business_id', $business_id)->get();
+            $subcategories = ($is_show_direct_product) ? [] : Category::where('parent_id', $category_id)->where('business_id', $business_id)->get()->toArray();
+            
+            if(!empty($subcategories)){
+                $category = Category::where('id', $category_id)->where('business_id', $business_id)->first();
+            }else{
+                $category = null;
+            }
+            
             return view('sale_pos.partials.product_list')
-                    ->with(compact('products', 'allowed_group_prices', 'show_prices', 'subcategories'));
+                    ->with(compact('products', 'allowed_group_prices', 'show_prices', 'subcategories', 'category'));
         }
     }
 

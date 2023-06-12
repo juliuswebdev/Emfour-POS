@@ -152,7 +152,7 @@
 				@endphp
 			@endif
 		<div class="col-md-3 col-xs-4 main-category no-print">
-			<div class="category_box" data-parent-id="" data-level="1" data-subcategory-count="{{ $subcategory }}" title="{{$category['name']}}" data-id="{{ $category['id'] }}">
+			<div class="category_box" data-direct-product="0" data-parent-id="" data-level="1" data-subcategory-count="{{ $subcategory }}" title="{{$category['name']}}" data-id="{{ $category['id'] }}">
 				<div class="image-container">
 					<img src="{{asset('/uploads/category_logos/' . rawurlencode($category['logo']))}}">
 				</div>
