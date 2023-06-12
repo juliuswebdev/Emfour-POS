@@ -1579,6 +1579,7 @@ return [
     'receipt_total_return' => 'Total Return',
     'receipt_invoice_no' => 'Invoice No.',
     'not_available' => 'Not Available',
+    'undo' => 'Undo',
     'item_has_been_removed' => 'Item has been removed.',
     'item_mark_as_not_available' => 'Item mark as not available',
     'transaction_paid' => 'The transaction is already paid!',

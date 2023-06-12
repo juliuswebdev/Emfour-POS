@@ -105,7 +105,7 @@
 								$product = \App\Product::where('id', $row->product_id)->select('product_custom_field1', 'type', 'name', 'product_description', 'unit_id')->first();
 							@endphp
 							
-							@if( ($product->product_custom_field1 == 1 && $row->res_line_order_status != 'served') || ($orders_for == 'waiter' ))
+							@if( ($product->product_custom_field1 == 1 && ($row->res_line_order_status != 'served' && $row->res_line_order_status != 'ready' || $order->is_kitchen_again != 1)) || ($orders_for == 'waiter' ))
 								<tr>
 									<td>
 										
@@ -161,11 +161,34 @@
 															@endphp
 														@endif
 														
-														<a href="javascript:;" data-href="{{ ($cooking_clickable) ? action([\App\Http\Controllers\Restaurant\KitchenController::class, 'updateCookProgress'], ['cook_start', $order->id, $row->product_id]) : '' }}" class="{{ ($cooking_clickable) ? 'btn-cooking-stage' : ''}}">
+
+														@php
+
+															$timeFirst  = strtotime($row->cook_start);
+															$timeSecond = strtotime(\Carbon::now());
+															$differenceInSeconds =  $timeSecond - $timeFirst;
+
+															$undo = false;
+															$stage = 'cook_start';
+															if($differenceInSeconds <= 600) {
+																$undo = true;
+																$cooking_clickable = true;
+																$stage = 'cook_start_undo';
+															}
+
+														@endphp
+
+														
+														<a href="javascript:;" data-href="{{ ($cooking_clickable) ? action([\App\Http\Controllers\Restaurant\KitchenController::class, 'updateCookProgress'], [$stage, $order->id, $row->product_id]) : '' }}" class="{{ ($cooking_clickable) ? 'btn-cooking-stage' : ''}}">
 															<span class="label kit-fix-w-label {{ $cooking_btn_bg }} ">
+																@if(!$undo)
 																{{ __('lang_v1.cooking') }}
+																@else
+																{{ __('lang_v1.undo') }}
+																@endif
 															</span>
 														</a>
+														
 								
 														<br><span class="fs-12">@if($row->cook_start != null){{ $row->display_cook_start_time }} @else &nbsp; @endif</span>
 
@@ -194,9 +217,31 @@
 															@endphp
 														@endif
 
-														<a href="javascript:;" data-href="{{ ($ready_clickable) ? action([\App\Http\Controllers\Restaurant\KitchenController::class, 'updateCookProgress'], ['cook_end', $order->id, $row->product_id]) : '' }}" class="{{ ($ready_clickable) ? 'btn-cooking-stage' : ''}}">
-															<span class="label kit-fix-w-label {{ $ready_btn_bg }}"
-															>{{ __('lang_v1.ready') }} </span>
+														@php
+
+															$timeFirst  = strtotime($row->cook_end);
+															$timeSecond = strtotime(\Carbon::now());
+															$differenceInSeconds =  $timeSecond - $timeFirst;
+
+															$undo = false;
+															$stage = 'cook_end';
+															if($differenceInSeconds <= 600) {
+																$undo = true;
+																$ready_clickable = true;
+																$stage = 'cook_end_undo';
+															}
+
+														@endphp
+
+
+														<a href="javascript:;" data-href="{{ ($ready_clickable) ? action([\App\Http\Controllers\Restaurant\KitchenController::class, 'updateCookProgress'], [$stage, $order->id, $row->product_id]) : '' }}" class="{{ ($ready_clickable) ? 'btn-cooking-stage' : ''}}">
+															<span class="label kit-fix-w-label {{ $ready_btn_bg }}">
+																@if(!$undo)
+																{{ __('lang_v1.ready') }}
+																@else
+																{{ __('lang_v1.undo') }}
+																@endif
+															</span>
 														</a>
 														
 															<br><span class="fs-12">@if($row->cook_end != null) {{ $row->display_cook_end_time }} @else &nbsp; @endif</span>
@@ -260,8 +305,30 @@
 															@endphp
 														@endif
 
-														<a href="javascript:;" data-href="{{ ($serve_clickable) ? action([\App\Http\Controllers\Restaurant\OrderController::class, 'updateServed'], ['served_at', $order->id, $row->product_id]) : '' }}" class="{{ ($serve_clickable) ? 'btn-served' : ''}}">
-															<span class="label kit-fix-w-label {{ $serve_btn_bg }}">{{ __('lang_v1.served') }} </span>
+														@php
+
+															$timeFirst  = strtotime($row->served_at);
+															$timeSecond = strtotime(\Carbon::now());
+															$differenceInSeconds =  $timeSecond - $timeFirst;
+
+															$undo = false;
+															$stage = 'served_at';
+															if($differenceInSeconds <= 600) {
+																$undo = true;
+																$serve_clickable = true;
+																$stage = 'served_at_undo';
+															}
+
+														@endphp
+
+														<a href="javascript:;" data-href="{{ ($serve_clickable) ? action([\App\Http\Controllers\Restaurant\OrderController::class, 'updateServed'], [$stage, $order->id, $row->product_id]) : '' }}" class="{{ ($serve_clickable) ? 'btn-served' : ''}}">
+															<span class="label kit-fix-w-label {{ $serve_btn_bg }}">
+																@if(!$undo)
+																{{ __('lang_v1.served') }}
+																@else
+																{{ __('lang_v1.undo') }}
+																@endif
+															</span>
 														</a>
 														<br><span class="fs-12">@if($row->served_at != null){{ $row->display_served_time }} @else &nbsp; @endif</span>
 													</div>
