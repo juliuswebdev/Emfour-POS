@@ -268,6 +268,29 @@
               <td></td>
               <td><span class="display_currency pull-right" data-currency_symbol="true">{{ $sell->total_before_tax }}</span></td>
             </tr>
+
+            <!-- Gratuity Amount -->
+            @if( ($sell->gratuity_charge_amount > 0) && ($sell->gratuity_label != "") )
+            <tr>
+              <th>{!! $sell->gratuity_label.' ('.$sell->gratuity_charge_percentage.'%)' !!}: </th>
+              <td><b>(+)</b></td>
+              <td><span class="display_currency pull-right" data-currency_symbol="true">{{ $sell->gratuity_charge_amount }}</span></td>
+            </tr>
+            @endif
+
+            <!-- Tips Amount-->
+            @if($sell->tips_amount > 0)
+            <tr>
+              <th>@lang('lang_v1.tips'): </th>
+              <td><b>(+)</b></td>
+              <td>
+                <span class="display_currency pull-right" data-currency_symbol="true">
+                  {{$sell->tips_amount}}
+                </span>
+              </td>
+            </tr>
+            @endif
+
             <tr>
               <th>{{ __('sale.discount') }}:</th>
               <td><b>(-)</b></td>

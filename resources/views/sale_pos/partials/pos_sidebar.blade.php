@@ -89,6 +89,8 @@
 @endif
 </div>
 <div class="row">
+
+	{{--
 	@if(!empty($categories))
 		<div class="col-md-4" id="product_category_div">
 			<select class="select2" id="product_category" style="width:100% !important">
@@ -111,12 +113,15 @@
 			</select>
 		</div>
 	@endif
-
+	--}}
+	
+	{{--
 	@if(count($brands) > 1)
 		<div class="col-sm-4" id="product_brand_div">
 			{!! Form::select('size', $brands, null, ['id' => 'product_brand', 'class' => 'select2', 'name' => null, 'style' => 'width:100% !important']) !!}
 		</div>
 	@endif
+	--}}
 
 	<!-- used in repair : filter for service/product -->
 	<div class="col-md-6 hide" id="product_service_div">
@@ -127,12 +132,52 @@
 		<button type="button" class="btn btn-primary btn-flat" id="show_featured_products">@lang('lang_v1.featured_products')</button>
 	</div>
 </div>
-<br>
+
+<!--- New Category P -->
+@if(!empty($categories))
+<div class="row">
+	<div class="col-md-12 back-btn-wrapper">
+		<button type="button" data-parent-id="" data-category="" data-level="1" data-subcategory-count="" title="Back" class="btn bg-primary back-event d-none">Back</button>
+	</div>
+</div>
+<div class="row" id="category-list-wrapper">
+	@foreach($categories as $category)
+			@if(empty($category['sub_categories']))
+				@php
+					$subcategory = 0;
+				@endphp
+			@else
+				@php
+					$subcategory = count($category['sub_categories']);
+				@endphp
+			@endif
+		<div class="col-md-3 col-xs-4 main-category no-print">
+			<div class="category_box" data-parent-id="" data-level="1" data-subcategory-count="{{ $subcategory }}" title="{{$category['name']}}" data-id="{{ $category['id'] }}">
+				<div class="image-container">
+					<img src="{{asset('/uploads/category_logos/' . rawurlencode($category['logo']))}}">
+				</div>
+				<div class="text_div">
+					<small class="text text-muted">
+						{{$category['name']}}
+					</small>
+				</div>
+			</div>
+		</div>
+	@endforeach
+</div>
+<div class="row" id="subcategory-list-wrapper">
+	
+</div>
+@endif
+<!--- New Category end -->
+
+{{-- <br> --}}
 <div class="row">
 	<input type="hidden" id="suggestion_page" value="1">
-	<div class="col-md-12">
-		<div class="eq-height-row" id="product_list_body"></div>
-	</div>
+	{{-- <div class="col-md-12"> --}}
+	<div class="eq-height-row" id="product_list_body"></div>
+	
+	{{-- </div> --}}
 	<div class="col-md-12 text-center" id="suggestion_page_loader" style="display: none;">
 		<i class="fa fa-spinner fa-spin fa-2x"></i>
 	</div>

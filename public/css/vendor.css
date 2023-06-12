@@ -9260,6 +9260,80 @@ button#pos-cancel{
   margin-left: 0px !important;
   margin-right: 0px !important;
 }
+
+.category_box{
+  background: #fff;
+  border-radius: 5px;
+  width: 100%;
+  cursor: pointer;
+  margin-bottom: 10px;
+  background: antiquewhite;
+}
+
+.category_box .image-container{
+  margin: auto;
+  width: 100%;
+  padding-top: 15px;
+}
+
+.category_box .image-container, img{
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.category_box .text_div{
+  text-align: center;
+  padding-bottom: 10px;
+  margin-top: 20px;
+}
+
+.category_box .text_div .text{
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.back-btn-wrapper button:hover, .back-btn-wrapper button:focus{
+  color: #fff;
+}
+
+.back-btn-wrapper button{
+  margin-bottom: 10px;
+  padding: 5px 12px;
+  font-size: 12px;
+} 
+
+#product_list_body .product_box{
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#product_list_body .product_list{
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.subcategory-wrapper{
+  width:100%;
+}
+
+.product_box .image-container{
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-repeat: initial !important;
+}
+
+#category-list-wrapper, #subcategory-list-wrapper{
+  max-height: 75vh;
+  overflow-y: scroll;
+}
+
+#product_list_body {
+  max-height: 75vh !important;
+  overflow-y: scroll !important;
+}
 /*!
  * FullCalendar v3.10.2
  * Docs & License: https://fullcalendar.io/
