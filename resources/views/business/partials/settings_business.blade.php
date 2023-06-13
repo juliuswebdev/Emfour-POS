@@ -240,6 +240,25 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('name',__('lang_v1.kitchen_ui_undo_timeframe') . ':') !!}
+                    {!! Form::text('kitchen_ui_undo_timeframe', $business->kitchen_screen_button_undo_timeframe, ['class' => 'form-control allow-number-only',
+                    'placeholder' => __('lang_v1.kitchen_ui_undo_timeframe')]); !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('name',__('lang_v1.order_ui_undo_timeframe') . ':') !!}
+                    {!! Form::text('order_ui_undo_timeframe', $business->order_screen_button_undo_timeframe, ['class' => 'form-control allow-number-only',
+                    'placeholder' => __('lang_v1.order_ui_undo_timeframe')]); !!}
+                </div>
+            </div>
+        </div>
+        
     @endif
 
 </div>

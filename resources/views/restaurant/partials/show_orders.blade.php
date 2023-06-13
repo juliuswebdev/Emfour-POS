@@ -60,7 +60,13 @@
 						</tr>
 						
 						@php
-						
+							$kitchen_undo_timeframe_in_sec = $business_details->kitchen_screen_button_undo_timeframe;
+
+							$order_undo_timeframe_in_sec = $business_details->kitchen_screen_button_undo_timeframe;
+							
+							$current_time_in_sec = strtotime(\Carbon::now());
+															
+
 							foreach ($order->sell_lines as $key => $value) {
 								if (! empty($value->sub_unit_id)) {
 									$t = new \App\Utils\TransactionUtil;
@@ -163,19 +169,19 @@
 														
 
 														@php
-
-															$timeFirst  = strtotime($row->cook_start);
-															$timeSecond = strtotime(\Carbon::now());
-															$differenceInSeconds =  $timeSecond - $timeFirst;
-
 															$undo = false;
 															$stage = 'cook_start';
-															if($differenceInSeconds <= 600) {
-																$undo = true;
-																$cooking_clickable = true;
-																$stage = 'cook_start_undo';
-															}
 
+															if($row->cook_start != null){
+																$time_on_press  = strtotime($row->cook_start);
+																$time_of_different = ($current_time_in_sec - $time_on_press);
+																
+																if($time_of_different <= $kitchen_undo_timeframe_in_sec) {
+																	$undo = true;
+																	$cooking_clickable = true;
+																	$stage = 'cook_start_undo';
+																}
+															}
 														@endphp
 
 														
@@ -218,19 +224,16 @@
 														@endif
 
 														@php
-
-															$timeFirst  = strtotime($row->cook_end);
-															$timeSecond = strtotime(\Carbon::now());
-															$differenceInSeconds =  $timeSecond - $timeFirst;
-
 															$undo = false;
 															$stage = 'cook_end';
-															if($differenceInSeconds <= 600) {
+															$time_on_press  = strtotime($row->cook_end);
+															$time_of_different = ($current_time_in_sec - $time_on_press);
+															
+															if($time_of_different <= $kitchen_undo_timeframe_in_sec) {
 																$undo = true;
 																$ready_clickable = true;
 																$stage = 'cook_end_undo';
 															}
-
 														@endphp
 
 
@@ -305,21 +308,20 @@
 															@endphp
 														@endif
 
+
 														@php
-
-															$timeFirst  = strtotime($row->served_at);
-															$timeSecond = strtotime(\Carbon::now());
-															$differenceInSeconds =  $timeSecond - $timeFirst;
-
 															$undo = false;
 															$stage = 'served_at';
-															if($differenceInSeconds <= 600) {
+															$time_on_press  = strtotime($row->served_at);
+															$time_of_different = ($current_time_in_sec - $time_on_press);
+															
+															if($time_of_different <= $order_undo_timeframe_in_sec) {
 																$undo = true;
 																$serve_clickable = true;
 																$stage = 'served_at_undo';
 															}
-
 														@endphp
+
 
 														<a href="javascript:;" data-href="{{ ($serve_clickable) ? action([\App\Http\Controllers\Restaurant\OrderController::class, 'updateServed'], [$stage, $order->id, $row->product_id]) : '' }}" class="{{ ($serve_clickable) ? 'btn-served' : ''}}">
 															<span class="label kit-fix-w-label {{ $serve_btn_bg }}">

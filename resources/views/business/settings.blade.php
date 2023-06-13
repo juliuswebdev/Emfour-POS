@@ -229,5 +229,19 @@
         return $txtBox; //for chaining
     });
 
+    
+    //Js Client Side Validation for kitchen & order ui undo button timeframe
+    $('input[name="kitchen_ui_undo_timeframe"],input[name="order_ui_undo_timeframe"]').on('input', function(){
+        if (/\D/g.test(this.value))
+        {
+            // Filter non-digits from input value.
+            this.value = this.value.replace(/\D/g, '');
+        }
+        var sec = parseInt(this.value);
+        if(sec > 120){
+            this.value = "";
+        }
+    });
+
 </script>
 @endsection

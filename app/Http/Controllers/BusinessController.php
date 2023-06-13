@@ -501,6 +501,15 @@ class BusinessController extends Controller
                         'percentage' => $request->gratuity_setting_percentage
                     ));
                 }
+
+                //Order Undo Time Frame setting
+                if($request->has('kitchen_ui_undo_timeframe') && $request->filled('kitchen_ui_undo_timeframe')){
+                    $business_details['kitchen_screen_button_undo_timeframe'] = $request->kitchen_ui_undo_timeframe;
+                }
+
+                if($request->has('order_ui_undo_timeframe') && $request->filled('order_ui_undo_timeframe')){
+                    $business_details['order_screen_button_undo_timeframe'] = $request->order_ui_undo_timeframe;
+                }
             }
 
             $business->fill($business_details);
