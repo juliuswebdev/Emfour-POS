@@ -1392,6 +1392,7 @@ $(document).ready(function() {
     $('select#product_category, select#product_brand, select#select_location_id').on('change', function(e) {
         $('input#suggestion_page').val(1);
         var location_id = $('input#location_id').val();
+        /*
         if (location_id != '' || location_id != undefined) {
             get_product_suggestion_list(
                 $('select#product_category').val(),
@@ -1400,7 +1401,12 @@ $(document).ready(function() {
                 null
             );
         }
-
+        */
+        $('div#category-list-wrapper').show();
+        $('div#subcategory-list-wrapper').hide();
+        $('.back-event').addClass('d-none');
+        $('div#product_list_body').html('');
+ 
         get_featured_products();
     });
 
