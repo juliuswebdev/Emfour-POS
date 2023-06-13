@@ -3347,6 +3347,14 @@ class SellPosController extends Controller
     }
 
 
+    public function getPosPublic()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $business = Business::find($business_id);
+        return view('sale_pos.public')->with(compact('business'));
+    }
+
+
 
 
 }

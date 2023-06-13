@@ -3439,3 +3439,42 @@ $('.btn-submit-tips').click(function(){
     $('#tips-modal').modal('hide'); 
 });
 
+
+setFakeWebsocket();
+$(document).on('click', 'body, .pos_remove_row, .quantity-up, .quantity-down', function(){
+    setFakeWebsocket();
+});
+
+function setFakeWebsocket() {
+    var table = $('#pos_table tbody').html();
+    localStorage.setItem('pos_table', table);
+
+    var location = $('#select_location_id option:selected').text();
+    localStorage.setItem('pos_location', location);
+
+    var total_payable = $('#total_payable').text();
+    localStorage.setItem('total_payable', total_payable);
+
+    var total_discount = $('#total_discount').text();
+    localStorage.setItem('total_discount', total_discount);
+
+    var order_tax = $('#order_tax').text();
+    localStorage.setItem('order_tax', order_tax);
+
+    var shipping_charges_amount = $('#shipping_charges_amount').text();
+    localStorage.setItem('shipping_charges_amount', shipping_charges_amount);
+
+    var packing_charge_text = $('#packing_charge_text').text();
+    localStorage.setItem('packing_charge_text', packing_charge_text);
+
+    var tips_text = $('#tips_text').text();
+    localStorage.setItem('tips_text', tips_text);
+
+}
+
+$('form#add_pos_sell_form, form#edit_pos_sell_form').submit(function() {
+    setTimeout(function(){
+        setFakeWebsocket();
+    },1000)
+});
+

@@ -253,6 +253,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reset-mapping', [SellController::class, 'resetMapping']);
 
     Route::resource('pos', SellPosController::class);
+    Route::get('public/pos', [SellPosController::class, 'getPosPublic']);
 
     //Sale Return Pin Verify & Return Payment
     Route::post('pos/sale-return/pin-verify', [SellPosController::class, 'saleReturnPinVerify']);

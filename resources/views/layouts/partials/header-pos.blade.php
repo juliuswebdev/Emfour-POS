@@ -182,6 +182,12 @@
           <span id="device_label">{{ ($payment_device == null) ? __('lang_v1.select_payment_device') : $payment_device->name }}</span> <strong><i class="fa fa-cog fa-lg"></i></strong>
         </button>
 
+        <a 
+          class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right" 
+          href="#" 
+          onClick="window.open('{{action([\App\Http\Controllers\SellPosController::class, 'getPosPublic'])}}','winname','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1000,height=1000');">
+          <strong><i class="fa fa-tv fa-lg"></i></strong>
+        </a>
 
     </div>
     
