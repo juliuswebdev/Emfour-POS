@@ -15,7 +15,8 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->decimal('tips_amount', 22,4)->default(0)->after('selling_price_group_id');
-            $table->decimal('gratuity_charge_percentage', 22,2)->default(0)->after('tips_amount');
+            $table->string('gratuity_label')->nullable()->after('tips_amount');
+            $table->decimal('gratuity_charge_percentage', 22,2)->default(0)->after('gratuity_label');
             $table->decimal('gratuity_charge_amount', 22,4)->default(0)->after('gratuity_charge_percentage');
         });
     }

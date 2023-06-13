@@ -508,7 +508,7 @@
 						@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
 							<div class="flex-box">
 								<p class="sub-headings">
-									@lang('lang_v1.card_charge') {{$payment['card_charge_percent']}}%
+									@lang('lang_v1.card_charge') ({{$payment['card_charge_percent']}}%)
 								</p>
 								<p class="width-50 text-right sub-headings">
 									{{$payment['card_charge_amount']}}
@@ -518,7 +518,30 @@
 								
 					@endforeach
 				@endif
+				
+				<!-- Gratuity Amount-->
+				@if( ($receipt_details->gratuity_unformatted_charges > 0) && ($receipt_details->gratuity_label != "") )
+				<div class="flex-box">
+					<p class="sub-headings">
+						{!! $receipt_details->gratuity_label.' ('.$receipt_details->gratuity_percentage.'%)' !!}
+					</p>
+					<p class="width-50 text-right sub-headings">
+						{{$receipt_details->gratuity_charges}}
+					</p>
+				</div>
+				@endif
 
+				<!-- Tips Amount-->
+				@if($receipt_details->tips_unformatted_amount > 0)
+				<div class="flex-box">
+					<p class="sub-headings">
+							@lang('lang_v1.tips')
+					</p>
+					<p class="width-50 text-right sub-headings">
+							{{$receipt_details->tips_amount}}
+					</p>
+				</div>
+				@endif
 
                 <!-- Shipping Charges -->
 				@if(!empty($receipt_details->shipping_charges))

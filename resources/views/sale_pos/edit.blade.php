@@ -133,6 +133,7 @@
 		$(document).ready(function(){
 			
 			//Hide the html component on sale return
+			$('#category-list-wrapper').hide();
 			$('#product_brand_div').hide();
 			$('#product_category_div').hide();
 			$('#product_list_body').hide();

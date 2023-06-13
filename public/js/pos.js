@@ -1369,6 +1369,9 @@ $(document).ready(function() {
 
 
     //Show product list / New update onchange category event
+    
+    /*
+    //Stop OnLoad Calling
     var product_category_select = $('select#product_category').val();
     var product_brand_select = $('select#product_brand').val();
     if(product_category_select == 'all' || product_brand_select == 'all') {
@@ -1383,9 +1386,13 @@ $(document).ready(function() {
         is_enabled_stock,
         device_model_id
     );
+    */
+
+
     $('select#product_category, select#product_brand, select#select_location_id').on('change', function(e) {
         $('input#suggestion_page').val(1);
         var location_id = $('input#location_id').val();
+        /*
         if (location_id != '' || location_id != undefined) {
             get_product_suggestion_list(
                 $('select#product_category').val(),
@@ -1394,7 +1401,12 @@ $(document).ready(function() {
                 null
             );
         }
-
+        */
+        $('div#category-list-wrapper').show();
+        $('div#subcategory-list-wrapper').hide();
+        $('.back-event').addClass('d-none');
+        $('div#product_list_body').html('');
+ 
         get_featured_products();
     });
 
@@ -2042,7 +2054,12 @@ function calculate_billing_details(price_total) {
         $('#tips_text').text("0"); 
     }
     
-    var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense + gratuity_charges + tips_amount;
+
+    if($('.wrapper-of-sale-return').length > 0){
+        var total_payable = price_total;
+    }else{
+        var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense + gratuity_charges + tips_amount;
+    }
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
@@ -2199,6 +2216,11 @@ function reset_pos_form(){
 
     if ($('#is_credit_sale').length) {
         $('#is_credit_sale').val(0);
+    }
+
+    //Gratuity Check
+    if ($('.gratuity_charges').length) {
+        $('.gratuity_charges').text(0);
     }
 
 	//Reset discount
@@ -3478,3 +3500,102 @@ $('form#add_pos_sell_form, form#edit_pos_sell_form').submit(function() {
     },1000)
 });
 
+//Function use for new category through get subcategory or products.
+$('body').on('click', '.category_box', function(){
+    var parent_id = $(this).data('parent-id');
+    var category_id = $(this).data('id');
+    var total_subcatgory = $(this).data('subcategory-count');
+    var level = $(this).data('level');
+    var is_show_direct_product = $(this).data('direct-product');
+    filterProductByCategory(parent_id, category_id, total_subcatgory, level, is_show_direct_product);
+});
+
+//Common function for filter pos categories
+function filterProductByCategory(parent_id, category_id, total_subcatgory, level, is_show_direct_product){
+    var location_id = $('input#location_id').val();
+    var is_enabled_stock = null;
+    if ($("#is_enabled_stock").length) {
+        is_enabled_stock = $("#is_enabled_stock").val();
+    }
+    var device_model_id = null;
+    if ($("#repair_model_id").length) {
+        device_model_id = $("#repair_model_id").val();
+    }
+    
+    var url = '/sells/pos/get-product-by-filter';
+    $('#suggestion_page_loader').fadeIn(700);
+    $.ajax({
+        method: 'GET',
+        url: url,
+        data: {
+            category_id: category_id,
+            location_id: location_id,
+            is_enabled_stock: is_enabled_stock,
+            is_show_direct_product:is_show_direct_product
+        },
+        dataType: 'html',
+        success: function(result) {
+           
+            $('div#product_list_body').html('');
+            $('div#product_list_body').append(result);
+            $('div#category-list-wrapper').hide();
+            $('div#subcategory-list-wrapper').hide();
+            
+            if(level == ""){
+                $('div#subcategory-list-wrapper').hide();
+            }
+            $('button.back-event').removeClass('d-none');
+            
+            if($('div#product_list_body .subcategory-wrapper').length != 0){
+                var subcategory_html = $('div#product_list_body .subcategory-wrapper').html();
+                $('div#subcategory-list-wrapper').html('');
+                $('div#subcategory-list-wrapper').append(subcategory_html);
+                $('div#product_list_body').find('.subcategory-wrapper').remove();
+                $('div#subcategory-list-wrapper').show();
+            }
+
+            if(parent_id != ""){
+                $('div#subcategory-list-wrapper').html('');
+                $('button.back-event').attr('data-parent-id', parent_id);
+            }
+
+            /*
+            if(is_show_direct_product == 1){
+               level = 2;
+               $('button.back-event').attr('data-parent-id', category_id);
+            }
+            */
+
+            $('button.back-event').attr('data-category', category_id);
+            $('button.back-event').attr('data-subcategory-count', total_subcatgory);
+            $('button.back-event').attr('data-level', level);
+            $('#suggestion_page_loader').fadeOut(700);
+
+        },
+    });
+}
+
+//POS Category Back Button Event
+$('body').on('click', '.back-btn-wrapper button', function(){
+    $('div#product_list_body').html('');
+    $('div#subcategory-list-wrapper').hide();
+    var level = $('.back-btn-wrapper button').attr('data-level');
+    var total_subcatgory = $('.back-btn-wrapper button').attr('data-subcategory-count');
+    if(level == "1"){
+        $('button.back-event').addClass('d-none');
+        $('div#category-list-wrapper').fadeIn(700);
+    }else if(level == "2"){
+        var parent_category_id = $('.back-btn-wrapper button').attr('data-parent-id');
+        if(parent_category_id == undefined){
+            $('div#product_list_body').html('');
+            $('div#subcategory-list-wrapper').hide();
+            $('button.back-event').addClass('d-none');
+            $('div#category-list-wrapper').fadeIn(700);
+            $('button.back-event').attr('data-level', 1);
+        }else{
+            filterProductByCategory("", parent_category_id, total_subcatgory, level);
+            $('div#subcategory-list-wrapper').show();
+            $('button.back-event').removeAttr('data-parent-id');
+        }        
+    }
+});

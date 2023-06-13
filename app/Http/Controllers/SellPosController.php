@@ -396,12 +396,15 @@ class SellPosController extends Controller
                 
                 //Apply Service Charges
                 $business = Business::find($business_id);
+                $gratuity_charge_amount = 0;
                 if($business->business_type_id == 1){
                     if($business->gratuity_settings != null){
                         $gratuity_settings = json_decode($business->gratuity_settings, true);
                         $gratuity_percentage = $gratuity_settings['percentage'];
+                        $gratuity_label = $gratuity_settings['label'];
                         $gratuity_charge_amount = ($invoice_total['total_before_tax'] * $gratuity_percentage) / 100;
                         $gratuity_charge_amount = sprintf('%0.2f', $gratuity_charge_amount);
+                        $input['gratuity_label'] = $gratuity_label;
                         $input['gratuity_charge_percentage'] = $gratuity_percentage;
                         $input['gratuity_charge_amount'] = $gratuity_charge_amount;
                         $invoice_total['final_total'] = ($invoice_total['final_total'] + $gratuity_charge_amount);
@@ -409,13 +412,15 @@ class SellPosController extends Controller
                 }
 
                 //Apply Tips
+                $tips_amount = 0;
                 if($request->has('tips_amount') && $request->filled('tips_amount')){
-                    $input['tips_amount'] = $request->tips_amount;
-                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $request->tips_amount);
+                    $tips_amount = $request->tips_amount;
+                    $input['tips_amount'] = $tips_amount;
+                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $tips_amount);
                 }
 
-                
                 // Card Charge J
+                /*
                 $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
                 $input_final_total_temp = 0;
                 $invoice_total_total_before_tax_temp = 0;
@@ -434,10 +439,29 @@ class SellPosController extends Controller
                     }
                 }
                 $input['final_total'] = $input_final_total_temp;
-                $invoice_total['total_before_tax'] = $invoice_total_total_before_tax_temp;
+                $invoice_total['total_before_tax'] = ($invoice_total_total_before_tax_temp - ($gratuity_charge_amount + $tips_amount));
                 $invoice_total['final_total'] = $invoice_total_final_total_temp;
+                */
 
+                //Card Charges applied only sub total
+                if($business->card_charge > 0){
+                    $card_charge_percentage = $business->card_charge;
+                    foreach($input['payment'] as $payment) {
+                        if(isset($payment['method'])) {
+                            if($payment['method']  == 'card'){
+                                $total_card_charge = ($invoice_total['total_before_tax'] * $card_charge_percentage / 100);
+                                $total_card_charge = sprintf('%0.2f', $total_card_charge);
+                                $input['total_card_charge'] = $total_card_charge;
+                                $invoice_total['final_total'] = ($invoice_total['final_total'] + $total_card_charge);
+                            } 
+                        }
+                    }
+                }
+                
+                //Modify Final amount with include tip, card charge & gratuity
+                $input['final_total'] = $invoice_total['final_total'];
 
+                //dd($invoice_total);
                 DB::beginTransaction();
 
                 if (empty($request->input('transaction_date'))) {
@@ -620,7 +644,8 @@ class SellPosController extends Controller
 
                     //Update payment status
                     $payment_status = $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
-                    
+                    //dd($payment_status);
+
                     $transaction->payment_status = $payment_status;
 
                     if ($request->session()->get('business.enable_rp') == 1) {
@@ -661,7 +686,7 @@ class SellPosController extends Controller
                         //Make Payment through card
                         $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
                         $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
-                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id);
+                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
                         if($response_of_payment['success'] == 0){
                             //Payment Failed Rollback Transaction
                             DB::rollback();
@@ -860,9 +885,7 @@ class SellPosController extends Controller
             $output['data'] = $receipt_details;
         } else {
             $layout = ! empty($receipt_details->design) ? 'sale_pos.receipts.'.$receipt_details->design : 'sale_pos.receipts.classic';
-
             $output['html_content'] = view($layout, compact('receipt_details'))->render();
-
         }
 
         return $output;
@@ -1353,12 +1376,15 @@ class SellPosController extends Controller
                 
                 //Apply Gratuity
                 $business = Business::find($business_id);
+                $gratuity_charge_amount = 0;
                 if($business->business_type_id == 1){
                     if($business->gratuity_settings != null){
                         $gratuity_settings = json_decode($business->gratuity_settings, true);
+                        $gratuity_label = $gratuity_settings['label'];
                         $gratuity_percentage = $gratuity_settings['percentage'];
                         $gratuity_charge_amount = ($invoice_total['total_before_tax'] * $gratuity_percentage) / 100;
                         $gratuity_charge_amount = sprintf('%0.2f', $gratuity_charge_amount);
+                        $input['gratuity_label'] = $gratuity_label;
                         $input['gratuity_charge_percentage'] = $gratuity_percentage;
                         $input['gratuity_charge_amount'] = $gratuity_charge_amount;
                         $invoice_total['final_total'] = ($invoice_total['final_total'] + $gratuity_charge_amount);
@@ -1366,10 +1392,13 @@ class SellPosController extends Controller
                 }
 
                 //Apply Tips
+                $tips_amount = 0;
                 if($request->has('tips_amount') && $request->filled('tips_amount')){
-                    $input['tips_amount'] = $request->tips_amount;
-                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $request->tips_amount);
+                    $tips_amount = $request->tips_amount;
+                    $input['tips_amount'] = $tips_amount;
+                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $tips_amount);
                 }
+
 
                 if (! empty($request->input('transaction_date'))) {
                     $input['transaction_date'] = $this->productUtil->uf_date($request->input('transaction_date'), true);
@@ -2216,6 +2245,140 @@ class SellPosController extends Controller
 
             return view('sale_pos.partials.product_list')
                     ->with(compact('products', 'allowed_group_prices', 'show_prices'));
+        }
+    }
+
+
+
+    /**
+     * Get product by filter
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getProductByFilter(Request $request)
+    {
+        if ($request->ajax()) {
+            $category_id = $request->get('category_id');
+            $brand_id = $request->get('brand_id');
+            $location_id = $request->get('location_id');
+            $is_show_direct_product = $request->get('is_show_direct_product');
+
+            $check_qty = false;
+            $business_id = $request->session()->get('user.business_id');
+            $business = $request->session()->get('business');
+            $pos_settings = empty($business->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business->pos_settings, true);
+
+            $products = Variation::join('products as p', 'variations.product_id', '=', 'p.id')
+                ->join('product_locations as pl', 'pl.product_id', '=', 'p.id')
+                ->leftjoin(
+                    'variation_location_details AS VLD',
+                    function ($join) use ($location_id) {
+                        $join->on('variations.id', '=', 'VLD.variation_id');
+
+                        //Include Location
+                        if (! empty($location_id)) {
+                            $join->where(function ($query) use ($location_id) {
+                                $query->where('VLD.location_id', '=', $location_id);
+                                //Check null to show products even if no quantity is available in a location.
+                                //TODO: Maybe add a settings to show product not available at a location or not.
+                                $query->orWhereNull('VLD.location_id');
+                            });
+                        }
+                    }
+                )
+                ->where('p.business_id', $business_id)
+                ->where('p.type', '!=', 'modifier')
+                ->where('p.is_inactive', 0)
+                ->where('p.not_for_selling', 0)
+                //Hide products not available in the selected location
+                ->where(function ($q) use ($location_id) {
+                    $q->where('pl.location_id', $location_id);
+                });
+
+            //Include search
+            if (! empty($term)) {
+                $products->where(function ($query) use ($term) {
+                    $query->where('p.name', 'like', '%'.$term.'%');
+                    $query->orWhere('sku', 'like', '%'.$term.'%');
+                    $query->orWhere('sub_sku', 'like', '%'.$term.'%');
+                });
+            }
+
+            //Include check for quantity
+            if ($check_qty) {
+                $products->where('VLD.qty_available', '>', 0);
+            }
+
+            if (! empty($category_id) && ($category_id != 'all')) {
+                $products->where(function ($query) use ($category_id) {
+                    $query->where('p.category_id', $category_id);
+                    $query->orWhere('p.sub_category_id', $category_id);
+                });
+            }
+            if (! empty($brand_id) && ($brand_id != 'all')) {
+                $products->where('p.brand_id', $brand_id);
+            }
+
+            if (! empty($request->get('is_enabled_stock'))) {
+                $is_enabled_stock = 0;
+                if ($request->get('is_enabled_stock') == 'product') {
+                    $is_enabled_stock = 1;
+                }
+
+                $products->where('p.enable_stock', $is_enabled_stock);
+            }
+
+            if (! empty($request->get('repair_model_id'))) {
+                $products->where('p.repair_model_id', $request->get('repair_model_id'));
+            }
+
+            $products = $products->select(
+                'p.id as product_id',
+                'p.name',
+                'p.type',
+                'p.enable_stock',
+                'p.image as product_image',
+                'variations.id',
+                'variations.name as variation',
+                'VLD.qty_available',
+                'variations.default_sell_price as selling_price',
+                'variations.sub_sku',
+                'p.category_id',
+                'p.sub_category_id'
+            )
+            ->with(['media', 'group_prices'])
+            ->orderBy('p.name', 'asc')
+            ->get();
+
+            $price_groups = SellingPriceGroup::where('business_id', $business_id)->active()->pluck('name', 'id');
+
+            $allowed_group_prices = [];
+            foreach ($price_groups as $key => $value) {
+                if (auth()->user()->can('selling_price_group.'.$key)) {
+                    $allowed_group_prices[$key] = $value;
+                }
+            }
+
+            $show_prices = ! empty($pos_settings['show_pricing_on_product_sugesstion']);
+
+            /*
+            $subcategories = ($is_show_direct_product) ? [] : Category::where('parent_id', $category_id)->where('business_id', $business_id)->get()->toArray();
+            
+            if(!empty($subcategories)){
+                $category = Category::where('id', $category_id)->where('business_id', $business_id)->first();
+            }else{
+                $category = null;
+            }
+            
+            return view('sale_pos.partials.product_list')
+                    ->with(compact('products', 'allowed_group_prices', 'show_prices', 'subcategories', 'category'));
+            */
+
+            $subcategories = Category::where('parent_id', $category_id)->where('business_id', $business_id)->get()->toArray();
+            
+            return view('sale_pos.partials.product_list')
+                    ->with(compact('products', 'allowed_group_prices', 'show_prices', 'subcategories'));
         }
     }
 

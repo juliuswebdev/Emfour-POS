@@ -1586,7 +1586,7 @@ return [
     'create_transaction' => 'Create new transaction',
     'gratuity_setting_label' => 'Gratuity Label',
     'gratuity_setting_percentage' => 'Gratuity Percentage (%)',
-    'tips' => 'Tips',
+    'tips' => 'Tip',
     'enter_tips_amount' => 'Enter Tips Amount',
     'update' => 'Update',
     'cancel' => 'Cancel',

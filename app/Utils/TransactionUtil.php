@@ -43,7 +43,7 @@ class TransactionUtil extends Util
         $sale_type = ! empty($input['type']) ? $input['type'] : 'sell';
         $invoice_scheme_id = ! empty($input['invoice_scheme_id']) ? $input['invoice_scheme_id'] : null;
         $invoice_no = ! empty($input['invoice_no']) ? $input['invoice_no'] : $this->getInvoiceNumber($business_id, $input['status'], $input['location_id'], $invoice_scheme_id, $sale_type);
-
+       
         $final_total = $uf_data ? $this->num_uf($input['final_total']) : $input['final_total'];
 
         $pay_term_number = isset($input['pay_term_number']) ? $input['pay_term_number'] : null;
@@ -140,6 +140,7 @@ class TransactionUtil extends Util
             'additional_expense_key_3' => ! empty($input['additional_expense_key_3']) ? $input['additional_expense_key_3'] : null,
             'additional_expense_key_4' => ! empty($input['additional_expense_key_4']) ? $input['additional_expense_key_4'] : null,
             'tips_amount' => isset($input['tips_amount']) ? $input['tips_amount'] : 0,
+            'gratuity_label' => isset($input['gratuity_label']) ? $input['gratuity_label'] : null, 
             'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
             'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
         ]);
@@ -258,6 +259,7 @@ class TransactionUtil extends Util
             'additional_expense_key_3' => ! empty($input['additional_expense_key_3']) ? $input['additional_expense_key_3'] : null,
             'additional_expense_key_4' => ! empty($input['additional_expense_key_4']) ? $input['additional_expense_key_4'] : null,
             'tips_amount' => isset($input['tips_amount']) ? $input['tips_amount'] : 0,
+            'gratuity_label' => isset($input['gratuity_label']) ? $input['gratuity_label'] : null, 
             'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
             'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
         ];
@@ -787,19 +789,29 @@ class TransactionUtil extends Util
                         }
                     }
 
+                    
                     // Card Charge J
                     $business_id = $transaction->business_id;
+                    
                     if($payment['method']  == 'card'){
                         $business = Business::find($business_id);
+                        /*
                         $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
-
                         $card_charge_amount = ($payment_data['amount'] * $card_charge);
-
                         $payment_data['original_amount'] = $payment_data['amount'];
                         $payment_data['card_charge_amount'] = $card_charge_amount;
                         $payment_data['card_charge_percent'] = $business->card_charge;
                         $payment_data['amount'] = $payment_data['amount'] + $card_charge_amount; 
+                        */
 
+                        $card_charge = $business->card_charge;
+                        $card_charge_amount = ($transaction['total_before_tax'] * $card_charge / 100);
+                        $card_charge_amount = sprintf('%0.2f', $card_charge_amount);
+
+                        $payment_data['original_amount'] = $transaction['total_before_tax'];
+                        $payment_data['card_charge_amount'] = $card_charge_amount;
+                        $payment_data['card_charge_percent'] = $card_charge;
+                        $payment_data['amount'] = $payment_data['amount'] + $card_charge_amount;
                     }
                     
                     $payments_formatted[] = new TransactionPayment($payment_data);
@@ -1937,6 +1949,14 @@ class TransactionUtil extends Util
         $output['design'] = $il->design;
         $output['table_tax_headings'] = ! empty($il->table_tax_headings) ? array_filter(json_decode($il->table_tax_headings), 'strlen') : null;
 
+        //Gratuity & Tips Data
+        $output['gratuity_label'] = $transaction->gratuity_label;
+        $output['gratuity_percentage'] = $transaction->gratuity_charge_percentage;
+        $output['gratuity_unformatted_charges'] = $transaction->gratuity_charge_amount;
+        $output['gratuity_charges'] = ($transaction->gratuity_charge_amount > 0) ? $this->num_f($transaction->gratuity_charge_amount, $show_currency, $business_details) : 0;
+        $output['tips_unformatted_amount'] = $transaction->tips_amount;
+        $output['tips_amount'] = ($transaction->tips_amount > 0) ? $this->num_f($transaction->tips_amount, $show_currency, $business_details) : 0;
+        
         return (object) $output;
     }
 

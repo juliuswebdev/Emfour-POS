@@ -360,7 +360,7 @@ class PaymentDevicesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
     */
-    public function paymentInit($payment_type, $trans_type, $amount, $invoice_num){
+    public function paymentInit($payment_type, $trans_type, $amount, $invoice_num, $tips_amount=0){
 
         try {
             $active_payment_device = PaymentDevice::select('settings')->where('id', auth()->user()->default_payment_device)->first();
@@ -378,7 +378,7 @@ class PaymentDevicesController extends Controller
                             <PaymentType>'. $payment_type .'</PaymentType>
                             <TransType>'. $trans_type .'</TransType>
                             <Amount>'. $amount .'</Amount>
-                            <Tip></Tip>
+                            <Tip>'.$tips_amount.'</Tip>
                             <CustomFee>0</CustomFee>
                             <Frequency>OneTime</Frequency>
                             <InvNum></InvNum>
@@ -402,8 +402,8 @@ class PaymentDevicesController extends Controller
                 $array_response = json_decode($t, true);
                 $payment_response_message = $array_response['response']['Message'];
                 */
+
                 $payment_response_message = $array_response['response']['Message'];
-                //$payment_response_message = "Approved";
                 if($payment_response_message == "Approved"){
                     $output = [
                         'success' => 1,
