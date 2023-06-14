@@ -133,6 +133,9 @@ class OrderController extends Controller
     public function updateServed($stage, $id, $product_id){
         try {
 
+            $undo_stage_label = $stage;
+            $update_table = true;
+
             $res_line_order_status = null;
             if($stage == 'cook_start') {
                 $res_line_order_status = 'cooking';
@@ -149,19 +152,49 @@ class OrderController extends Controller
             $stage = str_replace('_undo', '', $stage);
 
             $business_id = request()->session()->get('user.business_id');
-            $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
-                        ->where('t.business_id', $business_id)
-                        ->where('transaction_id', $id)
-                        ->where('product_id', $product_id)
-                        ->update([
-                            $stage => $date,
-                            'res_line_order_status' => $res_line_order_status
-                        ]);
 
-            $output = [
-                'success' => 1,
-                'msg' =>  __('lang_v1.order_item_served_message'),
-            ];
+            if(in_array($undo_stage_label, ['served_at_undo'])) {
+                $business_details = $this->businessUtil->getDetails($business_id);
+                $order_undo_timeframe_in_sec = $business_details->order_screen_button_undo_timeframe;
+                $current_time_in_sec = strtotime(\Carbon::now());
+
+                $cook_activity_time = TransactionSellLine::select($stage)->leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                            ->where('t.business_id', $business_id)
+                            ->where('transaction_id', $id)
+                            ->where('product_id', $product_id)
+                            ->pluck($stage)
+                            ->first();
+                $cook_activity_time = strtotime($cook_activity_time);
+                $time_of_different = ($current_time_in_sec - $cook_activity_time);
+                                    
+                if($time_of_different > $order_undo_timeframe_in_sec) {
+                    $update_table = false;
+                }else{
+                    $update_table = true;
+                }
+            }
+
+
+            if($update_table){
+                $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                            ->where('t.business_id', $business_id)
+                            ->where('transaction_id', $id)
+                            ->where('product_id', $product_id)
+                            ->update([
+                                $stage => $date,
+                                'res_line_order_status' => $res_line_order_status
+                            ]);
+
+                $output = [
+                    'success' => 1,
+                    'msg' =>  __('lang_v1.order_item_served_message'),
+                ];
+            }else{
+                $output = [
+                    'success' => 0,
+                    'msg' => __('lang_v1.you_can_not_undo_cooking_activity'),
+                ];
+            }
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
             $output = ['success' => 0,

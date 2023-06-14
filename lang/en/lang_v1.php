@@ -1590,4 +1590,7 @@ return [
     'enter_tips_amount' => 'Enter Tips Amount',
     'update' => 'Update',
     'cancel' => 'Cancel',
+    'kitchen_ui_undo_timeframe' => 'Kitchen UI button undo timeframe(In Sec)',
+    'order_ui_undo_timeframe' => 'Order UI button undo timeframe(In Sec)',
+    'you_can_not_undo_cooking_activity' => 'Sorry, You can not able to undo cooking activity.'
 ];
