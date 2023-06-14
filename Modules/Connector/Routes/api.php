@@ -37,6 +37,8 @@ Route::middleware('auth:api', 'timezone')->prefix('connector/api')->group(functi
 
     Route::resource('sell', Modules\Connector\Http\Controllers\Api\SellController::class)->only('index', 'store', 'show', 'update', 'destroy');
 
+    Route::post('payment-dejavoo', [Modules\Connector\Http\Controllers\Api\SellController::class, 'paymentDejavoo']);
+
     Route::post('sell-return', [Modules\Connector\Http\Controllers\Api\SellController::class, 'addSellReturn']);
 
     Route::get('list-sell-return', [Modules\Connector\Http\Controllers\Api\SellController::class, 'listSellReturn']);
