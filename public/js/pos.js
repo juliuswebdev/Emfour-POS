@@ -3463,13 +3463,14 @@ $('.btn-submit-tips').click(function(){
 
 
 setFakeWebsocket();
-$(document).on('click', 'body, .pos_remove_row, .quantity-up, .quantity-down', function(){
+$(document).on('click', 'body, .pos_remove_row, .quantity-up, .quantity-down, .add_modifier', function(){
     setFakeWebsocket();
 });
 
 function setFakeWebsocket() {
-    var table = $('#pos_table tbody').html();
-    localStorage.setItem('pos_table', table);
+    var pos_table = $('#pos_table tbody').html();
+    pos_table = pos_table.replace(/modal/g, '');
+    localStorage.setItem('pos_table', pos_table);
 
     var location = $('#select_location_id option:selected').text();
     localStorage.setItem('pos_location', location);

@@ -48,6 +48,9 @@
                 font-weight: 700;
                 font-size: 24px;
             }
+            .fade {
+                display: none!important;
+            }
         </style>
     </head>
     <body>
@@ -122,7 +125,6 @@
 
             var tips_text = localStorage.getItem('tips_text');
             $('#tips_text').text(tips_text);
-
 
         },1);
 
