@@ -126,7 +126,13 @@
             var tips_text = localStorage.getItem('tips_text');
             $('#tips_text').text(tips_text);
 
-        },1);
+            $('.pos_line_total').each(function(i){
+                var total = $(this).val();
+                var price = $(this).parents('.product_row').find('.pos_unit_price_inc_tax').val();
+                var qty = total/price;
+                $(this).parents('.product_row').find('.input_quantity').val(qty);
+            })
+        },1500);
 
         currentTime();
 
