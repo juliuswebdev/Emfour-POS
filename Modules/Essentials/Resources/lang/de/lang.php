@@ -193,7 +193,7 @@ return [
     'designation_code_help' => 'Geben Sie eine eindeutige Kennung ein',
     'department' => 'Abteilung',
     'designation' => 'Bezeichnung',
-    'hrm_details' => 'HRM Details',
+    'hrm_details' => 'HRIS Details',
     'document_shared' => 'Dokument freigegeben',
     'leave_status_changed' => 'Status geändert lassen',
     'leave_added_successfully' => 'Erfolgreich hinzugefügt lassen',

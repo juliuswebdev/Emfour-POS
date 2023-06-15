@@ -24,7 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Modules\Connector\Transformers\SellResource;
-
+use Illuminate\Support\Facades\Http;
 /**
  * @group Sales management
  * @authenticated
@@ -2130,65 +2130,111 @@ class SellController extends ApiController
 
     public function paymentDejavoo(Request $request)
     {
+        $filters = request()->input();
 
-        try {
-
-            $payment_type = 'Card';
-            $trans_type = 'Sale';
-            $amount = 1;
-            $invoice_num = 1.00;
-            $tips_amount=0;
-            
-            $auth_key = 'cyzdiH7Ca6';
-            $register_id = '116058001';
-
-            $xml = '<request>
-                        <PaymentType>'. $payment_type .'</PaymentType>
-                        <TransType>'. $trans_type .'</TransType>
-                        <Amount>'. $amount .'</Amount>
-                        <Tip>'.$tips_amount.'</Tip>
-                        <CustomFee>0</CustomFee>
-                        <Frequency>OneTime</Frequency>
-                        <InvNum></InvNum>
-                        <RefId>'. $invoice_num .'</RefId>
-                        <RegisterId>'. $register_id .'</RegisterId>
-                        <AuthKey>'. $auth_key .'</AuthKey>
-                        <PrintReceipt>No</PrintReceipt>
-                        <SigCapture>No</SigCapture>
-                    </request>';
+        $payment_type = 'Credit';
+        $trans_type = 'Sale';
+        $amount = number_format((float)$filters['payment']['amount'], 2, '.', '');
+        $invoice_num = $filters['invoice_no'];
+        $tips_amount=0;
         
-            $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
+        $auth_key = 'cyzdiH7Ca6';
+        $register_id = '116058002';
 
-            $response = Http::timeout(1000)->get($request_url);
-            $xml_data = $response->body();
-            $xml_response = simplexml_load_string($xml_data);
-            $json_response = json_encode($xml_response);
-            $array_response = json_decode($json_response,TRUE);
+        $xml = '<request>
+                    <PaymentType>'. $payment_type .'</PaymentType>
+                    <TransType>'. $trans_type .'</TransType>
+                    <Amount>'. $amount .'</Amount>
+                    <Tip>'.$tips_amount.'</Tip>
+                    <CustomFee>0</CustomFee>
+                    <Frequency>OneTime</Frequency>
+                    <InvNum></InvNum>
+                    <RefId>'. $invoice_num .'</RefId>
+                    <RegisterId>'. $register_id .'</RegisterId>
+                    <AuthKey>'. $auth_key .'</AuthKey>
+                    <PrintReceipt>No</PrintReceipt>
+                    <SigCapture>No</SigCapture>
+                </request>';
+    
+        $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
+        $response = Http::timeout(1000)->get($request_url);
+        $xml_data = $response->body();
+        $xml_response = simplexml_load_string($xml_data);
+        $json_response = json_encode($xml_response);
+        $array_response = json_decode($json_response,TRUE);
+        
+        $payment_response_message = $array_response['response']['Message'];
 
-            $payment_response_message = $array_response['response']['Message'];
-            if($payment_response_message == "Approved"){
-                $output = [
-                    'success' => 1,
-                    'msg' => __('business.settings_updated_success'),
-                    'data' => $array_response
-                ];    
-            }else{
-                $output = [
-                    'success' => 0,
-                    'msg' => $payment_response_message,
-                    'data' => $array_response
-                ];  
-            }
-
-        } catch (\Exception $e) {
-            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+        if($payment_response_message == "Approved"){
             $output = [
-                'success' => 0,
-                'msg' => __('messages.something_went_wrong'),
+                'success' => true,
+                'response' => $array_response['response']
+            ];
+        }else{
+            $output = [
+                'success' => false,
+                'response' => $array_response['response']
             ];
         }
 
         return $output;
+        // try {
+
+            // $payment_type = 'Credit';
+            // $trans_type = 'Sale';
+            // $amount = $request->input('amount');
+            // $invoice_num = $filters['sells'][0]['invoice_no'];
+            // $tips_amount=0;
+            
+            // $auth_key = 'cyzdiH7Ca6';
+            // $register_id = '116058002';
+
+            // $xml = '<request>
+            //             <PaymentType>'. $payment_type .'</PaymentType>
+            //             <TransType>'. $trans_type .'</TransType>
+            //             <Amount>'. $amount .'</Amount>
+            //             <Tip>'.$tips_amount.'</Tip>
+            //             <CustomFee>0</CustomFee>
+            //             <Frequency>OneTime</Frequency>
+            //             <InvNum></InvNum>
+            //             <RefId>'. $invoice_num .'</RefId>
+            //             <RegisterId>'. $register_id .'</RegisterId>
+            //             <AuthKey>'. $auth_key .'</AuthKey>
+            //             <PrintReceipt>No</PrintReceipt>
+            //             <SigCapture>No</SigCapture>
+            //         </request>';
+        
+            // $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
+            // $response = Http::timeout(1000)->get($request_url);
+            // $xml_data = $response->body();
+            // $xml_response = simplexml_load_string($xml_data);
+            // $json_response = json_encode($xml_response);
+            // $array_response = json_decode($json_response,TRUE);
+
+            // $payment_response_message = $array_response['response']['Message'];
+            // if($payment_response_message == "Approved"){
+            //     $output = [
+            //         'success' => 1,
+            //         'msg' => __('business.settings_updated_success'),
+            //         'data' => $array_response
+            //     ];    
+            // }else{
+            //     $output = [
+            //         'success' => 0,
+            //         'msg' => $payment_response_message,
+            //         'data' => $array_response
+            //     ];  
+            // }
+
+        // } catch (\Exception $e) {
+        //     \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+        //     $output = [
+        //         'success' => 0,
+        //         'msg' => __('messages.something_went_wrong'),
+        //     ];
+        // }
+
+        // return $output;
     }
 
 }

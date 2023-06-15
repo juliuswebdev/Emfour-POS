@@ -171,7 +171,7 @@ return [
     'designation_code_help' => 'Enter unique designation ID',
     'department' => 'Department',
     'designation' => 'Designation',
-    'hrm_details' => 'HRM Details',
+    'hrm_details' => 'HRIS Details',
     'document_shared' => 'Document Shared',
     'leave_status_changed' => 'Leave status changed',
     'leave_added_successfully' => 'Leave added successfully',
