@@ -3484,8 +3484,11 @@ function setFakeWebsocket() {
     var order_tax = $('#order_tax').text();
     localStorage.setItem('order_tax', order_tax);
 
-    var shipping_charges_amount = $('#shipping_charges_amount').text();
-    localStorage.setItem('shipping_charges_amount', shipping_charges_amount);
+    var gratuity_charges = $('.gratuity_charges').text();
+    localStorage.setItem('gratuity_charges', gratuity_charges);
+
+    var gratuity_charges_label = $('.gratuity_wrapper b').text();
+    localStorage.setItem('gratuity_charges_label', gratuity_charges_label);
 
     var packing_charge_text = $('#packing_charge_text').text();
     localStorage.setItem('packing_charge_text', packing_charge_text);

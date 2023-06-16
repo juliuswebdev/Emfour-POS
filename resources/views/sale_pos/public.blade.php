@@ -81,8 +81,8 @@
                 <td><span id="order_tax"></span></td>
             </tr>
             <tr>
-                <th>Shipping:&nbsp;&nbsp;</th>
-                <td><span id="shipping_charges_amount"></span></td>
+                <th><span id="gratuity_charges_label"></span>:&nbsp;&nbsp;</th>
+                <td><span id="gratuity_charges"></span></td>
             </tr>
             <tr>
                 <th>Packing Charge:&nbsp;&nbsp;</th>
@@ -117,8 +117,11 @@
             var order_tax = localStorage.getItem('order_tax');
             $('#order_tax').text(order_tax);
 
-            var shipping_charges_amount = localStorage.getItem('shipping_charges_amount');
-            $('#shipping_charges_amount').text(shipping_charges_amount);
+            var gratuity_charges_label = localStorage.getItem('gratuity_charges_label');
+            $('#gratuity_charges_label').text(gratuity_charges_label);
+
+            var gratuity_charges = localStorage.getItem('gratuity_charges');
+            $('#gratuity_charges').text(gratuity_charges);
 
             var packing_charge_text = localStorage.getItem('packing_charge_text');
             $('#packing_charge_text').text(packing_charge_text);
