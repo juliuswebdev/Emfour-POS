@@ -1,4 +1,5 @@
 @if($__is_essentials_enabled && $is_employee_allowed)
+	{{--
 	<button 
 		type="button" 
 		class="btn bg-green btn-flat 
@@ -51,4 +52,5 @@
 	    >
 	    <i class="fas fa-hourglass-half"></i>&nbsp;&nbsp;@lang('essentials::lang.clock_out')
 	</button>
+	--}}
 @endif

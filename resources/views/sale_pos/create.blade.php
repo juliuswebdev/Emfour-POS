@@ -159,7 +159,7 @@
 						<label>@lang('lang_v1.enter_sale_return_9_digit_pin')*</label>
 						<div class="row">
 							<div class="col-md-10">
-								<input type="password" placeholder="@lang('lang_v1.enter_sale_return_9_digit_pin')" required="required" maxlength="9" minlength="4" name="sale_return_pin" class="form-control">
+								<input type="password" placeholder="@lang('lang_v1.enter_sale_return_9_digit_pin')" required="required" maxlength="9" minlength="4" name="security_pin" class="form-control">
 							</div>
 							<div class="col-md-2">
 								<button type="submit" class="btn btn-primary btn-verify-pin">@lang('lang_v1.verify')</button>

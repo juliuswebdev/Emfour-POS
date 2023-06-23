@@ -3459,15 +3459,15 @@ class SellPosController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        if($request->has('sale_return_pin') && $request->filled('sale_return_pin')){
+        if($request->has('security_pin') && $request->filled('security_pin')){
 
-            if($request->sale_return_pin == auth()->user()->sale_return_pin){
+            if($request->security_pin == auth()->user()->security_pin){
                 return response()->json(['status' => true, 'message' => __('lang_v1.verified_success'), 'data' => '']);
             }else{
-                return response()->json(['status' => false, 'message' =>  __('lang_v1.sale_return_pin_incorrect'), 'data' => '']);   
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.security_pin_incorrect'), 'data' => '']);   
             }
         }else{
-            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_sale_return_pin'), 'data' => '']);    
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_security_pin'), 'data' => '']);    
         }
     }
 

@@ -169,14 +169,13 @@ class EssentialsUtil extends Util
         $clock_in_time = is_object($data['clock_in_time']) ? $data['clock_in_time']->toDateTimeString() : $data['clock_in_time'];
 
         $shift = $this->checkUserShift($data['user_id'], $essentials_settings, $clock_in_time);
-
+        
         if (empty($shift)) {
             $available_shifts = $this->getAllAvailableShiftsForGivenUser($data['business_id'], $data['user_id']);
 
             $available_shifts_html = view('essentials::attendance.avail_shifts')
                                         ->with(compact('available_shifts'))
                                         ->render();
-
             $output = ['success' => false,
                 'msg' => __('essentials::lang.shift_not_allocated'),
                 'type' => 'clock_in',
@@ -197,18 +196,24 @@ class EssentialsUtil extends Util
             EssentialsAttendance::create($data);
 
             $shift_info = Shift::getGivenShiftInfo($data['business_id'], $shift);
-            $current_shift_html = view('essentials::attendance.current_shift')
-                                    ->with(compact('shift_info'))
-                                    ->render();
 
+            $essential_shift = EssentialsUserShift::where('user_id',  $data['user_id'])
+                                                ->where('essentials_shift_id', $shift_info->id)
+                                                ->first();
+
+            $current_shift_html = view('essentials::attendance.current_shift')
+                                    ->with(compact('shift_info', 'essential_shift'))
+                                    ->render();
+            
             $output = ['success' => true,
-                'msg' => __('essentials::lang.clock_in_success'),
+                'msg' => __('lang_v1.clock_in_success'),
                 'type' => 'clock_in',
                 'current_shift' => $current_shift_html,
             ];
         } else {
-            $output = ['success' => false,
-                'msg' => __('essentials::lang.already_clocked_in'),
+            $output = [
+                'success' => false,
+                'msg' => __('lang_v1.you_have_already_clockedin'),
                 'type' => 'clock_in',
             ];
         }
@@ -224,31 +229,32 @@ class EssentialsUtil extends Util
                                 ->where('user_id', $data['user_id'])
                                 ->whereNull('clock_out_time')
                                 ->first();
+        
         $clock_out_time = is_object($data['clock_out_time']) ? $data['clock_out_time']->toDateTimeString() : $data['clock_out_time'];
-
+        
         if (! empty($clock_in)) {
             $can_clockout = $this->canClockOut($clock_in, $essentials_settings, $clock_out_time);
+            
             if (! $can_clockout) {
                 $output = ['success' => false,
                     'msg' => __('essentials::lang.shift_not_over'),
                     'type' => 'clock_out',
                 ];
-
                 return $output;
             }
 
             $clock_in->clock_out_time = $data['clock_out_time'];
-            $clock_in->clock_out_note = $data['clock_out_note'];
-            $clock_in->clock_out_location = $data['clock_out_location'] ?? '';
+            //$clock_in->clock_out_note = $data['clock_out_note'];
+            //$clock_in->clock_out_location = $data['clock_out_location'] ?? '';
             $clock_in->save();
 
             $output = ['success' => true,
-                'msg' => __('essentials::lang.clock_out_success'),
+                'msg' => __('lang_v1.clock_out_success'),
                 'type' => 'clock_out',
             ];
         } else {
             $output = ['success' => false,
-                'msg' => __('essentials::lang.not_clocked_in'),
+                'msg' => __('lang_v1.you_have_already_clockedout'),
                 'type' => 'clock_out',
             ];
         }

@@ -3368,63 +3368,150 @@ $(document).on('click', '.clock_in_btn:not(:disabled), .clock_out_btn:not(:disab
 
 });
 
+
+// $(document).on('submit', 'form#clock_in_clock_out_form', function(e) {
+//     e.preventDefault();
+//     $(this).find('button[type="submit"]').attr('disabled', true);
+//     var data = $(this).serialize();
+//     $.ajax({
+//         method: $(this).attr('method'),
+//         url: $(this).attr('action'),
+//         dataType: 'json',
+//         data: data,
+//         success: function(result) {
+//             if (result.success == true) {
+//                 $('div#clock_in_clock_out_modal').modal('hide');
+
+//                 var shift_details = document.createElement("div");
+//                 if (result.current_shift) {
+//                     shift_details.innerHTML = result.current_shift;
+//                 }
+
+//                 // swal({
+//                 //     title: result.msg,
+//                 //     content: shift_details,
+//                 //     icon: 'success'
+//                 // });
+//                 toastr.success(result.msg);
+
+//                 if (typeof attendance_table !== 'undefined') {
+//                     attendance_table.ajax.reload();
+//                 }
+//                 if (result.type == 'clock_in') {
+//                     $('.clock_in_btn').attr('disabled', 'disabled');
+//                     $('.clock_in_btn').addClass('disabled');
+//                     $('.clock_out_btn').attr('disabled',false);
+//                     $('.clock_out_btn').removeClass('disabled');
+//                 } else if(result.type == 'clock_out') {
+//                     $('.clock_out_btn').attr('disabled', 'disabled');
+//                     $('.clock_out_btn').addClass('disabled');
+//                     $('.clock_in_btn').attr('disabled',false);
+//                     $('.clock_in_btn').removeClass('disabled');
+//                 }
+//             } else {
+//                 var shift_details = document.createElement("p");
+//                 if (result.shift_details) {
+//                     shift_details.innerHTML = result.shift_details;
+//                 }
+
+//                 swal({
+//                     title: result.msg,
+//                     content: shift_details,
+//                     icon: 'error'
+//                 })
+//                 //toastr.error(result.msg);
+
+//             }
+//             $('#clock_in_clock_out_form')[0].reset();
+//             $('#clock_in_clock_out_form').find('button[type="submit"]').removeAttr('disabled');
+//         },
+//     });
+// });
+
+
+
+//Clock in Clockout ReWrite by P
 $(document).on('submit', 'form#clock_in_clock_out_form', function(e) {
+    
     e.preventDefault();
     $(this).find('button[type="submit"]').attr('disabled', true);
     var data = $(this).serialize();
+    var cico_action = $('#cico_action').val();
     $.ajax({
         method: $(this).attr('method'),
         url: $(this).attr('action'),
         dataType: 'json',
         data: data,
         success: function(result) {
-            if (result.success == true) {
-                $('div#clock_in_clock_out_modal').modal('hide');
-
-                var shift_details = document.createElement("div");
-                if (result.current_shift) {
-                    shift_details.innerHTML = result.current_shift;
+            
+            if (result.success == true){
+                if(cico_action == ""){
+                    $('.cl-co-keyboard, .mf-input-box').hide();
+                    $('.cl-co-type-choose').show();
+                    
+                    $('.ci-co-user').text(result.data.first_name+' '+result.data.last_name);
+                    $('.ci-co-user-role').text(result.data.role);
+                    $('.ci-co-business').text(result.data.business.name);
+                }else{
+                    $('#clock_in_clock_out_modal').modal('hide');
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = "<div>"+result.current_shift+"</div>";
+                    swal({ 
+                        icon: 'success', 
+                        html:true, 
+                        title:result.msg, 
+                        content: wrapper, 
+                    });
                 }
-
-                // swal({
-                //     title: result.msg,
-                //     content: shift_details,
-                //     icon: 'success'
-                // });
-                toastr.success(result.msg);
-
-                if (typeof attendance_table !== 'undefined') {
-                    attendance_table.ajax.reload();
+            }else{
+                if(cico_action == ""){
+                    toastr.error(result.msg);
+                }else{
+                    swal({ 
+                        icon: 'error', 
+                        html:true, 
+                        title:result.msg, 
+                    });
                 }
-                if (result.type == 'clock_in') {
-                    $('.clock_in_btn').attr('disabled', 'disabled');
-                    $('.clock_in_btn').addClass('disabled');
-                    $('.clock_out_btn').attr('disabled',false);
-                    $('.clock_out_btn').removeClass('disabled');
-                } else if(result.type == 'clock_out') {
-                    $('.clock_out_btn').attr('disabled', 'disabled');
-                    $('.clock_out_btn').addClass('disabled');
-                    $('.clock_in_btn').attr('disabled',false);
-                    $('.clock_in_btn').removeClass('disabled');
-                }
-            } else {
-                var shift_details = document.createElement("p");
-                if (result.shift_details) {
-                    shift_details.innerHTML = result.shift_details;
-                }
-
-                swal({
-                    title: result.msg,
-                    content: shift_details,
-                    icon: 'error'
-                })
-                //toastr.error(result.msg);
-
             }
-            $('#clock_in_clock_out_form')[0].reset();
-            $('#clock_in_clock_out_form').find('button[type="submit"]').removeAttr('disabled');
+
         },
     });
+});
+
+//CICO btn action
+
+$('body').on('click', 'button.cl-co-btn-action', function() {
+    var action = $(this).data('action');
+    $('#cico_action').val(action);
+    $('#clock_in_clock_out_form').submit();
+});
+
+//Clock in Clock out on single button
+$('body').on('click', 'button.clockinout', function() {
+    $('.cl-co-keyboard, .mf-input-box').show();
+    $('.cl-co-type-choose').hide();
+    $('#user_pin').val('');
+    $('#cico_action').val('');
+    $('#clock_in_clock_out_modal').modal('show');
+});
+
+$('body').on('click', '.cl-key-input', function() {
+    var input = $(this).data('value');
+    var current_val = $('#user_pin').val();
+    if(input == "CANCEL"){
+        $('#user_pin').val('');
+    }else if(input == "ENTER"){
+        //Submit to server
+        var total_length = current_val.length;
+        if(current_val == ""){
+            toastr.error("Please enter the security pin.");
+        }
+
+    }else{
+        current_val += input
+        $('#user_pin').val(current_val);
+    }
 });
 
 

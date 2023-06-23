@@ -44,6 +44,12 @@
           @if(!empty($transaction->location_id)) {{$transaction->location->name}} @endif &nbsp; <span class="curr_datetime">{{ @format_datetime('now') }}</span> <i class="fa fa-keyboard hover-q text-muted" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="@include('sale_pos.partials.keyboard_shortcuts_details')" data-html="true" data-trigger="hover" data-original-title="" title=""></i>
         </p>
         @if($__is_essentials_enabled && $is_employee_allowed)
+
+        <div class="clock-inout-btn-wrapper">
+          <button class="btn bg-info btn-flat clockinout">@lang( 'lang_v1.btn_label_clockin_clockout' )</button>
+        </div>
+
+        {{--
           <button 
             type="button" 
             class="btn bg-green btn-flat 
@@ -96,6 +102,8 @@
               >
               <i class="fas fa-hourglass-half"></i>&nbsp;&nbsp;@lang('essentials::lang.clock_out')
           </button>
+        --}}
+
         @endif
       </div>
 

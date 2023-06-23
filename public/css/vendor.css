@@ -9337,6 +9337,82 @@ button#pos-cancel{
 .subcategory-box .category_box{
   background: aliceblue;
 }
+
+.clock-inout-btn-wrapper{
+  padding-left: 20px;
+  padding-bottom: 10px;
+}
+
+.font-weight-bold{
+  font-weight: bold;
+}
+
+#clock_in_clock_out_modal .modal-header{
+  border-bottom: none;
+}
+
+#clock_in_clock_out_modal .modal-footer{
+  border-top: none;
+}
+
+#clock_in_clock_out_modal .modal-content{
+  border-radius: 20px;
+  background: darkturquoise;
+  color: #000;
+}
+
+#clock_in_clock_out_modal .mf-title{
+  margin: 0px 0px 5px 0px;
+}
+
+#clock_in_clock_out_modal .mf-input-wrapper{
+  padding: 5% 15%;
+}
+
+#clock_in_clock_out_modal .mf-input-wrapper .input-pin{
+  height: 50px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#clock_in_clock_out_modal  .grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  margin-top: 10px;
+}
+#clock_in_clock_out_modal  .grid-item {
+  padding: 18px;
+  font-size: 30px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+#clock_in_clock_out_modal  .grid-item .circle{
+  width: 70px;
+  height: 70px;
+  background: #000;
+  color: #fff;
+  border-radius: 50%;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#clock_in_clock_out_modal .cl-co-action{
+padding: 13%;
+display: flex;
+justify-content: space-between;
+}
+
+.shift-text-wrapper{
+  text-align: left;
+}
+.shift-table .thead-light tr th{
+  text-align: center;
+}
 /*!
  * FullCalendar v3.10.2
  * Docs & License: https://fullcalendar.io/

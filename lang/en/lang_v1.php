@@ -1551,11 +1551,11 @@ return [
     'select_payment_device' => 'Select Payment Device',
     'tooltip_sale_return' => 'Sale Return Order',
     'sale_return' => 'Return',
-    'enter_sale_return_9_digit_pin' => 'Enter Sale Return Pin',
+    'enter_sale_return_9_digit_pin' => 'Enter Security Pin',
     'verify' => 'Verify',
     'verified_success' => 'Verified Successfully Completed',
-    'validate_sale_return_pin' => 'Please enter sale return pin',
-    'sale_return_pin_incorrect' => 'Please enter correct sale return pin',
+    'validate_security_pin' => 'Please enter security pin',
+    'security_pin_incorrect' => 'Please enter correct security pin',
     'title_sale_return' => 'Sale Return Order',
     'title_sale_return_invoice' => 'Sale Return Invoice',
     'enter_sale_return_invoice_number' => 'Enter Sale Return Invoice Number',
@@ -1592,5 +1592,20 @@ return [
     'cancel' => 'Cancel',
     'kitchen_ui_undo_timeframe' => 'Kitchen UI button undo timeframe(In Sec)',
     'order_ui_undo_timeframe' => 'Order UI button undo timeframe(In Sec)',
-    'you_can_not_undo_cooking_activity' => 'Sorry, You can not able to undo cooking activity.'
+    'you_can_not_undo_cooking_activity' => 'Sorry, You can not able to undo cooking activity.',
+    'btn_label_clockin_clockout' => 'EMFOUR SYSTEM CLOCK-IN / CLOCK-OUT',
+    'enter_security_pin' => 'Enter Security Pin',
+    'not_access_clockin_clockout' => "You can't access Clock In / Clock Out",
+    'label_enfour_system' => "EMFOUR SYSTEM",
+    'label_cico' => 'Clock In | Clock Out',
+    'your_shifts' => 'Your shifts',
+    'start_date' => 'Start Date',
+    'end_date' => 'End Date',
+    'timing' => 'Timing',
+    'clock_in_success' => "YOU'VE SUCCESSFULLY CLOCKED- IN!",
+    'clock_out_success' => "YOU'VE SUCCESSFULLY CLOCKED- OUT!",
+    'you_have_already_clockedin' => 'You have already clocked in.',
+    'you_have_already_clockedout' => 'You have already clocked out.'
+    
+
 ];

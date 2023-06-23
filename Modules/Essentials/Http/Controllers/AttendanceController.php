@@ -3,6 +3,7 @@
 namespace Modules\Essentials\Http\Controllers;
 
 use App\User;
+use App\BusinessAllowedIP;
 use App\Utils\ModuleUtil;
 use DB;
 use Excel;
@@ -363,54 +364,79 @@ class AttendanceController extends Controller
             ];
         }
 
+        //Check IP address validate
+        /*
+        $is_exit_ip = BusinessAllowedIP::select('id')
+                        ->where('business_id', $business_id)
+                        ->where('ip_address',  $this->getClientIp())->first();
+        if($is_exit_ip == null)
+        {
+            return [
+                'success' => false,
+                'msg' => __('lang_v1.not_access_clockin_clockout'),
+            ];
+        }
+        */
+
         try {
-            $type = $request->input('type');
 
             $user_id = $request->session()->get('user.id');
-            $user = User::find($user_id);
+            $user = User::with('business')->find($user_id);
             $input_user_pin = $request->input('user_pin');
 
-            if($input_user_pin == $user->sale_return_pin) {
+            if($input_user_pin == $user->security_pin) {
 
-                if ($type == 'clock_in') {
+                $user->role = $user->getRoleNames()->first();
+                if($request->has('cico_action') && $request->filled('cico_action')){
+                    $type = $request->input('cico_action');
 
-                    $data = [
-                        'business_id' => $business_id,
-                        'user_id' => auth()->user()->id,
-                        'clock_in_time' => \Carbon::now(),
-                        'clock_in_note' => $request->input('clock_in_note'),
-                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
-                        'clock_in_location' => $request->input('clock_in_out_location'),
-                    ];
+                    if ($type == 'clock_in') {
+                        $data = [
+                            'business_id' => $business_id,
+                            'user_id' => $user->id,
+                            'clock_in_time' => \Carbon::now(),
+                            'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                            //'clock_in_note' => $request->input('clock_in_note'),
+                            //'clock_in_location' => $request->input('clock_in_out_location'),
+                        ];
 
-                    $output = $this->essentialsUtil->clockin($data, $settings);
-                    if($output['success']) {
-                        $output['msg'] = $user->surname .' '. $user->first_name .' '. $user->last_name . ' ' . __('essentials::lang.clock_in_success_past');
+                        $output = $this->essentialsUtil->clockin($data, $settings);
+                        if(isset($output['current_shift'])){
+                            $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                        }else{
+                            $output['current_shift'] = "";
+                        }
+                    }else{
+                        $data = [
+                            'business_id' => $business_id,
+                            'user_id' => $user->id,
+                            'clock_out_time' => \Carbon::now(),
+                            'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                            //'clock_out_note' => $request->input('clock_out_note'),
+                            //'clock_out_location' => $request->input('clock_in_out_location'),
+                        ];
+                        $output = $this->essentialsUtil->clockout($data, $settings);
+                        if(isset($output['current_shift'])){
+                            $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                        }else{
+                            $output['current_shift'] = "";
+                        }
                     }
-                } elseif ($type == 'clock_out') {
-                    $data = [
-                        'business_id' => $business_id,
-                        'user_id' => auth()->user()->id,
-                        'clock_out_time' => \Carbon::now(),
-                        'clock_out_note' => $request->input('clock_out_note'),
-                        'clock_out_location' => $request->input('clock_in_out_location'),
+                }else{
+                    $output = [
+                        'success' => true,
+                        'msg' => "",
+                        'data' => $user
                     ];
-
-                    $output = $this->essentialsUtil->clockout($data, $settings);
-                    if($output['success']) {
-                        $output['msg'] = $user->surname .' '. $user->first_name .' '. $user->last_name . ' ' . __('essentials::lang.clock_out_success_past');
-                    }
                 }
 
-            } else {
-
-                $output = ['success' => false,
+            }else{
+                $output = [
+                    'success' => false,
                     'msg' => __('business.invalid_pin'),
-                    'type' => $type,
                 ];
-
             }
-
+        
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
@@ -421,6 +447,33 @@ class AttendanceController extends Controller
         }
 
         return $output;
+    }
+
+
+    // Get real visitor IP behind CloudFlare network
+    public function getClientIp() {
+        if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
+                $_SERVER['REMOTE_ADDR'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+                $_SERVER['HTTP_CLIENT_IP'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+        }
+        $client  = @$_SERVER['HTTP_CLIENT_IP'];
+        $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+        $remote  = $_SERVER['REMOTE_ADDR'];
+
+        if(filter_var($client, FILTER_VALIDATE_IP))
+        {
+        $ip = $client;
+        }
+        elseif(filter_var($forward, FILTER_VALIDATE_IP))
+        {
+        $ip = $forward;
+        }
+        else
+        {
+        $ip = $remote;
+        }
+
+        return $ip;
     }
 
     /**

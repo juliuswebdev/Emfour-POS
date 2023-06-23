@@ -321,7 +321,7 @@ class OrderController extends Controller
             $user = User::where('id', $user_id)->first();
         }
        
-        if(isset($user->sale_return_pin)) {
+        if(isset($user->security_pin)) {
             $output = [
                 'success' => true
             ];
@@ -342,7 +342,7 @@ class OrderController extends Controller
             $user_id = auth()->user()->id;
         }
         $pin = $request->input('pin');
-        $user = User::where('id', $user_id)->where('sale_return_pin', $pin)->first();
+        $user = User::where('id', $user_id)->where('security_pin', $pin)->first();
 
         if($user) {
             $output = [

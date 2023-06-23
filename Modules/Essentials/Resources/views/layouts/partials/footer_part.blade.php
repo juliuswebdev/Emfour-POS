@@ -23,6 +23,8 @@
 
         });
 	});
+
+    /*
 	$(document).on('submit', 'form#clock_in_clock_out_form', function(e) {
         e.preventDefault();
         $(this).find('button[type="submit"]').attr('disabled', true);
@@ -82,7 +84,8 @@
             },
         });
     });
-    
+    */
+
     $(document).on('click', '#get_current_location', function(){
         getFullAddress();
     });
