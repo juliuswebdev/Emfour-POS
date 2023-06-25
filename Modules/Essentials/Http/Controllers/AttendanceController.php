@@ -378,64 +378,63 @@ class AttendanceController extends Controller
         }
         */
 
+        //Check Input Pin exit In Our user table
+        $input_user_pin = $request->input('user_pin');
+        $user = User::with('business')->where('security_pin', $input_user_pin)->first();
+        if($user == null){
+            return [
+                'success' => false,
+                'msg' => __('business.invalid_pin'),
+            ];
+        }
+
         try {
+            
+            $user->role = $user->getRoleNames()->first();
+            if($request->has('cico_action') && $request->filled('cico_action')){
+                $type = $request->input('cico_action');
 
-            $user_id = $request->session()->get('user.id');
-            $user = User::with('business')->find($user_id);
-            $input_user_pin = $request->input('user_pin');
+                if ($type == 'clock_in') {
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => $user->id,
+                        'clock_in_time' => \Carbon::now(),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        //'clock_in_note' => $request->input('clock_in_note'),
+                        //'clock_in_location' => $request->input('clock_in_out_location'),
+                    ];
 
-            if($input_user_pin == $user->security_pin) {
-
-                $user->role = $user->getRoleNames()->first();
-                if($request->has('cico_action') && $request->filled('cico_action')){
-                    $type = $request->input('cico_action');
-
-                    if ($type == 'clock_in') {
-                        $data = [
-                            'business_id' => $business_id,
-                            'user_id' => $user->id,
-                            'clock_in_time' => \Carbon::now(),
-                            'ip_address' => $this->moduleUtil->getUserIpAddr(),
-                            //'clock_in_note' => $request->input('clock_in_note'),
-                            //'clock_in_location' => $request->input('clock_in_out_location'),
-                        ];
-
-                        $output = $this->essentialsUtil->clockin($data, $settings);
-                        if(isset($output['current_shift'])){
-                            $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
-                        }else{
-                            $output['current_shift'] = "";
-                        }
+                    $output = $this->essentialsUtil->clockin($data, $settings);
+                    if(isset($output['current_shift'])){
+                        $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
                     }else{
-                        $data = [
-                            'business_id' => $business_id,
-                            'user_id' => $user->id,
-                            'clock_out_time' => \Carbon::now(),
-                            'ip_address' => $this->moduleUtil->getUserIpAddr(),
-                            //'clock_out_note' => $request->input('clock_out_note'),
-                            //'clock_out_location' => $request->input('clock_in_out_location'),
-                        ];
-                        $output = $this->essentialsUtil->clockout($data, $settings);
-                        if(isset($output['current_shift'])){
-                            $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
-                        }else{
-                            $output['current_shift'] = "";
-                        }
+                        $output['current_shift'] = "";
                     }
                 }else{
-                    $output = [
-                        'success' => true,
-                        'msg' => "",
-                        'data' => $user
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => $user->id,
+                        'clock_out_time' => \Carbon::now(),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        //'clock_out_note' => $request->input('clock_out_note'),
+                        //'clock_out_location' => $request->input('clock_in_out_location'),
                     ];
+                    $output = $this->essentialsUtil->clockout($data, $settings);
+                    if(isset($output['current_shift'])){
+                        $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                    }else{
+                        $output['current_shift'] = "";
+                    }
                 }
-
             }else{
                 $output = [
-                    'success' => false,
-                    'msg' => __('business.invalid_pin'),
+                    'success' => true,
+                    'msg' => "",
+                    'data' => $user
                 ];
             }
+
+            
         
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());

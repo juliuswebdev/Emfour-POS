@@ -1602,8 +1602,8 @@ return [
     'start_date' => 'Start Date',
     'end_date' => 'End Date',
     'timing' => 'Timing',
-    'clock_in_success' => "YOU'VE SUCCESSFULLY CLOCKED- IN!",
-    'clock_out_success' => "YOU'VE SUCCESSFULLY CLOCKED- OUT!",
+    'clock_in_success' => "YOU'VE SUCCESSFULLY CLOCKED-IN!",
+    'clock_out_success' => "YOU'VE SUCCESSFULLY CLOCKED-OUT!",
     'you_have_already_clockedin' => 'You have already clocked in.',
     'you_have_already_clockedout' => 'You have already clocked out.'
     

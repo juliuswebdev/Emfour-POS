@@ -914,6 +914,8 @@ $(document).ready(function() {
         });
     });
 
+    
+
     $(document).on('click', '.remove_payment_row', function() {
         swal({
             title: LANG.sure,

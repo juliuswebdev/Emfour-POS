@@ -99,6 +99,9 @@
                   
                 </div>
             </div>
+            </div>
+            <div class="clearfix"></div>
+            
             <div class="col-md-4">
               <div class="form-group">
                 {!! Form::label('sale_return_9_digit_pin', __( 'business.security_pin' ) . ':') !!}
@@ -107,9 +110,7 @@
               </div>
             </div>
 
-            </div>
-            <div class="clearfix"></div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="form-group">
                   {!! Form::label('role', __( 'user.role' ) . ':*') !!} @show_tooltip(__('lang_v1.admin_role_location_permission_help'))
                     {!! Form::select('role', $roles, !empty($user->roles->first()->id) ? $user->roles->first()->id : null, ['class' => 'form-control select2', 'style' => 'width: 100%;']); !!}
