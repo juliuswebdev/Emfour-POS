@@ -2281,7 +2281,7 @@ class ProductUtil extends Util
                 }
             }
         } else {
-            $active_rules['rules'] = null;
+            $active_rules = null;
         }
         return $active_rules;
     }
