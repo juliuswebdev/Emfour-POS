@@ -115,105 +115,108 @@
 			$product_cat2_slug = $product_cat2->slug ?? '';
 
 			$today = date('Y-m-d', strtotime(date('d-m-Y'))); 
-			foreach($dp_rules as $rule) {
-				$start__date = $rule->$start_date ? date('Y-m-d', strtotime($rule->$start_date)) : $today;
-				$end__date = $rule->$end_date ? date('Y-m-d', strtotime($rule->$end_date)) : $today;
-				
-				if($rule->active &&
-					(($today >= $start__date) && ($today <= $end__date))
-				) {
-					if(isset($rule->prices)) {
-						foreach($rule->prices as $price) {
-							if($price->active) {
-								if($price->target == 'product') {
-									if( isset($price->product_sku)) {
-									
-										if(in_array($product->sub_sku, $price->product_sku)) {
-											$has_dp = true;
-											echo 'target product'.'<br>';
-											if($price->type == 'discount') {
-												
-												if($price->percent) {
-													$unit_price_inc_tax = $unit_price_inc_tax - ($unit_price_inc_tax * ($price->amount/100));
-												} else {
-													$unit_price_inc_tax = $unit_price_inc_tax - $price->amount;
-													if($unit_price_inc_tax < 0) {
-														$unit_price_inc_tax = 0;
-													}
-												}
+			if(count($dp_rules) > 0) {
+				foreach($dp_rules as $rule) {
+					$start__date = $rule->$start_date ? date('Y-m-d', strtotime($rule->$start_date)) : $today;
+					$end__date = $rule->$end_date ? date('Y-m-d', strtotime($rule->$end_date)) : $today;
+					
+					if($rule->active &&
+						(($today >= $start__date) && ($today <= $end__date))
+					) {
+						if(isset($rule->prices)) {
+							foreach($rule->prices as $price) {
+								if($price->active) {
 
-											} else if($price->type == 'increase') {
-												
-												if($price->percent) {
-													$unit_price_inc_tax = $unit_price_inc_tax + ($unit_price_inc_tax * ($price->amount/100));
-												} else {
-													$unit_price_inc_tax = $unit_price_inc_tax + $price->amount;
-												}
-
-											} else if($price->type == 'fixed_price') {
-
-												$unit_price_inc_tax = $price->amount;
-
-											}
-
-										}
-									}
-								}
-
-								if($price->target == 'product_cat') {
-									if( isset($price->product_cat_slug)) {
-										if(in_array($product_cat1_slug, $price->product_cat_slug) || in_array($product_cat2_slug, $price->product_cat_slug)) {
-											$has_dp = true;
-											echo 'target product_cat'.'<br>';
-											if($price->type == 'discount') {
-												
-												if($price->percent) {
-													$unit_price_inc_tax = $unit_price_inc_tax - ($unit_price_inc_tax * ($price->amount/100));
-												} else {
-													$unit_price_inc_tax = $unit_price_inc_tax - $price->amount;
-													if($unit_price_inc_tax < 0) {
-														$unit_price_inc_tax = 0;
-													}
-												}
-
-											} else if($price->type == 'increase') {
-
-												if($price->percent) {
-													$unit_price_inc_tax = $unit_price_inc_tax + ($unit_price_inc_tax * ($price->amount/100));
-												} else {
-													$unit_price_inc_tax = $unit_price_inc_tax + $price->amount;
-												}
-
-											} else if($price->type == 'fixed_price') {
-
-												$unit_price_inc_tax = $price->amount;
-												
-											}
-
-										}
-									}
-								}
-
-								if($price->target == 'promo_products') {
-									if(isset($price->promo_product_sku)) {
-										foreach($price->promo_product_sku as $promo) {
-									
-											if($product->sub_sku == $promo->product_sku) {
-												$has_dp = true;
-												$unit_price_inc_tax = $promo->product_price;
-											}
-										}
+									if($price->target == 'product') {
+										if( isset($price->product_sku)) {
 										
+											if(in_array($product->sub_sku, $price->product_sku)) {
+												$has_dp = true;
+											
+												if($price->type == 'discount') {
+													
+													if($price->percent) {
+														$unit_price_inc_tax = $unit_price_inc_tax - ($unit_price_inc_tax * ($price->amount/100));
+													} else {
+														$unit_price_inc_tax = $unit_price_inc_tax - $price->amount;
+														if($unit_price_inc_tax < 0) {
+															$unit_price_inc_tax = 0;
+														}
+													}
+
+												} else if($price->type == 'increase') {
+													
+													if($price->percent) {
+														$unit_price_inc_tax = $unit_price_inc_tax + ($unit_price_inc_tax * ($price->amount/100));
+													} else {
+														$unit_price_inc_tax = $unit_price_inc_tax + $price->amount;
+													}
+
+												} else if($price->type == 'fixed_price') {
+
+													$unit_price_inc_tax = $price->amount;
+
+												}
+
+											}
+										}
 									}
+
+									if($price->target == 'product_cat') {
+										if( isset($price->product_cat_slug)) {
+											if(in_array($product_cat1_slug, $price->product_cat_slug) || in_array($product_cat2_slug, $price->product_cat_slug)) {
+												$has_dp = true;
+												echo 'target product_cat'.'<br>';
+												if($price->type == 'discount') {
+													
+													if($price->percent) {
+														$unit_price_inc_tax = $unit_price_inc_tax - ($unit_price_inc_tax * ($price->amount/100));
+													} else {
+														$unit_price_inc_tax = $unit_price_inc_tax - $price->amount;
+														if($unit_price_inc_tax < 0) {
+															$unit_price_inc_tax = 0;
+														}
+													}
+
+												} else if($price->type == 'increase') {
+
+													if($price->percent) {
+														$unit_price_inc_tax = $unit_price_inc_tax + ($unit_price_inc_tax * ($price->amount/100));
+													} else {
+														$unit_price_inc_tax = $unit_price_inc_tax + $price->amount;
+													}
+
+												} else if($price->type == 'fixed_price') {
+
+													$unit_price_inc_tax = $price->amount;
+													
+												}
+
+											}
+										}
+									}
+
+									if($price->target == 'promo_products') {
+										if(isset($price->promo_product_sku)) {
+											foreach($price->promo_product_sku as $promo) {
+										
+												if($product->sub_sku == $promo->product_sku) {
+													$has_dp = true;
+													$unit_price_inc_tax = $promo->product_price;
+												}
+											}
+											
+										}
+									}
+
+
+
 								}
-
-
-
 							}
 						}
-					}
-				}	
+					}	
 
+				}
 			}
 
 		@endphp

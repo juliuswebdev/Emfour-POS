@@ -16,30 +16,33 @@
 	$promo_product_arr = [];
 
 	$today = date('Y-m-d', strtotime(date('d-m-Y'))); 
-	foreach($dp_rules as $rule) {
-		$start__date = $rule->$start_date ? date('Y-m-d', strtotime($rule->$start_date)) : $today;
-		$end__date = $rule->$end_date ? date('Y-m-d', strtotime($rule->$end_date)) : $today;
-		
-		if($rule->active &&
-			(($today >= $start__date) && ($today <= $end__date))
-		) {
-			if(isset($rule->prices)) {
-				foreach($rule->prices as $key => $price) {
-					if($price->active) {
-						if($price->target == 'cart') {
-							$dp_type = $price->type ?? 0;
-							$dp_percent = $price->percent ?? 0;
-							$dp_amount = $price->amount ?? 0;
-							$dp_cart_include_tax = $price->cart_include_tax ?? 0;
-							$dp_cart_include_shipping = $price->cart_include_shipping ?? 0;
-						}
-						if($price->target == 'promo_products') {
-							foreach($price->promo_product_sku as $promo_product) {
-								$product = \App\Product::where('sku', $promo_product->product_sku)->where('business_id', $business_details->id)->first();
-								$variation = \App\Variation::where('product_id', $product->id)->first();
-								$promo_product_arr[$key]['product_variation_id'] = $variation->id;
-								$promo_product_arr[$key]['product_sku'] = $promo_product->product_sku; 
-								$promo_product_arr[$key]['product_qty'] = $promo_product->product_qty; 
+	
+	if(count($dp_rules) > 0) {
+		foreach($dp_rules as $rule) {
+			$start__date = $rule->$start_date ? date('Y-m-d', strtotime($rule->$start_date)) : $today;
+			$end__date = $rule->$end_date ? date('Y-m-d', strtotime($rule->$end_date)) : $today;
+			
+			if($rule->active &&
+				(($today >= $start__date) && ($today <= $end__date))
+			) {
+				if(isset($rule->prices)) {
+					foreach($rule->prices as $key => $price) {
+						if($price->active) {
+							if($price->target == 'cart') {
+								$dp_type = $price->type ?? 0;
+								$dp_percent = $price->percent ?? 0;
+								$dp_amount = $price->amount ?? 0;
+								$dp_cart_include_tax = $price->cart_include_tax ?? 0;
+								$dp_cart_include_shipping = $price->cart_include_shipping ?? 0;
+							}
+							if($price->target == 'promo_products') {
+								foreach($price->promo_product_sku as $promo_product) {
+									$product = \App\Product::where('sku', $promo_product->product_sku)->where('business_id', $business_details->id)->first();
+									$variation = \App\Variation::where('product_id', $product->id)->first();
+									$promo_product_arr[$key]['product_variation_id'] = $variation->id;
+									$promo_product_arr[$key]['product_sku'] = $promo_product->product_sku; 
+									$promo_product_arr[$key]['product_qty'] = $promo_product->product_qty; 
+								}
 							}
 						}
 					}
