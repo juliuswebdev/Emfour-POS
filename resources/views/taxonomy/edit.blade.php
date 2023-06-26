@@ -37,6 +37,10 @@
       </div>
       @endif
       <div class="form-group">
+        {!! Form::label('slug', __('category.slug') . ':') !!}
+        {!! Form::text('slug', $category->slug, ['class' => 'form-control', 'placeholder' => __('category.slug')]); !!}
+      </div>
+      <div class="form-group">
         {!! Form::label('description', __( 'lang_v1.description' ) . ':') !!}
         {!! Form::textarea('description', $category->description, ['class' => 'form-control', 'placeholder' => __( 'lang_v1.description'), 'rows' => 3]); !!}
       </div>

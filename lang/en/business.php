@@ -112,5 +112,6 @@ return [
     'sucess_pin' => 'Success',
     'invalid_pin' => 'Invalid Pin',
     'user_no_pin' => 'User doesn\'t have PIN',
-    'sale_return_pin' => 'Sale Return Pin'
+    'sale_return_pin' => 'Sale Return Pin',
+    'user_pin' => 'User Pin'
 ];

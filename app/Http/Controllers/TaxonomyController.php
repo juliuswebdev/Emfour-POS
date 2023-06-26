@@ -7,6 +7,7 @@ use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
 
 class TaxonomyController extends Controller
 {
@@ -62,7 +63,7 @@ class TaxonomyController extends Controller
                 ->editColumn(
                     'logo', function($row)
                     {
-                        return '<img src="'.env('APP_URL').'/uploads/category_logos/'.$row->logo.'" style="width:40px;">';
+                        return '<img src="'.env('APP_URL').'/uploads/category_logos/'.$row->logo.'">';
                     }
                 )
                 ->addColumn(
@@ -144,24 +145,41 @@ class TaxonomyController extends Controller
 
         try {
             $input = $request->only(['name', 'short_code', 'category_type', 'description', 'logo']);
-            if (! empty($request->input('add_as_sub_cat')) && $request->input('add_as_sub_cat') == 1 && ! empty($request->input('parent_id'))) {
-                $input['parent_id'] = $request->input('parent_id');
-            } else {
-                $input['parent_id'] = 0;
-            }
-            //upload logo
-            $logo_name = $this->commonUtil->uploadFile($request, 'category_logo', 'category_logos', 'image');
-            if (! empty($logo_name)) {
-                $input['logo'] = $logo_name;
-            }
             $input['business_id'] = $request->session()->get('user.business_id');
             $input['created_by'] = $request->session()->get('user.id');
 
-            $category = Category::create($input);
-            $output = ['success' => true,
-                'data' => $category,
-                'msg' => __('category.added_success'),
-            ];
+            $cat_qry = Category::where('business_id', $input['business_id'])->where('name', $input['name'])->first();
+
+            if(!$cat_qry) {
+
+                if (! empty($request->input('add_as_sub_cat')) && $request->input('add_as_sub_cat') == 1 && ! empty($request->input('parent_id'))) {
+                    $input['parent_id'] = $request->input('parent_id');
+                } else {
+                    $input['parent_id'] = 0;
+                }
+                //upload logo
+                $logo_name = $this->commonUtil->uploadFile($request, 'category_logo', 'category_logos', 'image');
+                if (! empty($logo_name)) {
+                    $input['logo'] = $logo_name;
+                }
+
+                //slug
+                $input['slug'] = Str::slug($input['name'], "-");
+
+                $category = Category::create($input);
+                $output = ['success' => true,
+                    'data' => $category,
+                    'msg' => __('category.added_success'),
+                ];
+
+            } else {
+
+                $output = ['success' => false,
+                    'msg' => __('category.already_exist'),
+                ];
+            
+            }
+
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
@@ -233,7 +251,7 @@ class TaxonomyController extends Controller
     {
         if (request()->ajax()) {
             try {
-                $input = $request->only(['name', 'description']);
+                $input = $request->only(['name', 'description', 'slug']);
                 $business_id = $request->session()->get('user.business_id');
 
                 $category = Category::where('business_id', $business_id)->findOrFail($id);
@@ -250,6 +268,7 @@ class TaxonomyController extends Controller
 
                 $category->name = $input['name'];
                 $category->description = $input['description'];
+                $category->slug = $input['slug'];
                 $category->short_code = $request->input('short_code');
 
                 if (! empty($request->input('add_as_sub_cat')) && $request->input('add_as_sub_cat') == 1 && ! empty($request->input('parent_id'))) {
@@ -257,11 +276,13 @@ class TaxonomyController extends Controller
                 } else {
                     $category->parent_id = 0;
                 }
+
                 $category->save();
 
                 $output = ['success' => true,
                     'msg' => __('category.updated_success'),
                 ];
+
             } catch (\Exception $e) {
                 \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
