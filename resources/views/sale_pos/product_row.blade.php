@@ -124,15 +124,30 @@
 						(($today >= $start__date) && ($today <= $end__date))
 					) {
 						if(isset($rule->prices)) {
+
+							$sale = true;
+							$is_sale = false;
+					
+							
+
 							foreach($rule->prices as $price) {
 								if($price->active) {
 
 									if($price->target == 'product') {
 										if( isset($price->product_sku)) {
-										
-											if(in_array($product->sub_sku, $price->product_sku)) {
+
+											if($price->already_sale && $is_sale) {
+													$sale = false;
+											}
+
+											if(in_array($product->sub_sku, $price->product_sku) && $sale) {
+
+												if($price->is_sale) {
+													$is_sale = true;
+												}
+
 												$has_dp = true;
-											
+												
 												if($price->type == 'discount') {
 													
 													if($price->percent) {
