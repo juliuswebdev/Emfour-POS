@@ -25,6 +25,10 @@ Route::get('/get-locations/{id}', function($id) {
     return response($locations, 200);
 });
 
+Route::middleware(['cors'])->group(function () {
+    Route::post('/dynamic-pricing/store', [App\Http\Controllers\DynamicPricingController::class, 'store']);
+    Route::get('/dynamic-pricing/test', [App\Http\Controllers\DynamicPricingController::class, 'test']);
+});
 
 
 // API Ordering APP

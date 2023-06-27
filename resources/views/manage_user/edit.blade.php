@@ -104,9 +104,9 @@
             
             <div class="col-md-4">
               <div class="form-group">
-                {!! Form::label('sale_return_9_digit_pin', __( 'business.security_pin' ) . ':') !!}
-                {!! Form::password('security_pin', ['class' => 'form-control', 'minlength' => '4', 'maxlenght' => '9', "onkeyup" => "if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')", 'placeholder' => __( 'business.security_pin' ) ]); !!}
-                <p class="help-block">@lang('user.leave_security_pin_blank')</p>
+                {!! Form::label('sale_return_9_digit_pin', __( 'business.user_pin' ) . ':') !!}
+                {!! Form::password('sale_return_pin', ['class' => 'form-control', 'minlength' => '4', 'maxlenght' => '9', 'placeholder' => __( 'business.user_pin' ) ]); !!}
+                <p class="help-block">@lang('user.leave_user_pin_blank')</p>
               </div>
             </div>
 

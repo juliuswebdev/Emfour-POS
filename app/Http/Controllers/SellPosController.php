@@ -55,6 +55,7 @@ use App\Utils\TransactionUtil;
 use App\Variation;
 use App\Warranty;
 use App\PaymentDevice;
+use App\DynamicPricing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -275,8 +276,10 @@ class SellPosController extends Controller
                                 ->where('user_id', auth()->user()->id)
                                 ->whereNull('clock_out_time')
                                 ->first();
+        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
         return view('sale_pos.create')
             ->with(compact(
+                'dp_rules',
                 'clock_in',
                 '__is_essentials_enabled',
                 'is_employee_allowed',
@@ -1914,9 +1917,9 @@ class SellPosController extends Controller
                 $edit_discount = auth()->user()->can('edit_product_discount_from_pos_screen');
                 $edit_price = auth()->user()->can('edit_product_price_from_pos_screen');
             }
-
+            $dp_rules = $this->productUtil->getActiveDPRules($business_id);
             $output['html_content'] = view('sale_pos.product_row')
-                        ->with(compact('product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order', 'last_sell_line'))
+                        ->with(compact('dp_rules', 'product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order', 'last_sell_line'))
                         ->render();
         }
 
@@ -1952,7 +1955,7 @@ class SellPosController extends Controller
     {
         $output = [];
 
-        try {
+    //        try {
             $row_count = request()->get('product_row');
             $row_count = $row_count + 1;
             $quantity = request()->get('quantity', 1);
@@ -1990,12 +1993,12 @@ class SellPosController extends Controller
                     ->with(compact('product_ms', 'row_count'))->render();
                 }
             }
-        } catch (\Exception $e) {
-            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+        // } catch (\Exception $e) {
+        //     \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
-            $output['success'] = false;
-            $output['msg'] = __('lang_v1.item_out_of_stock');
-        }
+        //     $output['success'] = false;
+        //     $output['msg'] = __('lang_v1.item_out_of_stock');
+        // }
 
         return $output;
     }
