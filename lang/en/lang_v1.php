@@ -1607,7 +1607,8 @@ return [
     'you_have_already_clockedin' => 'You have already clocked in.',
     'you_have_already_clockedout' => 'You have already clocked out.',
     'essentials_settings' => 'Essentials settings',
-    'hrm_settings' => 'HRM settings'
+    'hrm_settings' => 'HRM settings',
+    'enable_pin_protection_on_expense_button' => 'Enable Pin Protection on Expense Button',
 
 
 ];

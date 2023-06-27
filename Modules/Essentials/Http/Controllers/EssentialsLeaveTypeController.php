@@ -34,9 +34,10 @@ class EssentialsLeaveTypeController extends Controller
      */
     public function index()
     {
+        
         $business_id = request()->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -85,7 +86,7 @@ class EssentialsLeaveTypeController extends Controller
     {
         $business_id = $request->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -132,7 +133,7 @@ class EssentialsLeaveTypeController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -155,7 +156,7 @@ class EssentialsLeaveTypeController extends Controller
     public function update(Request $request, $id)
     {
         $business_id = $request->session()->get('user.business_id');
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 

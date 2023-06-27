@@ -24,6 +24,7 @@
         </div>     
     @endif
     @if($is_employee_allowed)
+        {{--
         <div class="row">
             <div class="col-md-12 text-center">
                 <button 
@@ -55,6 +56,7 @@
                 @endif
             </div>
         </div>
+        --}}
     @endif
     <div class="row">
         <div class="col-md-12">

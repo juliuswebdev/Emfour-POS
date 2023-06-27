@@ -320,6 +320,7 @@ class BusinessController extends Controller
         $shortcuts = json_decode($business->keyboard_shortcuts, true);
 
         $pos_settings = empty($business->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business->pos_settings, true);
+        //dd($pos_settings);
 
         $email_settings = empty($business->email_settings) ? $this->businessUtil->defaultEmailSettings() : $business->email_settings;
 
