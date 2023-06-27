@@ -126,21 +126,41 @@ class ManageUserController extends Controller
         if (! auth()->user()->can('user.create')) {
             abort(403, 'Unauthorized action.');
         }
-
+        
         try {
-            if (! empty($request->input('dob'))) {
-                $request['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
+            if($request->has('security_pin') && $request->filled('security_pin')){
+                $validate_security_pin = true;
+            }else{
+                $validate_security_pin = false;
             }
 
-            $request['cmmsn_percent'] = ! empty($request->input('cmmsn_percent')) ? $this->moduleUtil->num_uf($request->input('cmmsn_percent')) : 0;
+            if($validate_security_pin){
+                $is_pin_validate_row = User::select('id')->where('security_pin', $request->security_pin)->first();
+                $is_pin_validate = ($is_pin_validate_row == null) ? true : false;
+            }else{
+                $is_pin_validate = true;
+            }
 
-            $request['max_sales_discount_percent'] = ! is_null($request->input('max_sales_discount_percent')) ? $this->moduleUtil->num_uf($request->input('max_sales_discount_percent')) : null;
 
-            $user = $this->moduleUtil->createUser($request);
+            if($is_pin_validate){
+                if (! empty($request->input('dob'))) {
+                    $request['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
+                }
 
-            $output = ['success' => 1,
-                'msg' => __('user.user_added'),
-            ];
+                $request['cmmsn_percent'] = ! empty($request->input('cmmsn_percent')) ? $this->moduleUtil->num_uf($request->input('cmmsn_percent')) : 0;
+
+                $request['max_sales_discount_percent'] = ! is_null($request->input('max_sales_discount_percent')) ? $this->moduleUtil->num_uf($request->input('max_sales_discount_percent')) : null;
+                $request['security_pin'] = $request->security_pin;
+                $user = $this->moduleUtil->createUser($request);
+                
+                $output = ['success' => 1,
+                    'msg' => __('user.user_added'),
+                ];
+            }else{
+                $output = ['success' => 0,
+                    'msg' => __('user.user_security_pin_exits'),
+                ];
+            }
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 

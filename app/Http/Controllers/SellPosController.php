@@ -270,7 +270,7 @@ class SellPosController extends Controller
             $payment_device = null;
         }
         $module_util = new ModuleUtil();
-        $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'essentials_module');
+        $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
         $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
         $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
                                 ->where('user_id', auth()->user()->id)
@@ -1266,7 +1266,7 @@ class SellPosController extends Controller
             $payment_device = null;
         }
         $module_util = new ModuleUtil();
-        $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'essentials_module');
+        $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
         $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
         $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
                                 ->where('user_id', auth()->user()->id)

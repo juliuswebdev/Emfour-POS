@@ -360,7 +360,7 @@ $(document).ready(function() {
                         var purchase_line_id = ui.item.purchase_line_id && searched_term == ui.item.lot_number ? ui.item.purchase_line_id : null;
                         pos_product_row(ui.item.variation_id, purchase_line_id);
                     } else {
-                        alert(LANG.out_of_stock);
+                        //alert(LANG.out_of_stock);
                     }
                 },
             })
@@ -454,7 +454,7 @@ $(document).ready(function() {
         var tr = $(this).parents('tr');
 
         var unit_price_inc_tax = tr.find('input.pos_unit_price_inc_tax').attr('value');
-        alert(unit_price_inc_tax);
+        //alert(unit_price_inc_tax);
         var line_total = entered_qty * unit_price_inc_tax;
 
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
@@ -914,6 +914,27 @@ $(document).ready(function() {
                     __select2($(appended).find('.select2'));
                     $(appended).find('#method_' + row_index).change();
                     $('#payment_row_index').val(parseInt(row_index) + 1);
+
+                    //DropDown Sequence Update
+                    var total_box = $('#payment_rows_div').find('.payment_types_dropdown').length;
+                    var recent_dropdown_selected = parseInt(total_box) - 2;
+                    var dropdown_all_options = $('.payment_types_dropdown:eq('+recent_dropdown_selected+')').find('option').length;
+                    var recent_dropdown_option_index = $('.payment_types_dropdown:eq('+recent_dropdown_selected+')').find('option:selected').index();
+
+                    var new_dropdown_index = parseInt(total_box) - 1;
+                    var new_dropdown =  $('.payment_types_dropdown:eq('+new_dropdown_index+')');
+                    new_dropdown.find('option').removeAttr('selected');
+	                
+                    dropdown_all_options = (parseInt(dropdown_all_options) - 1);
+                    if(dropdown_all_options == recent_dropdown_option_index){
+                        //Select First Option
+                        var new_option_position = 0;
+                    }else{
+                        //Select Next Option
+                        var new_option_position = parseInt(recent_dropdown_option_index) + 1;
+                    }
+                    new_dropdown.find('option:eq('+new_option_position+')').attr('selected', 'selected');
+
                 }
             },
         });
@@ -962,7 +983,7 @@ $(document).ready(function() {
             });
 
             if (total_advance_payments > 1) {
-                alert(LANG.advance_payment_cannot_be_more_than_once);
+                //alert(LANG.advance_payment_cannot_be_more_than_once);
                 return false;
             }
 
@@ -3753,3 +3774,12 @@ $('body').on('click', '.back-btn-wrapper button', function(){
         }        
     }
 });
+
+
+//Split Payment Update the Payment Method
+$('body').on('change', '.payment_types_dropdown', function() {
+	var selected_val = $(this).val();
+	$(this).find('option').removeAttr('selected');
+	$(this).find('option[value="'+selected_val+'"]').attr('selected', 'selected');
+});
+

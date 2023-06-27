@@ -112,7 +112,7 @@ return [
     'sucess_pin' => 'Success',
     'invalid_pin' => 'Please Enter Invalid Security Pin',
     'user_no_pin' => 'User doesn\'t have PIN',
-    'security_pin' => 'Security Pin'
+    'security_pin' => 'Security Pin',
     'sale_return_pin' => 'Sale Return Pin',
     'user_pin' => 'User Pin'
 ];
