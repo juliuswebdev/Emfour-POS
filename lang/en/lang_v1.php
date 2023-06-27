@@ -1605,7 +1605,9 @@ return [
     'clock_in_success' => "YOU'VE SUCCESSFULLY CLOCKED-IN!",
     'clock_out_success' => "YOU'VE SUCCESSFULLY CLOCKED-OUT!",
     'you_have_already_clockedin' => 'You have already clocked in.',
-    'you_have_already_clockedout' => 'You have already clocked out.'
-    
+    'you_have_already_clockedout' => 'You have already clocked out.',
+    'essentials_settings' => 'Essentials settings',
+    'hrm_settings' => 'HRM settings'
+
 
 ];

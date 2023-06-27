@@ -307,11 +307,11 @@
                     </div>
 
                     @if(!empty($permissions))
-                        <div class="row">                    
+                        <div class="row">
                             @foreach($permissions as $module => $module_permissions)
                                 @foreach($module_permissions as $permission)
                                 @php
-                                    $custom_permissions = json_decode($subscription->custom_permissions_super_admin, true);      
+                                    $custom_permissions = json_decode($subscription->custom_permissions_super_admin, true);  
                                     $value = isset($custom_permissions[$permission['name']]) ? $custom_permissions[$permission['name']] : false;
                                 @endphp
                                 <div class="col-sm-3">

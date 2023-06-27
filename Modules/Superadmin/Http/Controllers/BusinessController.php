@@ -360,7 +360,7 @@ class BusinessController extends BaseController
         if (! auth()->user()->can('superadmin')) {
             abort(403, 'Unauthorized action.');
         }
-
+        
         $business = Business::with(['currency', 'locations', 'subscriptions', 'owner', 'business_type'])->find($business_id);
         
         $created_id = $business->created_by;
@@ -368,9 +368,12 @@ class BusinessController extends BaseController
         $created_by = ! empty($created_id) ? User::find($created_id) : null;
 
         $modules = $this->moduleUtil->availableModules();
-
+        //dd($modules);
         $permissions = $this->moduleUtil->getModuleData('superadmin_package', true);
-
+        //Inject HRIS Module
+        $permissions['HRIS/Payroll'][0]['name'] = "hris_module";
+        $permissions['HRIS/Payroll'][0]['label'] = "HRIS/Payroll Module";
+        
         
         $subscription = Subscription::where('business_id', $business_id)->first();
   
@@ -587,8 +590,11 @@ class BusinessController extends BaseController
             'name' => $package->name,
         ];
 
-        $package_details = array_merge($package_details_arr, $request->input('custom_permissions'));
-
+        if($request->input('custom_permissions') == null){
+            $package_details = $package_details_arr;
+        }else{
+            $package_details = array_merge($package_details_arr, $request->input('custom_permissions'));
+        }
         $subscription->package_details = $package_details;
         $subscription->custom_permissions_super_admin = $request->input('custom_permissions');
         $subscription->update();

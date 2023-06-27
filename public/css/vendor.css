@@ -9415,6 +9415,9 @@ justify-content: space-between;
 .shift-table .thead-light tr th{
   text-align: center;
 }
+.hrm-essentials .pos-tab-content{
+  height:400px;
+}
 /*!
  * FullCalendar v3.10.2
  * Docs & License: https://fullcalendar.io/

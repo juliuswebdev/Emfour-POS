@@ -21,8 +21,9 @@ class ModuleUtil extends Util
      */
     public function isModuleInstalled($module_name)
     {
-        $is_available = Module::has($module_name);
-
+        
+        $is_available = ($module_name == "HRIS/Payroll") ? true : Module::has($module_name);
+        
         if ($is_available) {
             //Check if installed by checking the system table {module_name}_version
             $module_version = System::getProperty(strtolower($module_name).'_version');
@@ -56,7 +57,13 @@ class ModuleUtil extends Util
     public function getModuleData($function_name, $arguments = null)
     {
         $modules = Module::toCollection()->toArray();
-
+        
+        //Inject HRIS Module
+        $essentials_module = $modules['Essentials'];
+        $essentials_module['name'] = "HRIS/Payroll";
+        $essentials_module['alias'] = "hris";
+        $modules['HRIS/Payroll'] = $essentials_module;
+        
         $installed_modules = [];
         foreach ($modules as $module => $details) {
             if ($this->isModuleInstalled($details['name'])) {
@@ -69,22 +76,45 @@ class ModuleUtil extends Util
 
         $data = [];
         if($is_admin) {
+            
             if (! empty($installed_modules)) {
                 foreach ($installed_modules as $module) {
-                    $class = 'Modules\\'.$module['name'].'\Http\Controllers\DataController';
-                    if (class_exists($class)) {
-                        $class_object = new $class();
-                        if (method_exists($class_object, $function_name)) {
-                            if (! empty($arguments)) {
-                                $data[$module['name']] = call_user_func([$class_object, $function_name], $arguments);
-                            } else {
-                                $data[$module['name']] = call_user_func([$class_object, $function_name]);
+                    //Inject Hris module 
+                    if($module['name'] == "HRIS/Payroll"){
+                        $module_name = 'Essentials';
+                        $class = 'Modules\\'.$module_name.'\Http\Controllers\DataController';
+                        if (class_exists($class)) {
+                            $additional_data = array(
+                                "additional_js" => '',
+                                "additional_css" => '',
+                                "additional_html" => '',
+                                "additional_views" => '',
+                            );
+                            $class_object = new $class();
+                            if (method_exists($class_object, $function_name)) {
+                                if( ($function_name != "superadmin_package") && ($function_name != "moduleViewPartials") ){
+                                    $data[$module['name']] = $additional_data;
+                                }
+                            }
+                        }
+                    }else{
+                        $module_name = $module['name'];
+                        $class = 'Modules\\'.$module_name.'\Http\Controllers\DataController';
+                        if (class_exists($class)) {
+                            $class_object = new $class();
+                            if (method_exists($class_object, $function_name)) {
+                                if (! empty($arguments)) {
+                                    $data[$module['name']] = call_user_func([$class_object, $function_name], $arguments);
+                                } else {
+                                    $data[$module['name']] = call_user_func([$class_object, $function_name]);
+                                }
                             }
                         }
                     }
                 }
             }
         } else {
+            
             $module = 'Essentials';
             $class = 'Modules\\'.$module.'\Http\Controllers\DataController';
             if (class_exists($class)) {
@@ -165,7 +195,6 @@ class ModuleUtil extends Util
                 if (! is_null($callback_function)) {
                     $obj = new ModuleUtil();
                     $permissions = $obj->getModuleData($callback_function);
-
                     $permission_formatted = [];
                     foreach ($permissions as $per) {
                         foreach ($per as $details) {

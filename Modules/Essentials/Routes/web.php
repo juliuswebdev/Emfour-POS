@@ -41,6 +41,12 @@ Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezon
         Route::resource('knowledge-base', 'Modules\Essentials\Http\Controllers\KnowledgeBaseController');
 
         Route::get('user-sales-targets', [Modules\Essentials\Http\Controllers\DashboardController::class, 'getUserSalesTargets']);
+    
+        
+        //Apply Essential Setting
+        Route::get('/settings', [Modules\Essentials\Http\Controllers\EssentialsSettingsController::class, 'edit']);
+        Route::post('/settings', [Modules\Essentials\Http\Controllers\EssentialsSettingsController::class, 'update']);
+
     });
 
     Route::prefix('hrm')->group(function () {
