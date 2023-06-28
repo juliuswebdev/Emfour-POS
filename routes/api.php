@@ -25,6 +25,8 @@ Route::get('/get-locations/{id}', function($id) {
     return response($locations, 200);
 });
 
+Route::get('/sells/pos/get-product-variation/{business_id}/{sku}', [App\Http\Controllers\SellPosController::class, 'getProductVariation']);
+
 Route::middleware(['cors'])->group(function () {
     Route::post('/dynamic-pricing/store', [App\Http\Controllers\DynamicPricingController::class, 'store']);
     Route::get('/dynamic-pricing/test', [App\Http\Controllers\DynamicPricingController::class, 'test']);

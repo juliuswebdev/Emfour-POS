@@ -3526,5 +3526,12 @@ class SellPosController extends Controller
         return response()->json($dp_rules);
     }
 
+    public function getProductVariation($business_id, $sku) {
+        $business_id = $business_id;
+        $product = \App\Product::where('sku', $sku)->where('business_id', $business_id)->first();
+		$variation = \App\Variation::where('product_id', $product->id)->first();
+        return response($variation, 200);
+    }
+
 
 }
