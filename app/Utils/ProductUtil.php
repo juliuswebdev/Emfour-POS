@@ -2274,7 +2274,7 @@ class ProductUtil extends Util
         if($dp) {
             $dp = $dp->toArray();
             $rules = json_decode($dp['rules']);
-            $rules = $rules->rules;
+            $rules = ($rules->rules) ?? [];
             foreach($rules as $rule) {
                 if($rule->active) {
                     $active_rules[] = $rule;

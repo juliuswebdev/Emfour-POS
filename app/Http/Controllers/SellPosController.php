@@ -3520,7 +3520,18 @@ class SellPosController extends Controller
         return view('sale_pos.public')->with(compact('business'));
     }
 
+    public function getDPRules() {
+        $business_id = request()->session()->get('user.business_id');
+        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+        return response()->json($dp_rules);
+    }
 
+    public function getProductVariation($business_id, $sku) {
+        $business_id = $business_id;
+        $product = \App\Product::where('sku', $sku)->where('business_id', $business_id)->first();
+		$variation = \App\Variation::where('product_id', $product->id)->first();
+        return response($variation, 200);
+    }
 
 
 }

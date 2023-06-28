@@ -14,8 +14,24 @@
 	@endif
 @endforeach
 
-<tr class="product_row product_row_{{$product->product_id}}"  data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif>
+@php
+	
+	$product_cat1 = \App\Category::find($product->category_id);
+	$product_cat1_slug = $product_cat1->slug ?? '';
+	$product_cat2 = \App\Category::find($product->sub_category_id);
+	$product_cat2_slug = $product_cat2->slug ?? '';
+@endphp
+
+<tr class="product_row product_row_{{$product->product_id}}"  
+	data-cat-slug="{{ $product_cat1_slug }}"
+	data-sub-cat-slug="{{ $product_cat2_slug }}"
+	data-sku="{{ $product->sub_sku }}"
+	data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif
+>
 	<td>
+		@php
+		echo $product->sub_category_id;
+		@endphp
 		@if(!empty($so_line))
 			<input type="hidden" 
 			name="products[{{$row_count}}][so_line_id]" 
@@ -104,15 +120,10 @@
 
 		@php
 			$has_dp = false;
+			$has_items_in_cart = false;
 			
 			$start_date = 'start-date';
 			$end_date = 'end-date';
-
-
-			$product_cat1 = \App\Category::find($product->category_id);
-			$product_cat1_slug = $product_cat1->slug ?? '';
-			$product_cat2 = \App\Category::find($product->sub_category_id);
-			$product_cat2_slug = $product_cat2->slug ?? '';
 
 			$today = date('Y-m-d', strtotime(date('d-m-Y'))); 
 			if(count($dp_rules) > 0) {
@@ -123,13 +134,27 @@
 					if($rule->active &&
 						(($today >= $start__date) && ($today <= $end__date))
 					) {
+
+						if(isset($rule->conditions)) {
+
+							foreach($rule->conditions as $condition) {
+
+								if($condition->condition_data == 'items_in_cart') {
+
+									if(in_array($product->sub_sku, $condition->product_sku)) {
+										$has_items_in_cart = true;
+									}
+								}
+							}
+						}
+
+
 						if(isset($rule->prices)) {
 
 							$sale = true;
 							$is_sale = false;
 					
 							
-
 							foreach($rule->prices as $price) {
 								if($price->active) {
 
@@ -181,7 +206,6 @@
 										if( isset($price->product_cat_slug)) {
 											if(in_array($product_cat1_slug, $price->product_cat_slug) || in_array($product_cat2_slug, $price->product_cat_slug)) {
 												$has_dp = true;
-												echo 'target product_cat'.'<br>';
 												if($price->type == 'discount') {
 													
 													if($price->percent) {
@@ -236,8 +260,12 @@
 
 		@endphp
 
-		@if($has_dp);
+		@if($has_dp)
 		<input type="hidden" class="has_dp" value="1">
+		@endif
+
+		@if($has_items_in_cart)
+		<input type="hidden" class="has_items_in_cart" value="1">
 		@endif
 		
 		@if(empty($is_direct_sell))
