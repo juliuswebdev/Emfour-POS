@@ -244,6 +244,12 @@ class SellController extends Controller
                 $sells->whereNotNull('transactions.res_waiter_id');
             }
 
+            //Tips Where Cause
+            if (! empty(request()->list_for) && request()->list_for == 'sales_tips_report') {
+                $sells->whereNotNull('transactions.res_waiter_id'); 
+                $sells->where('transactions.tips_amount', '>', 0);           
+            }
+
             if (! empty(request()->res_waiter_id)) {
                 $sells->where('transactions.res_waiter_id', request()->res_waiter_id);
             }
@@ -327,6 +333,11 @@ class SellController extends Controller
             if ($this->businessUtil->isModuleEnabled('subscription')) {
                 $sells->addSelect('transactions.is_recurring', 'transactions.recur_parent_id');
             }
+
+            //Tips Column added in List
+            $sells->addSelect('transactions.tips_amount');
+            
+
             $sales_order_statuses = Transaction::sales_order_statuses();
             $datatable = Datatables::of($sells)
                 ->addColumn(
@@ -566,6 +577,10 @@ class SellController extends Controller
 
                     return $status;
                 })
+                ->editColumn(
+                    'tips_amount',
+                    '<span class="tip-amount" data-orig-value="{{$tips_amount}}">@format_currency($tips_amount)</span>'
+                )
                 ->editColumn('so_qty_remaining', '{{@format_quantity($so_qty_remaining)}}')
                 ->setRowAttr([
                     'data-href' => function ($row) {
@@ -576,7 +591,7 @@ class SellController extends Controller
                         }
                     }, ]);
 
-            $rawColumns = ['final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name', 'payment_methods', 'return_due', 'conatct_name', 'status'];
+            $rawColumns = ['final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name', 'payment_methods', 'return_due', 'conatct_name', 'status', 'tips_amount'];
 
             return $datatable->rawColumns($rawColumns)
                       ->make(true);

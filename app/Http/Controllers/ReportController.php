@@ -2510,6 +2510,28 @@ class ReportController extends Controller
             ->with(compact('business_locations', 'waiters'));
     }
 
+
+    /**
+     * Shows sales tips report
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getSalesTipsReport(Request $request)
+    {
+        if (! auth()->user()->can('sales_representative.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = $request->session()->get('user.business_id');
+
+        $business_locations = BusinessLocation::forDropdown($business_id, true);
+
+        $waiters = $this->transactionUtil->serviceStaffDropdown($business_id);
+
+        return view('report.sales_tips_report')
+            ->with(compact('business_locations', 'waiters'));
+    }
+
     /**
      * Shows product sell report grouped by date
      *
