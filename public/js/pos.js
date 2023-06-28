@@ -934,7 +934,12 @@ $(document).ready(function() {
                         var new_option_position = parseInt(recent_dropdown_option_index) + 1;
                     }
                     new_dropdown.find('option:eq('+new_option_position+')').attr('selected', 'selected');
-
+                    
+                    //Update the dropdown vise input fields
+                    var select_box = $('#payment_rows_div').find('.payment_row:eq('+new_dropdown_index+')');
+                    select_box.find('.payment_details_div').removeClass('hide').addClass('hide');
+                    var selected_option_value = new_dropdown.find('option:eq('+new_option_position+')').val();
+                    select_box.find('.payment_details_div[data-type="'+selected_option_value+'"]').removeClass('hide');
                 }
             },
         });
