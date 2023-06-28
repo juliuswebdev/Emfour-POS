@@ -3520,7 +3520,11 @@ class SellPosController extends Controller
         return view('sale_pos.public')->with(compact('business'));
     }
 
-
+    public function getDPRules() {
+        $business_id = request()->session()->get('user.business_id');
+        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+        return response()->json($dp_rules);
+    }
 
 
 }

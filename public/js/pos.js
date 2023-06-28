@@ -2138,8 +2138,6 @@ function calculate_billing_details(price_total) {
         shown_total = 0;
     }
 
-
- 
     html_total_payable.text(__currency_trans_from_en(shown_total, false));
 
     $('span.total_payable_span').text(__currency_trans_from_en(total_payable_rounded, true));
@@ -3664,3 +3662,15 @@ $('body').on('click', '.back-btn-wrapper button', function(){
         }        
     }
 });
+
+
+//Split Payment Update the Payment Method
+$('body').on('change', '.payment_types_dropdown', function() {
+	var selected_val = $(this).val();
+	$(this).find('option').removeAttr('selected');
+	$(this).find('option[value="'+selected_val+'"]').attr('selected', 'selected');
+});
+
+function dp_rules() {
+
+}

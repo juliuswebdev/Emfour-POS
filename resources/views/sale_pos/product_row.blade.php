@@ -129,7 +129,6 @@
 							$is_sale = false;
 					
 							
-
 							foreach($rule->prices as $price) {
 								if($price->active) {
 

@@ -253,6 +253,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     //Get product by filter
     Route::get('/sells/pos/get-product-by-filter', [SellPosController::class, 'getProductByFilter']);
 
+    Route::get('/sells/pos/get-dp-rules', [SellPosController::class, 'getDPRules']);
+
     Route::get('/sells/pos/get-featured-products/{location_id}', [SellPosController::class, 'getFeaturedProducts']);
     Route::get('/sells/pos/get-product-by-filter', [SellPosController::class, 'getProductByFilter']);
     Route::get('/reset-mapping', [SellController::class, 'resetMapping']);
