@@ -194,19 +194,24 @@
                                     html:true, 
                                     title:result.msg, 
                                     content: wrapper, 
+                                }).then(function() {
+                                    location.reload();
                                 });
                             }
                         }else{
                             if(cico_action == ""){
                                 toastr.error(result.msg);
+				                setTimeout(function(){ location.reload(); },1000);
                             }else{
                                 swal({ 
                                     icon: 'error', 
                                     html:true, 
                                     title:result.msg, 
                                 });
+				
                             }
                         }
+			
 
                     },
                 });
