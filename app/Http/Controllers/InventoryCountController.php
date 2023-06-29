@@ -11,6 +11,7 @@ use App\BusinessLocation;
 use App\Category;
 use App\Brands;
 use App\Product;
+use App\Variation;
 use App\ProductVariation;
 use App\VariationLocationDetails;
 use App\Transaction;
@@ -246,10 +247,10 @@ class InventoryCountController extends Controller
         if($count_header->count_type == 'partial' || $count_header->count_type == 'entire_location' ) {
 
             $products_query = $this->filter_products($count_header);
-
+            
             $products = $products_query->select([
                 DB::raw('CONCAT("'.$count_header->id.'") AS count_header_id'),
-                'products.id AS product_id',
+                'variations.id AS product_id',
                 'products.sku AS sku',
                 DB::raw('products.upc AS upc'),
                 DB::raw('CURRENT_TIMESTAMP() AS created_at')
@@ -370,6 +371,10 @@ class InventoryCountController extends Controller
     {
         $products_query = DB::table('products')
         ->where('products.business_id', Auth::user()->business_id)
+        // added
+        ->leftJoin('variations', function($join){
+            $join->on('variations.product_id', '=', 'products.id');
+        })
         ->leftJoin('variation_location_details', function($join) {
             $join->on('variation_location_details.product_id', '=', 'products.id');
         })->leftJoin('product_locations', function($join) {
@@ -526,114 +531,119 @@ class InventoryCountController extends Controller
     */
     public function post_count(Request $request, $id)
     {
-        $count_header = CountHeader::find($id);
+        try {
+            $count_header = CountHeader::find($id);
 
-        $user_id = Auth::user()->id;
+            $user_id = Auth::user()->id;
 
-        if ($count_header == null || $count_header->status == 4) {
-            abort(404);
-        }
-
-        $fileName = null;
-        if ($request->hasFile('attach_document')) {
-            $file = $request->file('attach_document');
-            $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $fileName = date("Ymd-his") . "." . $file->getClientOriginalExtension();
-            $file->storeAs('post_count', $fileName, 'local');
-        }
-
-        $count_header->count_note = $request->input('post_note');
-        $count_header->user_posted_count = Auth::user()->id;
-        $count_header->attach_document = $fileName;
-        $count_header->status = 4;
-        $count_header->save();
-
-        // Remove count details
-        $count_detail_delete_id_arr = explode(',', $request->input('count_detail_id_deleted'));
-        $count_details = CountDetail::whereIn('id', $count_detail_delete_id_arr)->delete();
-        
-        foreach($request->count_quantity as $key => $count_quantity) {
-
-            if($count_quantity != 0 && is_numeric($count_quantity)) {
-                $count_detail = CountDetail::where('id', $key)->where('count_header_id', $count_header->id)->first();
-                $count_detail->count_quantity = $count_quantity;
-                $count_detail->save();
-
-                $product_id  = $count_detail->product_id;
-                $product_variation_id = ProductVariation::where('product_id', $product_id)->first()->id ?? 0;
-
-                $variation_location_details = VariationLocationDetails::where('product_id', $product_id)->where('product_variation_id', $product_variation_id)->first(); 
-
-                $old_qty_available = $variation_location_details->qty_available ?? 0;
-
-
-                $product_q = Product::find($product_id);
-                $product_q->enable_stock = 1;
-                $product_q->save();
-
-                //Add quantity in VariationLocationDetails
-                $variation_location_d = VariationLocationDetails::where('variation_id', $product_variation_id)
-                        ->where('product_id', $product_id)
-                        ->where('product_variation_id', $product_variation_id)
-                        ->where('location_id', $count_header->business_location_id)
-                        ->first();
-
-                if (empty($variation_location_d)) {
-                $variation_location_d = new VariationLocationDetails();
-                $variation_location_d->variation_id = $product_variation_id;
-                $variation_location_d->product_id = $product_id;
-                $variation_location_d->location_id = $count_header->business_location_id;
-                $variation_location_d->product_variation_id = $product_variation_id;
-                $variation_location_d->qty_available = $count_quantity;
-                }
-
-                $variation_location_d->qty_available = $count_quantity;
-                $variation_location_d->save();
-
-
-                if($count_quantity != $old_qty_available) {
-            
-                    $transaction_date = request()->session()->get('financial_year.start');
-                    $transaction_date = \Carbon::createFromFormat('Y-m-d', $transaction_date)->toDateTimeString();
-                    $transaction = Transaction::create(
-                        [
-                            'type' => 'physical_count_adjustment',
-                            'opening_stock_product_id' => $product_id,
-                            'status' => 'received',
-                            'business_id' => $count_header->business_id,
-                            'transaction_date' => $transaction_date,
-                            'total_before_tax' => 0,
-                            'location_id' => $count_header->business_location_id,
-                            'final_total' => $count_quantity,
-                            'payment_status' => 'paid',
-                            'created_by' => $user_id,
-                            'ref_no' => $count_header->count_reference
-                        ]
-                    );
-
-                    StockAdjustmentLine::create(
-                        [
-                            'transaction_id' => $transaction->id,
-                            'product_id' => $product_id,
-                            'variation_id' => $product_variation_id,
-                            'quantity' => $count_quantity
-                        ]
-                    );
-
-                    // Update purchase line history
-                    $purchase_line = PurchaseLine::create(
-                        [
-                            'transaction_id' => $transaction->id,
-                            'product_id' => $product_id,
-                            'variation_id' => $product_variation_id,
-                            'quantity' => $count_quantity
-                        ]
-                    );
-
-                }
+            if ($count_header == null || $count_header->status == 4) {
+                abort(404);
             }
 
+            $fileName = null;
+            if ($request->hasFile('attach_document')) {
+                $file = $request->file('attach_document');
+                $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $fileName = date("Ymd-his") . "." . $file->getClientOriginalExtension();
+                $file->storeAs('post_count', $fileName, 'local');
+            }
+
+            $count_header->count_note = $request->input('post_note');
+            $count_header->user_posted_count = Auth::user()->id;
+            $count_header->attach_document = $fileName;
+            $count_header->status = 4;
+            $count_header->save();
+
+            // Remove count details
+            $count_detail_delete_id_arr = explode(',', $request->input('count_detail_id_deleted'));
+            $count_details = CountDetail::whereIn('id', $count_detail_delete_id_arr)->delete();
+            
+            foreach($request->count_quantity as $key => $count_quantity) {
+
+                if($count_quantity != 0 && is_numeric($count_quantity)) {
+                    $count_detail = CountDetail::where('id', $key)->where('count_header_id', $count_header->id)->first();
+                    $count_detail->count_quantity = $count_quantity;
+                    $count_detail->save();
+
+                    $product_id  = Variation::find($count_detail->product_id)->product_id ?? 0;
+                    $product_variation_id = Variation::where('product_id', $product_id)->first()->id ?? 0;
+
+                    $variation_location_details = VariationLocationDetails::where('product_id', $product_id)->where('product_variation_id', $product_variation_id)->first(); 
+
+                    $old_qty_available = $variation_location_details->qty_available ?? 0;
+
+                    $variation = Variation::find($product_id);
+                    $product_q = Product::find($variation->product_id);
+                    //$product_q = Product::find($product_id);
+                    $product_q->enable_stock = 1;
+                    $product_q->save();
+
+                    //Add quantity in VariationLocationDetails
+                    $variation_location_d = VariationLocationDetails::where('variation_id', $product_variation_id)
+                            ->where('product_id', $product_id)
+                            ->where('product_variation_id', $product_variation_id)
+                            ->where('location_id', $count_header->business_location_id)
+                            ->first();
+
+                    if (empty($variation_location_d)) {
+                    $variation_location_d = new VariationLocationDetails();
+                    $variation_location_d->variation_id = $product_variation_id;
+                    $variation_location_d->product_id = $product_id;
+                    $variation_location_d->location_id = $count_header->business_location_id;
+                    $variation_location_d->product_variation_id = $product_variation_id;
+                    $variation_location_d->qty_available = $count_quantity;
+                    }
+
+                    $variation_location_d->qty_available = $count_quantity;
+                    $variation_location_d->save();
+
+
+                    if($count_quantity != $old_qty_available) {
+                
+                        $transaction_date = request()->session()->get('financial_year.start');
+                        $transaction_date = \Carbon::createFromFormat('Y-m-d', $transaction_date)->toDateTimeString();
+                        $transaction = Transaction::create(
+                            [
+                                'type' => 'physical_count_adjustment',
+                                'opening_stock_product_id' => $product_id,
+                                'status' => 'received',
+                                'business_id' => $count_header->business_id,
+                                'transaction_date' => $transaction_date,
+                                'total_before_tax' => 0,
+                                'location_id' => $count_header->business_location_id,
+                                'final_total' => $count_quantity,
+                                'payment_status' => 'paid',
+                                'created_by' => $user_id,
+                                'ref_no' => $count_header->count_reference
+                            ]
+                        );
+
+                        StockAdjustmentLine::create(
+                            [
+                                'transaction_id' => $transaction->id,
+                                'product_id' => $product_id,
+                                'variation_id' => $product_variation_id,
+                                'quantity' => $count_quantity
+                            ]
+                        );
+
+                        // Update purchase line history
+                        $purchase_line = PurchaseLine::create(
+                            [
+                                'transaction_id' => $transaction->id,
+                                'product_id' => $product_id,
+                                'variation_id' => $product_variation_id,
+                                'quantity' => $count_quantity
+                            ]
+                        );
+
+                    }
+                }
+
+            }
+            return redirect()->route('inventory_count');
+        } catch (\Exception $e) {
+            return redirect()->route('inventory_count');
         }
-        return redirect()->route('inventory_count');
     }
 }
