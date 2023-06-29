@@ -92,6 +92,7 @@ return [
     'clock_out_success' => 'Clocked Out successfully',
     'clock_in_success_past' => 'successfully clocked-in',
     'clock_out_success_past' => 'successfully clocked-out',
+    'employee_clock_in_out_link' => 'Employee Clock In-Out Link',
     'not_allowed' => 'Not allowed',
     'edit_attendance' => 'Edit Attendance',
     'clocked_in_at' => 'Clocked In at',

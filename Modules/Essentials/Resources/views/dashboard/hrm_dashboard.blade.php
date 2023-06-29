@@ -4,7 +4,22 @@
 @section('content')
 @include('essentials::layouts.nav_hrm')
 <!-- Main content -->
+
 <section class="content">
+	<div class="row mb-2">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-10">
+                    <label>@lang('essentials::lang.employee_clock_in_out_link')</label>
+                    <div class="public-link mb-2" style="margin-bottom: 15px">
+                        <textarea class="form-control" id="copy-clipboard-link-customer">{{ route('employee.clockinout') }}</textarea>
+                        <a href="#" class="copy-clipboard-btn" onclick="copyToClipboard('#copy-clipboard-link-customer')"><i class="fa fas fa-copy"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 	<div class="row row-custom">
 		<div class="col-md-4 col-sm-6 col-xs-12 col-custom">
 			<div class="box box-solid">
@@ -297,5 +312,12 @@
 		    });
 		}
 	});
+	function copyToClipboard(elem) {
+		const element = document.querySelector(elem);
+		element.select();
+		element.setSelectionRange(0, 99999);
+		document.execCommand('copy');
+		toastr.success('Copy to Clipboard Success!');
+	}
 </script>
 @endsection

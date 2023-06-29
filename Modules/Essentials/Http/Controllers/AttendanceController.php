@@ -3,6 +3,7 @@
 namespace Modules\Essentials\Http\Controllers;
 
 use App\User;
+use App\Business;
 use App\BusinessAllowedIP;
 use App\Utils\ModuleUtil;
 use DB;
@@ -794,4 +795,12 @@ class AttendanceController extends Controller
 
         return view('essentials::attendance.attendance_row')->with(compact('attendance', 'shifts', 'user'));
     }
+
+    public function getEmployeeClockInOut() {
+
+        $business_id = request()->session()->get('user.business_id');
+        $business = Business::find($business_id);
+        return view('essentials::attendance.employee_clockinout')->with(compact('business'));
+    }
+
 }
