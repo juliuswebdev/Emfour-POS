@@ -27,10 +27,10 @@
 		@if(!empty($permissions))
 			@php
 				$custom_permissions_super_admin = $package->custom_permissions;
-				if($subscription->custom_permissions_super_admin) {
+				if($subscription->custom_permissions_super_admin != null) {
 					$custom_permissions_super_admin = json_decode($subscription->custom_permissions_super_admin, true);
 				}
-				$super_admin_permission_arr = array_keys($custom_permissions_super_admin);
+				$super_admin_permission_arr = (isset($custom_permissions_super_admin)) ? array_keys($custom_permissions_super_admin) : [];
 			@endphp
 			<div class="row">                    
 				@foreach($permissions as $module => $module_permissions)

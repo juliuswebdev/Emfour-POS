@@ -3521,6 +3521,26 @@ class SellPosController extends Controller
     }
 
 
+    /**
+     * Function is use for verify 9 digits pin in pos screen.
+     */
+    public function securityPinVerify(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('security_pin') && $request->filled('security_pin')){
+
+            if($request->security_pin == auth()->user()->security_pin){
+                return response()->json(['status' => true, 'message' => __('lang_v1.verified_success'), 'data' => '']);
+            }else{
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.security_pin_incorrect'), 'data' => '']);   
+            }
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_security_pin'), 'data' => '']);    
+        }
+    }
+
 
 
 }
