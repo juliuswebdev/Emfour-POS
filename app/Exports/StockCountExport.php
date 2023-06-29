@@ -39,7 +39,12 @@ class StockCountExport implements FromCollection, WithHeadings, WithColumnWidths
                 ->select([
                     'products.sku AS sku',
                     DB::raw('CONCAT(products.upc) AS upc_code'),
-                    'products.name AS product_name',
+                    DB::raw('
+                        IF(variations.name = "DUMMY",
+                            CONCAT(products.name),
+                            CONCAT(products.name," - ",variations.name)  
+                        )
+                    AS product_name'),
                     DB::raw("( SELECT COALESCE(SUM(qty_available), 0) FROM variation_location_details WHERE product_id = products.id
                     ) as expected"),
                     DB::raw('CONCAT("") AS counted')
