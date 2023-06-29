@@ -651,6 +651,13 @@ class AdminSidebarMenu
                                 __('restaurant.service_staff_report'),
                                 ['icon' => 'fa fas fa-user-secret', 'active' => request()->segment(2) == 'service-staff-report']
                             );
+
+                            $sub->url(
+                                action([\App\Http\Controllers\ReportController::class, 'getSalesTipsReport']),
+                                __('restaurant.sales_tips_report'),
+                                ['icon' => 'fa fas fa-user-secret', 'active' => request()->segment(2) == 'sales-tips-report']
+                            );
+
                         }
 
                         if ($is_admin) {
