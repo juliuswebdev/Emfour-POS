@@ -9418,6 +9418,10 @@ justify-content: space-between;
 .hrm-essentials .pos-tab-content{
   height:400px;
 }
+
+.custom-p-0{
+  padding:0px !important;
+}
 /*!
  * FullCalendar v3.10.2
  * Docs & License: https://fullcalendar.io/

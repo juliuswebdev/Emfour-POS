@@ -164,11 +164,12 @@ class LoginController extends Controller
     }
 
     public function userAllowed($user) {
- 
+        
         $is_admin = $this->moduleUtil->is_admin($user);
+        $enable_ip_restriction = $user->business->enable_ip_restriction;
         $allowed = false;
-
-        if(!$is_admin) {
+        if( (!$is_admin) && ($enable_ip_restriction) ){
+            
             $clientIP = \Request::getClientIp(true);
             $user_locations = $user->permitted_locations($user->business_id);
             if($user_locations == 'all') {
@@ -182,9 +183,8 @@ class LoginController extends Controller
                 $ip = $this->filterIP($item->ip_address);
                 array_push($whitelist_ips, $ip);
             }
-
+            
             $client_ip = $this->filterIP($clientIP);
-
             $allowed = false;
 
             if(in_array($client_ip, $whitelist_ips)) {

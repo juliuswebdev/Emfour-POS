@@ -360,7 +360,7 @@ class BusinessController extends Controller
         if (! auth()->user()->can('business_settings.access')) {
             abort(403, 'Unauthorized action.');
         }
-
+        
         try {
             $notAllowed = $this->businessUtil->notAllowedInDemo();
             if (! empty($notAllowed)) {
@@ -375,11 +375,14 @@ class BusinessController extends Controller
                 'redeem_amount_per_unit_rp', 'min_order_total_for_redeem',
                 'min_redeem_point', 'max_redeem_point', 'rp_expiry_period',
                 'rp_expiry_type', 'custom_labels', 'weighing_scale_setting',
-                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge', 'custom_permissions']);
+                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge', 'custom_permissions', 'enable_ip_restriction']);
 
             if(!auth()->user()->can('superadmin')) {
                 unset($business_details['card_charge']);
             }
+
+            //Ip Restriction setting
+            $business_details['enable_ip_restriction'] = ! empty($business_details['enable_ip_restriction']) ? $this->businessUtil->num_uf($business_details['enable_ip_restriction']) : 0;
 
             if (! empty($request->input('enable_rp')) && $request->input('enable_rp') == 1) {
                 $business_details['enable_rp'] = 1;
