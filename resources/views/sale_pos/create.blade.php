@@ -204,6 +204,36 @@
 
 
 
+<div class="modal fade in" tabindex="-1" role="dialog" id="security-pin-modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+				<h4 class="modal-title">@lang('lang_v1.title_security_pin')</h4>
+			</div>
+			<div class="modal-body">
+				<!-- /.box-header -->
+				<div class="box-body">
+					<form action="{{ action('\App\Http\Controllers\SellPosController@securityPinVerify') }}" class="form" method="post" id="frmSecurityPinVerify">
+						<label>@lang('lang_v1.enter_security_pin')*</label>
+						<div class="row">
+							<div class="col-md-10">
+								<input type="password" placeholder="@lang('lang_v1.enter_security_pin')" required="required" maxlength="9" minlength="4" name="security_pin" class="form-control">
+							</div>
+							<div class="col-md-2">
+								<button type="submit" class="btn btn-primary btn-verify-security-pin">@lang('lang_v1.verify')</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!-- /.box-body --> 
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
 @stop
 @section('css')
 	<!-- include module css -->
@@ -374,6 +404,64 @@
 								$('#frmSaleReturnInvoiceVerify')[0].reset();
 								//console.log(res.data.redirect_url);
 								window.location.href = res.data.redirect_url;
+							}else{
+								toastr.error(res.message);	
+							}
+						},
+					});
+				}
+			});
+
+
+			//Validate security pin for add expance
+			$("#frmSecurityPinVerify").validate({
+				errorElement: 'span',
+				errorPlacement: function (error, element) {
+					error.addClass('invalid-feedback');
+					element.closest('.form-group').append(error);
+					if (element.hasClass('select2')) {
+						error.insertAfter(element.parent().find('span.select2'));
+					} else if (element.parent('.input-group').length ||
+						element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
+						error.insertAfter(element.parent());
+					} else {
+						error.insertAfter(element);
+					}
+				},
+				highlight: function (element, errorClass, validClass) {
+					$(element).addClass('is-invalid').removeClass('is-valid');
+				},
+				unhighlight: function (element, errorClass, validClass) {
+					$(element).removeClass('is-invalid').addClass('is-valid');
+				},
+				focusInvalid: true,
+				submitHandler: function (form) {
+
+					$.ajax({
+						url: $('#frmSecurityPinVerify').attr('action'),
+						type: "POST",
+						headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+						data: new FormData(form),
+						contentType: false,
+						cache: false,
+						processData: false,
+						success: function (res) {
+							if(res.status == true){
+								$('#security-pin-modal').modal('hide');
+								$('#frmSecurityPinVerify')[0].reset();
+								toastr.success(res.message);	
+								//Call the ajax for open add expance popup.
+								$.ajax({
+									url: '/expenses/create',
+									data: { 
+										location_id: $('#select_location_id').val()
+									},
+									dataType: 'html',
+									success: function(result) {
+										$('#expense_modal').html(result);
+										$('#expense_modal').modal('show');
+									},
+								});
 							}else{
 								toastr.error(res.message);	
 							}

@@ -268,6 +268,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('pos/sale-return/invoice', [SellPosController::class, 'getSaleReturnInvoice']);
     Route::any('sale-return/{id}/invoice', [SellReturnController::class, 'makeSaleReturnTransaction']);
 
+    //Comman security pin verify
+    Route::post('pos/security-pin-verify', [SellPosController::class, 'securityPinVerify']);
+
     Route::resource('roles', RoleController::class);
 
     Route::resource('users', ManageUserController::class);

@@ -180,8 +180,22 @@
           @endcan
         @endif
         @can('expense.add')
+        @php
+          $is_open_security_pin_on_expance_btn_click = false;
+        @endphp
+        @isset($pos_settings['enable_pin_protection_on_expense_button'])
+            @if($pos_settings['enable_pin_protection_on_expense_button'] == 1)
+              @php
+                $is_open_security_pin_on_expance_btn_click = true;
+              @endphp
+            @else
+              @php
+                $is_open_security_pin_on_expance_btn_click = false;
+              @endphp
+            @endif
+        @endisset
         <button type="button" title="{{ __('expense.add_expense') }}"   
-          data-placement="bottom" class="btn bg-purple btn-flat m-6 btn-xs m-5 btn-modal pull-right" id="add_expense">
+          data-placement="bottom" class="btn bg-purple btn-flat m-6 btn-xs m-5 btn-modal pull-right" id="{{ ($is_open_security_pin_on_expance_btn_click) ? 'open_security_pin_modal': 'add_expense' }}">
             <strong><i class="fa fas fa-minus-circle"></i> @lang('expense.add_expense')</strong>
         </button>
         @endcan

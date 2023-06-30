@@ -97,6 +97,12 @@ class ModuleUtil extends Util
                                 }
                             }
                         }
+
+                        if(($function_name == "superadmin_package") && ($arguments == true)){
+                            $data[$module['name']][0]['name'] = "hris_module";
+                            $data[$module['name']][0]['label'] = "HRIS/Payroll Module";
+                            $data[$module['name']][0]['default'] = false;
+                        }
                     }else{
                         $module_name = $module['name'];
                         $class = 'Modules\\'.$module_name.'\Http\Controllers\DataController';

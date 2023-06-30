@@ -3437,6 +3437,13 @@ $(document).on('click', '#add_expense', function(){
     });
 });
 
+//Open Security Pin Modal
+$(document).on('click', '#open_security_pin_modal', function(){
+    $("#frmSecurityPinVerify")[0].reset();
+    $('#security-pin-modal').modal('show');
+});
+
+
 $(document).on('shown.bs.modal', '#expense_modal', function(){
     $('#expense_transaction_date').datetimepicker({
         format: moment_date_format + ' ' + moment_time_format,

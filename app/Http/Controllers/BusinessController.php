@@ -343,7 +343,6 @@ class BusinessController extends Controller
         $payment_types = $this->moduleUtil->payment_types(null, false, $business_id);
 
         $permissions = $this->moduleUtil->getModuleData('superadmin_package', true);
-
         $subscription = Subscription::where('business_id', $business_id)->first();
         $package = Package::find($subscription->package_id);
 
