@@ -44,6 +44,8 @@
             .col-right {
                 width: calc(100% - 105px);
             }
+            #amount_tendered,
+            #amount_change,
             #total_payable {
                 font-weight: 700;
                 font-size: 24px;
@@ -96,6 +98,14 @@
                 <th>Total:&nbsp;&nbsp;</th>
                 <td><span id="total_payable"></span></td>
             </tr>
+            <tr>
+                <th>Amount Tendered:&nbsp;&nbsp;</th>
+                <td><span id="amount_tendered"></span></td>
+            </tr>
+            <tr>
+                <th>Change:&nbsp;&nbsp;</th>
+                <td><span id="amount_change"></span></td>
+            </tr>
         </table>
     </body>
     <script src="{{ asset('js/vendor.js?v=' . $asset_v) }}"></script>
@@ -118,6 +128,9 @@
             $('#order_tax').text(order_tax);
 
             var gratuity_charges_label = localStorage.getItem('gratuity_charges_label');
+            if(!gratuity_charges_label) {
+                $('#gratuity_charges_label').parents('tr').hide();
+            }
             $('#gratuity_charges_label').text(gratuity_charges_label);
 
             var gratuity_charges = localStorage.getItem('gratuity_charges');
@@ -128,6 +141,12 @@
 
             var tips_text = localStorage.getItem('tips_text');
             $('#tips_text').text(tips_text);
+
+            var amount_tendered = localStorage.getItem('amount_tendered');
+            $('#amount_tendered').text(amount_tendered);
+
+            var amount_change = localStorage.getItem('amount_change');
+            $('#amount_change').text(amount_change ?? 0);
 
             $('.pos_line_total').each(function(i){
                 var total = $(this).val();

@@ -833,6 +833,10 @@ $(document).ready(function() {
             }
             
             $('div#confirmSuspendModal').modal('show');
+        } else if (pay_method == 'cash') {
+
+            $('div#modal_cash_payment').modal('show');
+            
         } else {
             pos_form_obj.submit();
         }
@@ -1024,7 +1028,7 @@ $(document).ready(function() {
                             if (result.whatsapp_link) {
                                 window.open(result.whatsapp_link);
                             }
-                            $('#modal_payment').modal('hide');
+                            $('#modal_payment, #modal_cash_payment').modal('hide');
                             // var data_authorize_net = {
                             //     'invoice_id' : result.receipt.print_title,
                             //     'amount' : result.receipt.receipt_details.subtotal_unformatted,
@@ -2478,13 +2482,19 @@ function pos_order_tax(price_total, discount) {
 function calculate_balance_due() {
     var total_payable = __read_number($('#final_total_input'));
     var total_paying = 0;
-    $('#payment_rows_div')
+
+    var elem_id = '#' + $('.modal.in').attr('id') + ' ';
+
+    $(elem_id+'#payment_rows_div')
         .find('.payment-amount')
         .each(function() {
             if (parseFloat($(this).val())) {
                 total_paying += __read_number($(this));
             }
         });
+    
+    localStorage.setItem('amount_tendered', total_paying);
+
     var bal_due = total_payable - total_paying;
     var change_return = 0;
 
@@ -3942,8 +3952,8 @@ function setFakeWebsocket() {
     var packing_charge_text = $('#packing_charge_text').text();
     localStorage.setItem('packing_charge_text', packing_charge_text);
 
-    var tips_text = $('#tips_text').text();
-    localStorage.setItem('tips_text', tips_text);
+    var amount_change = $('.in .change_return_span').text();
+    localStorage.setItem('amount_change', amount_change !='' ? amount_change : 0);
 
 }
 
