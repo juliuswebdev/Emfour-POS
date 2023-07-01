@@ -30,6 +30,7 @@
 				if($subscription->custom_permissions_super_admin != null) {
 					$custom_permissions_super_admin = json_decode($subscription->custom_permissions_super_admin, true);
 				}
+				//dump($permissions);
 				$super_admin_permission_arr = (isset($custom_permissions_super_admin)) ? array_keys($custom_permissions_super_admin) : [];
 			@endphp
 			<div class="row">                    
@@ -41,6 +42,7 @@
 						if($subscription->package_details) {
 							$custom_permissions_business = $subscription->package_details;
 						}
+						//dump($custom_permissions_business);
 						$value_business = isset($custom_permissions_business[$permission['name']]) ? $custom_permissions_business[$permission['name']] : false;
 					@endphp
 					<div class="col-sm-3">

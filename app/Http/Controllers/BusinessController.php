@@ -343,7 +343,9 @@ class BusinessController extends Controller
         $payment_types = $this->moduleUtil->payment_types(null, false, $business_id);
 
         $permissions = $this->moduleUtil->getModuleData('superadmin_package', true);
+        //dd($permissions);
         $subscription = Subscription::where('business_id', $business_id)->first();
+        //dd($subscription);
         $package = Package::find($subscription->package_id);
 
         return view('business.settings', compact('package', 'permissions', 'subscription', 'business', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types'));
@@ -380,6 +382,7 @@ class BusinessController extends Controller
             if(!auth()->user()->can('superadmin')) {
                 unset($business_details['card_charge']);
             }
+
 
             //Ip Restriction setting
             $business_details['enable_ip_restriction'] = ! empty($business_details['enable_ip_restriction']) ? $this->businessUtil->num_uf($business_details['enable_ip_restriction']) : 0;
@@ -456,10 +459,23 @@ class BusinessController extends Controller
                 'name' => $package->name,
             ];
 
-            $custom_permissions = $business_details['custom_permissions'] ?? [];
-    
-            $package_details = array_merge($package_details_arr, $custom_permissions);
-    
+            //$custom_permissions = $business_details['custom_permissions'] ?? [];
+            //Custom Permission Active
+            $custom_permissions = NULL;
+            if($request->has('custom_permissions') && $request->filled('custom_permissions')){
+                $custom_permissions = new \StdClass;
+                foreach($request->custom_permissions as $key => $permission_val){
+                    $custom_permissions->$key = 1;
+                }
+                $custom_permissions = json_decode(json_encode($custom_permissions, true), true);
+                $package_details = array_merge($package_details_arr, $custom_permissions);
+            }else{
+                $package_details = $package_details_arr;    
+            }
+
+            //$package_details = array_merge($package_details_arr, $custom_permissions);
+            //$package_details = $package_details_arr;
+        
             $subscription->package_details = $package_details;
             $subscription->custom_permissions_business_admin = $custom_permissions;
             $subscription->update();
