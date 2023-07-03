@@ -3946,6 +3946,9 @@ function setFakeWebsocket() {
     var gratuity_charges = $('.gratuity_charges').text();
     localStorage.setItem('gratuity_charges', gratuity_charges);
 
+    var tips_text = $('#tips_text').text();
+    localStorage.setItem('tips_text', tips_text);
+
     var gratuity_charges_label = $('.gratuity_wrapper b').text();
     localStorage.setItem('gratuity_charges_label', gratuity_charges_label);
 
