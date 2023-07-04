@@ -26,3 +26,7 @@ npm-debug.log
 .scribe
 /public/docs
 /public/js/skins/
+composer.lock
+package-lock.json
+.DS_Store
+/bootstrap/.DS_Store

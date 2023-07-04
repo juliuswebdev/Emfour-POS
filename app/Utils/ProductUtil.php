@@ -21,6 +21,7 @@ use App\VariationLocationDetails;
 use App\VariationTemplate;
 use App\VariationValueTemplate;
 use App\DynamicPricing;
+use App\Utils\ModuleUtil;
 use Illuminate\Support\Facades\DB;
 
 class ProductUtil extends Util
@@ -2269,19 +2270,27 @@ class ProductUtil extends Util
 
     public function getActiveDPRules($business_id)
     {
+        //Check permission of DP rules
         $active_rules = [];
-        $dp = DynamicPricing::where('business_id', $business_id)->first();
-        if($dp) {
-            $dp = $dp->toArray();
-            $rules = json_decode($dp['rules']);
-            $rules = ($rules->rules) ?? [];
-            foreach($rules as $rule) {
-                if($rule->active) {
-                    $active_rules[] = $rule;
+        $module_util = new ModuleUtil();
+        $is_dp_pricing_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'dynamic_price_module');
+        if($is_dp_pricing_enabled == false){
+            return $active_rules;
+        }else{
+            //Get DP Rules for business
+            $dp = DynamicPricing::where('business_id', $business_id)->first();
+            if($dp) {
+                $dp = $dp->toArray();
+                $rules = json_decode($dp['rules']);
+                $rules = ($rules->rules) ?? [];
+                foreach($rules as $rule) {
+                    if($rule->active) {
+                        $active_rules[] = $rule;
+                    }
                 }
+            } else {
+                $active_rules = [];
             }
-        } else {
-            $active_rules = [];
         }
         return $active_rules;
     }
