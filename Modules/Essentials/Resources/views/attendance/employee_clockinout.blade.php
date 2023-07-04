@@ -11,7 +11,13 @@
         <link rel="stylesheet" href="{{ asset('css/app.css?v='.$asset_v) }}">
         <style>
             body {
+                background: #DEEBF7;
+            }
+            .container {
                 background: darkturquoise;
+                width: 450px;
+                margin-top: 40px;
+                border-radius: 20px;
             }
             .header {
                 margin: 30px 0 10px;
@@ -28,6 +34,10 @@
             .cl-co-type-choose {
                 display: none;
             }
+            #pos_clock {
+                margin-top: 50px;
+                font-size: 30px;
+            }
         </style>
     </head>
     <body>
@@ -40,7 +50,7 @@
                         <img src="{{ asset('img') }}/default.png" alt="Color-Correction">
                         @endif
                     </div>
-                    {!! Form::open(['url' => action([\Modules\Essentials\Http\Controllers\AttendanceController::class, 'clockInClockOut']), 'method' => 'post', 'id' => 'clock_in_clock_out_form' ]) !!}
+                    {!! Form::open(['url' => action('\Modules\Essentials\Http\Controllers\AttendanceController@employeeClockInClockOut', [$business->slug, $location_id]), 'method' => 'post', 'id' => 'clock_in_clock_out_form' ]) !!}
                     <div class="modal-body mf-clockin-clockout">
                         <div class="row">
                             <div class="col-md-12 ">
@@ -105,7 +115,8 @@
                                     <div>
                                         <span class="font-weight-bold ci-co-business"></span>
                                     </div>
-
+                                    
+                                    <p id="pos_clock"></p>
                                     <div class="cl-co-action">
                                         <div>
                                             <button class="btn btn-success cl-co-btn-action" data-action="clock_in" type="button">Clock In</button>
@@ -114,6 +125,8 @@
                                             <button class="btn btn-warning cl-co-btn-action" data-action="clock_out" type="button">Clock Out</button>
                                         </div>
                                     </div>
+
+                                    
 
                                 </div>
                             </div>
@@ -131,8 +144,7 @@
         </div>
     </body>
 
-   
-	<script src="{{ asset('js/auto_height.js?v=' . $asset_v) }}"></script>
+
     <!-- <script src="{{ asset('js/pos.js?v=' . date('yymmddhhiiss')) }}"></script>    -->
     <script src="{{ asset('js/vendor.js?v=' . $asset_v) }}"></script>
 
@@ -243,6 +255,28 @@
             });
 
         });
+        currentTime();
+
+        function currentTime() {
+            let date = new Date(); 
+            let hh = date.getHours();
+            let mm = date.getMinutes();
+            let ss = date.getSeconds();
+            let session = "AM";
+            if(hh == 0){
+                hh = 12;
+            }
+            if(hh > 12){
+                hh = hh - 12;
+                session = "PM";
+            }
+            hh = (hh < 10) ? "0" + hh : hh;
+            mm = (mm < 10) ? "0" + mm : mm;
+            ss = (ss < 10) ? "0" + ss : ss;  
+            let time = hh + ":" + mm + ":" + ss + " " + session;
+            $("#pos_clock").html(date.toLocaleDateString("en-US") + '<br> ' + time); 
+            let t = setTimeout(function(){ currentTime() }, 1000);
+        }
     </script>
 
 

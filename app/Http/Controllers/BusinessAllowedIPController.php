@@ -10,7 +10,7 @@ use Illuminate\Routing\Controller;
 use App\BusinessAllowedIP;
 use App\BusinessLocation;
 use App\User;
-
+use DB;
 use App\Utils\ModuleUtil;
 use Illuminate\Support\Facades\Http;
 
@@ -53,7 +53,7 @@ class BusinessAllowedIPController extends Controller
                 'business_allowed_ips.id as id',
                 'business_allowed_ips.name as name',
                 'business_allowed_ips.ip_address as ip_address',
-                'business_locations.name as location',
+                DB::raw("CONCAT(business_locations.name, '-', business_locations.location_id) as location"),
                 'business_allowed_ips.description as description',
             )->orderBy('business_allowed_ips.location_id', 'ASC'); 
 

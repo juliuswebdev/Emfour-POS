@@ -42,7 +42,7 @@
             <select name="location_id" class="form-control select2" required>
                 <option value="">@lang('business_ip.select_business_locations')</option>
                 @foreach($business_locations as $item)
-                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                <option value="{{ $item->id }}">{{ $item->name }} - {{ $item->location_id }}</option>
                 @endforeach
             </select>
           </div>
