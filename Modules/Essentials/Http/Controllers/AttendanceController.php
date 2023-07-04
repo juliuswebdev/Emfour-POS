@@ -833,38 +833,8 @@ class AttendanceController extends Controller
     {
         $business = Business::where('slug', $slug)->first();
         $business_id = $business->id;
-        //$business_id = $request->session()->get('user.business_id');
-
-        // if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
-        //     abort(403, 'Unauthorized action.');
-        // }
-
-        // //Check if employees allowed to add their own attendance
-        // $settings = request()->session()->get('business.essentials_settings');
-        // $settings = ! empty($settings) ? json_decode($settings, true) : [];
-        // if (! auth()->user()->can('essentials.allow_users_for_attendance_from_web')) {
-        //     return ['success' => false,
-        //         'msg' => __('essentials::lang.not_allowed'),
-        //     ];
-        // } elseif ((! empty($settings['is_location_required']) && $settings['is_location_required']) && empty($request->input('clock_in_out_location'))) {
-        //     return ['success' => false,
-        //         'msg' => __('essentials::lang.you_must_enable_location'),
-        //     ];
-        // }
-
-        //Check IP address validate
-        /*
-        $is_exit_ip = BusinessAllowedIP::select('id')
-                        ->where('business_id', $business_id)
-                        ->where('ip_address',  $this->getClientIp())->first();
-        if($is_exit_ip == null)
-        {
-            return [
-                'success' => false,
-                'msg' => __('lang_v1.not_access_clockin_clockout'),
-            ];
-        }
-        */
+        
+        $settings = [];
 
         //Check Input Pin exit In Our user table
         $input_user_pin = $request->input('user_pin');

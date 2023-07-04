@@ -167,7 +167,6 @@ class EssentialsUtil extends Util
     {
         //Check user can clockin
         $clock_in_time = is_object($data['clock_in_time']) ? $data['clock_in_time']->toDateTimeString() : $data['clock_in_time'];
-
         $shift = $this->checkUserShift($data['user_id'], $essentials_settings, $clock_in_time);
         
         if (empty($shift)) {
