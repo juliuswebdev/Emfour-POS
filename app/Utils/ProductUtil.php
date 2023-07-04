@@ -2271,6 +2271,7 @@ class ProductUtil extends Util
     public function getActiveDPRules($business_id)
     {
         //Check permission of DP rules
+        
         $active_rules = [];
         $module_util = new ModuleUtil();
         $is_dp_pricing_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'dynamic_price_module');
