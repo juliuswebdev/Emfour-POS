@@ -320,8 +320,7 @@ class BusinessController extends Controller
         $shortcuts = json_decode($business->keyboard_shortcuts, true);
 
         $pos_settings = empty($business->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business->pos_settings, true);
-        //dd($pos_settings);
-
+        
         $email_settings = empty($business->email_settings) ? $this->businessUtil->defaultEmailSettings() : $business->email_settings;
 
         $sms_settings = empty($business->sms_settings) ? $this->businessUtil->defaultSmsSettings() : $business->sms_settings;
@@ -343,7 +342,7 @@ class BusinessController extends Controller
         $payment_types = $this->moduleUtil->payment_types(null, false, $business_id);
 
         $permissions = $this->moduleUtil->getModuleData('superadmin_package', true);
-        //dd($permissions);
+        
         $subscription = Subscription::where('business_id', $business_id)->first();
         //dd($subscription);
         $package = Package::find($subscription->package_id);

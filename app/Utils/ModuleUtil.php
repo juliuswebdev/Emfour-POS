@@ -22,7 +22,7 @@ class ModuleUtil extends Util
     public function isModuleInstalled($module_name)
     {
         
-        $is_available = ($module_name == "HRIS/Payroll") ? true : Module::has($module_name);
+        $is_available = ($module_name == "HRIS/Payroll" || $module_name == "DynamicPrice") ? true : Module::has($module_name);
         
         if ($is_available) {
             //Check if installed by checking the system table {module_name}_version
@@ -64,6 +64,14 @@ class ModuleUtil extends Util
         $essentials_module['alias'] = "hris";
         $modules['HRIS/Payroll'] = $essentials_module;
         
+        //Inject Dynamic Pricing Module
+        $dp_module = [];
+        $dp_module['name'] = "DynamicPrice";
+        $dp_module['alias'] = "dynamic_price_module";
+        $modules['DynamicPrice'] = $dp_module;
+        
+        
+        
         $installed_modules = [];
         foreach ($modules as $module => $details) {
             if ($this->isModuleInstalled($details['name'])) {
@@ -103,6 +111,11 @@ class ModuleUtil extends Util
                             $data[$module['name']][0]['label'] = "HRIS/Payroll Module";
                             $data[$module['name']][0]['default'] = false;
                         }
+                    }else if($module['name'] == "DynamicPrice"){ 
+                        //Inject Dynamic Price Module
+                        $data[$module['name']][0]['name'] = "dynamic_price_module";
+                        $data[$module['name']][0]['label'] = "Dynamic Price Module";
+                        $data[$module['name']][0]['default'] = false;
                     }else{
                         $module_name = $module['name'];
                         $class = 'Modules\\'.$module_name.'\Http\Controllers\DataController';
