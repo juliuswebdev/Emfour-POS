@@ -2633,6 +2633,17 @@ function reset_pos_form(){
     $('.contact_due_text').find('span').text('');
     $('.contact_due_text').addClass('hide');
 
+    localStorage.setItem('pos_table', '');
+    localStorage.setItem('pos_location', '');
+    localStorage.setItem('total_payable', 0);
+    localStorage.setItem('total_discount', 0);
+    localStorage.setItem('order_tax', 0);
+    localStorage.setItem('gratuity_charges', 0);
+    localStorage.setItem('tips_text', 0);
+    localStorage.setItem('gratuity_charges_label', 0);
+    localStorage.setItem('packing_charge_text', 0);
+    localStorage.setItem('amount_change', 0);
+
     $(document).trigger('sell_form_reset');
     dp_rule_promos();
 }

@@ -12,7 +12,10 @@
                 <div class="col-md-10">
                     <label>@lang('essentials::lang.employee_clock_in_out_link')</label>
                     <div class="public-link mb-2" style="margin-bottom: 15px">
-                        <textarea class="form-control" id="copy-clipboard-link-customer">{{ route('employee.clockinout') }}</textarea>
+					@php
+					$location_code = 'business-location-code';
+					@endphp
+                        <textarea class="form-control" id="copy-clipboard-link-customer">{{ route('employee.clockinout', [$business->slug, $location_code]) }}</textarea>
                         <a href="#" class="copy-clipboard-btn" onclick="copyToClipboard('#copy-clipboard-link-customer')"><i class="fa fas fa-copy"></i></a>
                     </div>
                 </div>

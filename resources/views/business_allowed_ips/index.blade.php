@@ -29,7 +29,7 @@
                     <tr>
                         <th style="width: 100px">@lang('business_ip.name')</th>
                         <th style="width: 200px">@lang('business_ip.ip_address')</th>
-                        <th style="width: 100px">@lang('business_ip.location')</th>
+                        <th style="width: 300px">@lang('business_ip.location')</th>
                         <th>@lang('business_ip.description')</th>
                         <th style="width: 100px">@lang('messages.action')</th>
                     </tr>

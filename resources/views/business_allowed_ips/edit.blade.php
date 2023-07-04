@@ -43,7 +43,7 @@
                 <option value="">@lang('business_ip.select_business_locations')</option>
                 @foreach($business_locations as $item)
                 
-                <option value="{{ $item->id }}" @if($business_ip->location_id == $item->id) selected @endif>{{ $item->name }}</option>
+                <option value="{{ $item->id }}" @if($business_ip->location_id == $item->id) selected @endif>{{ $item->name }} - {{ $item->location_id }}</option>
                 @endforeach
             </select>
           </div>
