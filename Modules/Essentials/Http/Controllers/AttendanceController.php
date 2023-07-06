@@ -831,6 +831,7 @@ class AttendanceController extends Controller
 
     public function employeeClockInClockOut(Request $request, $slug, $location_id)
     {
+    
         $business = Business::where('slug', $slug)->first();
         $business_id = $business->id;
         
@@ -845,6 +846,30 @@ class AttendanceController extends Controller
                 'msg' => __('business.invalid_pin'),
             ];
         }
+        
+
+        //Check for business validation
+        if($user->business->id != $business_id){
+            return [
+                'success' => false,
+                'msg' => __('business.not_allowed_to_access_cico'),
+            ];
+        }
+
+        //Check business location validation
+        $business_location_id = BusinessLocation::where('business_id', $business_id)->where('location_id', $location_id)->pluck('id')->first();
+        $access_all_locations = $user->hasPermissionTo('access_all_locations');
+        if($access_all_locations == false){
+            $check_specific_business_location = $user->hasPermissionTo('location.'.$business_location_id);
+            if($check_specific_business_location == false){
+                return [
+                    'success' => false,
+                    'msg' => __('business.not_allowed_to_access_cico'),
+                ];
+            }
+        }
+        
+        
 
         try {
             
@@ -862,6 +887,7 @@ class AttendanceController extends Controller
                         //'clock_in_location' => $request->input('clock_in_out_location'),
                     ];
 
+                    
                     $output = $this->essentialsUtil->clockin($data, $settings);
                     if(isset($output['current_shift'])){
                         $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
