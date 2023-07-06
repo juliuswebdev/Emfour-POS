@@ -377,7 +377,7 @@ class BusinessController extends BaseController
         
         //Inject Dynamic Price Permission
         $permissions['DynamicPrice'][0]['name'] = "dynamic_price_module";
-        $permissions['DynamicPrice'][0]['label'] = "Dynamic Price Module";
+        $permissions['DynamicPrice'][0]['label'] = "Dynamic Pricing Module";
         
         $subscription = Subscription::where('business_id', $business_id)->first();
         

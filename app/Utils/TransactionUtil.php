@@ -60,6 +60,7 @@ class TransactionUtil extends Util
             'location_id' => $input['location_id'],
             'type' => $sale_type,
             'status' => $input['status'],
+            'dp_flag' => $input['dp_flag'],
             'sub_status' => ! empty($input['sub_status']) ? $input['sub_status'] : null,
             'contact_id' => $input['contact_id'],
             'customer_group_id' => ! empty($input['customer_group_id']) ? $input['customer_group_id'] : null,

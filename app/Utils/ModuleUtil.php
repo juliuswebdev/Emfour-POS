@@ -114,7 +114,7 @@ class ModuleUtil extends Util
                     }else if($module['name'] == "DynamicPrice"){ 
                         //Inject Dynamic Price Module
                         $data[$module['name']][0]['name'] = "dynamic_price_module";
-                        $data[$module['name']][0]['label'] = "Dynamic Price Module";
+                        $data[$module['name']][0]['label'] = "Dynamic Pricing Module";
                         $data[$module['name']][0]['default'] = false;
                     }else{
                         $module_name = $module['name'];

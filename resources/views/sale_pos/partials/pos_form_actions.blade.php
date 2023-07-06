@@ -5,7 +5,7 @@
 	$enabled_modules = ! empty(session('business.enabled_modules')) ? session('business.enabled_modules') : [];
 
 
-
+	
 
 @endphp
 <div class="row">
@@ -22,6 +22,8 @@
 					<span id="total_payable" class="number" 
 					>0</span>
 				</div>
+				<input type="hidden" id="dp_flag" name="dp_flag" value="{{ $transaction->dp_flag ?? 0 }}">
+
 			</div>
 			@endif
 		</div>
