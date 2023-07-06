@@ -2020,6 +2020,26 @@ function pos_total_row() {
     calculate_billing_details(price_total);
 }
 
+function pos_total_row_a() {
+    var total_quantity = 0;
+    var price_total = get_subtotal();
+    $('table#pos_table tbody tr').each(function() {
+        total_quantity = total_quantity + __read_number($(this).find('input.pos_quantity'));
+    });
+
+    //updating shipping charges
+    $('span#shipping_charges_amount').text(
+        __currency_trans_from_en(__read_number($('input#shipping_charges_modal')), false)
+    );
+
+    $('span.total_quantity').each(function() {
+        $(this).html(__number_f(total_quantity));
+    });
+
+    //$('span.unit_price_total').html(unit_price_total);
+    $('span.price_total').html(__currency_trans_from_en(price_total, false));
+}
+
 function get_subtotal() {
     var price_total = 0;
 
@@ -2182,7 +2202,7 @@ function calculate_billing_details(price_total) {
     //     }
     // }
 
-
+    var condition_bool = true;
     if(dp_rules && dp_rules.length > 0) {
         dp_rules.forEach(function(rule){
           
@@ -2201,7 +2221,7 @@ function calculate_billing_details(price_total) {
                 (today_d > start_d && today_d < end_d) &&
                 (rule['active'])
             ) {
-                var condition_bool = true;
+                
                 if(rule['conditions']) {
                     condition_bool = false;
                     rule['conditions'].forEach(function(condition, id) {
@@ -2291,6 +2311,7 @@ function calculate_billing_details(price_total) {
                 }
                 if(condition_bool) {
                     shown_total = dp_rule_prices(rule['prices'], shown_total);
+                    pos_total_row_a();
                 }
                
             }
@@ -2312,7 +2333,6 @@ function calculate_billing_details(price_total) {
     calculate_balance_due();
 
 }
-
 
 function conditions_operator(value, limit, operator){
     const operators = [null, 'eq_number', 'eq_text', 'eq_bool', 'gt', 'lt', 'gt_eq', 'lt_eq', 'not_eq_number', 'not_eq_text'];
@@ -2355,46 +2375,56 @@ function dp_rule_prices(prices, shown_total){
                         if(price['already_sale'] && $is_sale) {
                                 $sale = false;
                         }
-                        price['product_sku'].forEach(function(sku) {
-                            var product_class = '.product_row_'+ sku;
-                            
-                            if($(product_class).length && $sale) {
-                                var orig_price = $(product_class+' .pos_unit_price_inc_tax').attr('value');
-                                var item_price = orig_price;
-                                var data_dp_type = price['type'] ?? 0;
-                                var data_dp_percent = price['percent'] ?? 0;
-                                var data_dp_amount = price['amount'] ?? 0;
+                        if($('#pos_table tbody tr').length > 0 ) {
+                            $('#pos_table tbody tr').each(function() {
+                                var sku = $(this).attr('data-sku');
+                                var has_dp = $(this).attr('data-has-dp');
+                                var product_class = '.product_row_'+ sku + '[data-has-dp="0"]';
+                                if(has_dp == 0) {
+                                    if($(product_class).length && $sale) {
+                                        var orig_price = $(product_class+' .hidden_base_unit_sell_price').attr('value');
+                                        var item_price = orig_price;
+                                        var data_dp_type = price['type'] ?? 0;
+                                        var data_dp_percent = price['percent'] ?? 0;
+                                        var data_dp_amount = price['amount'] ?? 0;
 
-                                if(data_dp_type == 'discount') {
-                                    if(data_dp_percent) {
-                                        item_price = item_price - (item_price * (data_dp_amount/100));
-                                    } else {
-                                        item_price = item_price - data_dp_amount;
-                                    }
-                                } else if(data_dp_type == 'increase') {
-                                    if(data_dp_percent) {
-                                        item_price = item_price + (item_price * (data_dp_amount/100));
-                                    } else {
-                                        item_price = item_price + data_dp_amount;
-                                    }
-                                } else if(data_dp_type == 'fixed_price') {
-                                    item_price =  data_dp_amount;
-                                }
+                                        if(data_dp_type == 'discount') {
+                                            if(data_dp_percent) {
+                                                item_price = parseFloat(item_price) - (parseFloat(item_price) * (parseFloat(data_dp_amount)/100));
+                                            } else {
+                                                item_price = parseFloat(item_price) - parseFloat(data_dp_amount);
+                                            }
+                                        } else if(data_dp_type == 'increase') {
+                                            
+                                            if(data_dp_percent) {
+                                                item_price = parseFloat(item_price) + (parseFloat(item_price) * (parseFloat(data_dp_amount)/100));
+                                    
+                                            } else {
+                                                item_price = parseFloat(item_price) + parseFloat(data_dp_amount);
+                                            }
+                                        } else if(data_dp_type == 'fixed_price') {
+                                            item_price =  parseFloat(data_dp_amount);
+                                        }
 
-                                if(parseFloat(orig_price) > parseFloat(item_price)) {
-                                    shown_total = shown_total + ( parseFloat(orig_price) - parseFloat(item_price) );
-                                } else {
-                                    shown_total = shown_total - ( parseFloat(orig_price) - parseFloat(item_price) );
+                                        var qty = $(product_class+' .input_quantity').val();
+                                        var final_item_price = item_price;
+                                        var final_orig_price = orig_price;
+                                        $(product_class+' .pos_line_total_text').text(__currency_trans_from_en(final_item_price * parseFloat(qty), true));
+                                        $(product_class+' .pos_unit_price_inc_tax').attr('value', final_item_price);
+                                        $(product_class+' .pos_unit_price').val(final_item_price);
+                                        $(product_class+' .hidden_base_unit_sell_price').val(final_item_price);
+                                        $(product_class+' .pos_line_total').val(final_item_price * parseFloat(qty));
+
+                                        if(parseFloat(final_orig_price) > parseFloat(final_item_price)) {
+                                            shown_total = shown_total + ( parseFloat(final_orig_price) - parseFloat(final_item_price) );
+                                        } else {
+                                            shown_total = shown_total - ( parseFloat(final_orig_price) - parseFloat(final_item_price) );
+                                        }
+                                        $(this).attr('data-has-dp', 1);
+                                    }
                                 }
-                                
-                                console.log(product_class+' .pos_unit_price_inc_tax');
-                                $(product_class+' .pos_line_total_text').text(__currency_trans_from_en(item_price, true));
-                                $(product_class+' .pos_unit_price_inc_tax').attr('value', item_price);
-                                $(product_class+' .pos_unit_price').val(item_price);
-                                $(product_class+' .hidden_base_unit_sell_price').val(item_price);
-                                $(product_class+' .pos_line_total').val(item_price);
-                            }
-                        });
+                            });
+                        }
                     }
                 }
                 if(price['target'] == 'product_cat') {
@@ -2404,44 +2434,54 @@ function dp_rule_prices(prices, shown_total){
                             $('#pos_table tbody tr').each(function() {
                                 var cat_slug = $(this).attr('data-cat-slug');
                                 var sub_cat_slug = $(this).attr('data-sub-cat-slug');
-                                if(price['product_cat_slug'].includes(cat_slug) || price['product_cat_slug'].includes(sub_cat_slug)) {
-                                    var sku = $(this).attr('data-sku');
-                                    var product_class = '.product_row_'+ sku;
+                                var has_dp = $(this).attr('data-has-dp');
+                                if(has_dp == 0) {
+                                    if( (price['product_cat_slug'].includes(cat_slug) || price['product_cat_slug'].includes(sub_cat_slug)) ) {
+                                        var sku = $(this).attr('data-sku');
+                                        var product_class = '.product_row_'+ sku + '[data-has-dp="0"]';
+                                        if($(product_class).length) {
+                                            var orig_price = $(product_class+' .hidden_base_unit_sell_price').attr('value');
+                                            var item_price = orig_price;
+                                            var data_dp_type = price['type'] ?? 0;
+                                            var data_dp_percent = price['percent'] ?? 0;
+                                            var data_dp_amount = price['amount'] ?? 0;
 
-                                    if($(product_class).length) {
-                                        var orig_price = $(product_class+' .pos_unit_price_inc_tax').attr('value');
-                                        var item_price = orig_price;
-                                        var data_dp_type = price['type'] ?? 0;
-                                        var data_dp_percent = price['percent'] ?? 0;
-                                        var data_dp_amount = price['amount'] ?? 0;
-
-                                        if(data_dp_type == 'discount') {
-                                            if(data_dp_percent) {
-                                                item_price = item_price - (item_price * (data_dp_amount/100));
-                                            } else {
-                                                item_price = item_price - data_dp_amount;
+                                            if(data_dp_type == 'discount') {
+                                                if(data_dp_percent) {
+                                                    item_price = parseFloat(item_price) - (parseFloat(item_price) * (parseFloat(data_dp_amount)/100));
+                                                } else {
+                                                    item_price = parseFloat(item_price) - parseFloat(data_dp_amount);
+                                                }
+                                            } else if(data_dp_type == 'increase') {
+                                                
+                                                if(data_dp_percent) {
+                                                    item_price = parseFloat(item_price) + (parseFloat(item_price) * (parseFloat(data_dp_amount)/100));
+                                        
+                                                } else {
+                                                    item_price = parseFloat(item_price) + parseFloat(data_dp_amount);
+                                                }
+                                            } else if(data_dp_type == 'fixed_price') {
+                                                item_price =  parseFloat(data_dp_amount);
                                             }
-                                        } else if(data_dp_type == 'increase') {
-                                            if(data_dp_percent) {
-                                                item_price = item_price + (item_price * (data_dp_amount/100));
-                                            } else {
-                                                item_price = item_price + data_dp_amount;
-                                            }
-                                        } else if(data_dp_type == 'fixed_price') {
-                                            item_price =  data_dp_amount;
-                                        }
 
-                                        if(parseFloat(orig_price) > parseFloat(item_price)) {
-                                            shown_total = shown_total + ( parseFloat(orig_price) - parseFloat(item_price) );
-                                        } else {
-                                            shown_total = shown_total - ( parseFloat(orig_price) - parseFloat(item_price) );
+                                    
+                                            var qty = $(product_class+' .input_quantity').val();
+                                            var final_item_price = item_price;
+                                            var final_orig_price = orig_price;
+                                            $(product_class+' .pos_line_total_text').text(__currency_trans_from_en(final_item_price * parseFloat(qty), true));
+                                            $(product_class+' .pos_unit_price_inc_tax').attr('value', final_item_price);
+                                            $(product_class+' .pos_unit_price').val(final_item_price);
+                                            $(product_class+' .hidden_base_unit_sell_price').val(final_item_price);
+                                            $(product_class+' .pos_line_total').val(final_item_price * parseFloat(qty));
+
+
+                                            if(parseFloat(final_orig_price) > parseFloat(final_item_price)) {
+                                                shown_total = shown_total + ( parseFloat(final_orig_price) - parseFloat(final_item_price) );
+                                            } else {
+                                                shown_total = shown_total - ( parseFloat(final_orig_price) - parseFloat(final_item_price) );
+                                            }
                                         }
-                                
-                                        $(product_class+' .pos_line_total_text').text(__currency_trans_from_en(item_price, true));
-                                        $(product_class+' .pos_unit_price_inc_tax').attr('value', item_price);
-                                        $(product_class+' .pos_unit_price').val(item_price);
-                                        $(product_class+' .hidden_base_unit_sell_price').val(item_price);
-                                        $(product_class+' .pos_line_total').val(item_price);
+                                        $(this).attr('data-has-dp', 1);
                                     }
                                 }
                             });
@@ -2459,18 +2499,20 @@ function dp_rule_prices(prices, shown_total){
 
                         if(data_dp_type == 'discount') {
                             if(data_dp_percent) {
-                                shown_total = shown_total - (shown_total * (data_dp_amount/100));
+                                item_price = parseFloat(item_price) - (parseFloat(item_price) * (parseFloat(data_dp_amount)/100));
                             } else {
-                                shown_total = shown_total - data_dp_amount;
+                                item_price = parseFloat(item_price) - parseFloat(data_dp_amount);
                             }
                         } else if(data_dp_type == 'increase') {
+                            
                             if(data_dp_percent) {
-                                shown_total = shown_total + (shown_total * (data_dp_amount/100));
+                                item_price = parseFloat(item_price) + (parseFloat(item_price) * (parseFloat(data_dp_amount)/100));
+                      
                             } else {
-                                shown_total = shown_total + data_dp_amount;
+                                item_price = parseFloat(item_price) + parseFloat(data_dp_amount);
                             }
                         } else if(data_dp_type == 'fixed_price') {
-                            shown_total =  data_dp_amount;
+                            item_price =  parseFloat(data_dp_amount);
                         }
                 
                         var price_total = $('.price_total').text();
@@ -2498,6 +2540,7 @@ function dp_rule_prices(prices, shown_total){
                 }
             }
         });
+
         return shown_total;
     }
 }
