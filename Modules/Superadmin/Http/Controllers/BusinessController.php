@@ -374,6 +374,9 @@ class BusinessController extends BaseController
         $permissions['HRIS/Payroll'][0]['name'] = "hris_module";
         $permissions['HRIS/Payroll'][0]['label'] = "HRIS/Payroll Module";
         
+        //Inject Dynamic Price Permission
+        $permissions['DynamicPrice'][0]['name'] = "dynamic_price_module";
+        $permissions['DynamicPrice'][0]['label'] = "Dynamic Pricing Module";
         
         $subscription = Subscription::where('business_id', $business_id)->first();
   

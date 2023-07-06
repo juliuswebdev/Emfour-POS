@@ -22,16 +22,13 @@
 	$product_cat2_slug = $product_cat2->slug ?? '';
 @endphp
 
-<tr class="product_row product_row_{{$product->product_id}}"  
+<tr class="product_row product_row_{{$product->product_id}} product_row_{{ $product->sub_sku }}"  
 	data-cat-slug="{{ $product_cat1_slug }}"
 	data-sub-cat-slug="{{ $product_cat2_slug }}"
 	data-sku="{{ $product->sub_sku }}"
 	data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif
 >
 	<td>
-		@php
-		echo $product->sub_category_id;
-		@endphp
 		@if(!empty($so_line))
 			<input type="hidden" 
 			name="products[{{$row_count}}][so_line_id]" 
@@ -118,155 +115,7 @@
 		@endphp
 
 
-		@php
-			$has_dp = false;
-			$has_items_in_cart = false;
-			
-			$start_date = 'start-date';
-			$end_date = 'end-date';
-
-			$today = date('Y-m-d', strtotime(date('d-m-Y'))); 
-			if(count($dp_rules) > 0) {
-				foreach($dp_rules as $rule) {
-					$start__date = $rule->$start_date ? date('Y-m-d', strtotime($rule->$start_date)) : $today;
-					$end__date = $rule->$end_date ? date('Y-m-d', strtotime($rule->$end_date)) : $today;
-					
-					if($rule->active &&
-						(($today >= $start__date) && ($today <= $end__date))
-					) {
-
-						if(isset($rule->conditions)) {
-
-							foreach($rule->conditions as $condition) {
-
-								if($condition->condition_data == 'items_in_cart') {
-
-									if(in_array($product->sub_sku, $condition->product_sku)) {
-										$has_items_in_cart = true;
-									}
-								}
-							}
-						}
-
-
-						if(isset($rule->prices)) {
-
-							$sale = true;
-							$is_sale = false;
-					
-							
-							foreach($rule->prices as $price) {
-								if($price->active) {
-
-									if($price->target == 'product') {
-										if( isset($price->product_sku)) {
-
-											if($price->already_sale && $is_sale) {
-													$sale = false;
-											}
-
-											if(in_array($product->sub_sku, $price->product_sku) && $sale) {
-
-												if($price->is_sale) {
-													$is_sale = true;
-												}
-
-												$has_dp = true;
-												
-												if($price->type == 'discount') {
-													
-													if($price->percent) {
-														$unit_price_inc_tax = $unit_price_inc_tax - ($unit_price_inc_tax * ($price->amount/100));
-													} else {
-														$unit_price_inc_tax = $unit_price_inc_tax - $price->amount;
-														if($unit_price_inc_tax < 0) {
-															$unit_price_inc_tax = 0;
-														}
-													}
-
-												} else if($price->type == 'increase') {
-													
-													if($price->percent) {
-														$unit_price_inc_tax = $unit_price_inc_tax + ($unit_price_inc_tax * ($price->amount/100));
-													} else {
-														$unit_price_inc_tax = $unit_price_inc_tax + $price->amount;
-													}
-
-												} else if($price->type == 'fixed_price') {
-
-													$unit_price_inc_tax = $price->amount;
-
-												}
-
-											}
-										}
-									}
-
-									if($price->target == 'product_cat') {
-										if( isset($price->product_cat_slug)) {
-											if(in_array($product_cat1_slug, $price->product_cat_slug) || in_array($product_cat2_slug, $price->product_cat_slug)) {
-												$has_dp = true;
-												if($price->type == 'discount') {
-													
-													if($price->percent) {
-														$unit_price_inc_tax = $unit_price_inc_tax - ($unit_price_inc_tax * ($price->amount/100));
-													} else {
-														$unit_price_inc_tax = $unit_price_inc_tax - $price->amount;
-														if($unit_price_inc_tax < 0) {
-															$unit_price_inc_tax = 0;
-														}
-													}
-
-												} else if($price->type == 'increase') {
-
-													if($price->percent) {
-														$unit_price_inc_tax = $unit_price_inc_tax + ($unit_price_inc_tax * ($price->amount/100));
-													} else {
-														$unit_price_inc_tax = $unit_price_inc_tax + $price->amount;
-													}
-
-												} else if($price->type == 'fixed_price') {
-
-													$unit_price_inc_tax = $price->amount;
-													
-												}
-
-											}
-										}
-									}
-
-									if($price->target == 'promo_products') {
-										if(isset($price->promo_product_sku)) {
-											foreach($price->promo_product_sku as $promo) {
-										
-												if($product->sub_sku == $promo->product_sku) {
-													$has_dp = true;
-													$unit_price_inc_tax = $promo->product_price;
-												}
-											}
-											
-										}
-									}
-
-
-
-								}
-							}
-						}
-					}	
-
-				}
-			}
-
-		@endphp
-
-		@if($has_dp)
-		<input type="hidden" class="has_dp" value="1">
-		@endif
-
-		@if($has_items_in_cart)
-		<input type="hidden" class="has_items_in_cart" value="1">
-		@endif
+		
 		
 		@if(empty($is_direct_sell))
 		<div class="modal fade row_edit_product_price_model" id="row_edit_product_price_modal_{{$row_count}}" tabindex="-1" role="dialog">
@@ -505,15 +354,13 @@
 			</td>
 		@endif
 		@php
-			if($has_dp) {
-				$pos_unit_price = $unit_price_inc_tax;
-			} else {
+
 				$pos_unit_price = !empty($product->unit_price_before_discount) ? $product->unit_price_before_discount : $product->default_sell_price;
 
 				if(!empty($so_line) && $action !== 'edit') {
 					$pos_unit_price = $so_line->unit_price_before_discount;
 				}
-			}
+	
 
 		@endphp
 		<td class="@if(!auth()->user()->can('edit_product_price_from_sale_screen')) hide @endif">
@@ -573,15 +420,11 @@
 			$subtotal_type = !empty($pos_settings['is_pos_subtotal_editable']) ? 'text' : 'hidden';
 		@endphp
 
-		@if($has_dp)
-			<input type="{{$subtotal_type}}" class="form-control pos_line_total" value="{{@num_format($unit_price_inc_tax )}}">
-			<span class="display_currency pos_line_total_text" data-currency_symbol="true">{{$unit_price_inc_tax}}</span>
-		
-		@else
+
 			
 			<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
 			<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
-		@endif
+	
 	</td>
 
 	<td class="text-center v-center">

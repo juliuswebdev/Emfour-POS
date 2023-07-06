@@ -97,6 +97,17 @@ class ModuleUtil extends Util
                                 }
                             }
                         }
+
+                        if(($function_name == "superadmin_package") && ($arguments == true)){
+                            $data[$module['name']][0]['name'] = "hris_module";
+                            $data[$module['name']][0]['label'] = "HRIS/Payroll Module";
+                            $data[$module['name']][0]['default'] = false;
+                        }
+                    }else if($module['name'] == "DynamicPrice"){ 
+                        //Inject Dynamic Price Module
+                        $data[$module['name']][0]['name'] = "dynamic_price_module";
+                        $data[$module['name']][0]['label'] = "Dynamic Pricing Module";
+                        $data[$module['name']][0]['default'] = false;
                     }else{
                         $module_name = $module['name'];
                         $class = 'Modules\\'.$module_name.'\Http\Controllers\DataController';

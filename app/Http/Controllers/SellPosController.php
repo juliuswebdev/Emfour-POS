@@ -564,6 +564,12 @@ class SellPosController extends Controller
                     $input['res_waiter_id'] = request()->get('res_waiter_id');
                 }
 
+                $input['dp_flag'] = $request->input('dp_flag');
+
+                if($input['dp_flag']) {
+                    $input['final_total'] = $request->input('final_total');
+                }
+
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
