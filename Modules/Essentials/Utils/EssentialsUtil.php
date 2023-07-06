@@ -108,13 +108,22 @@ class EssentialsUtil extends Util
 
         $user_shifts = EssentialsUserShift::join('essentials_shifts as s', 's.id', '=', 'essentials_user_shifts.essentials_shift_id')
                     ->where('user_id', $user_id)
-                    ->where('start_date', '<=', $shift_datetime)
-                    ->where(function ($q) use ($shift_datetime) {
-                        $q->whereNull('end_date')
-                        ->orWhere('end_date', '>=', $shift_datetime);
-                    })
+                    ->where('s.start_time', '=', NULL)
+                    ->where('s.end_time', '=', NULL)
+                    ->where('s.type', '=', 'flexible_shift')
                     ->select('essentials_user_shifts.*', 's.holidays', 's.start_time', 's.end_time', 's.type')
                     ->get();
+        if($user_shifts->count() == 0){
+            $user_shifts = EssentialsUserShift::join('essentials_shifts as s', 's.id', '=', 'essentials_user_shifts.essentials_shift_id')
+                        ->where('user_id', $user_id)
+                        ->where('start_date', '<=', $shift_datetime)
+                        ->where(function ($q) use ($shift_datetime) {
+                            $q->whereNull('end_date')
+                            ->orWhere('end_date', '>=', $shift_datetime);
+                        })
+                        ->select('essentials_user_shifts.*', 's.holidays', 's.start_time', 's.end_time', 's.type')
+                        ->get();
+        }
 
         foreach ($user_shifts as $shift) {
             $holidays = json_decode($shift->holidays, true);
@@ -169,6 +178,7 @@ class EssentialsUtil extends Util
         $clock_in_time = is_object($data['clock_in_time']) ? $data['clock_in_time']->toDateTimeString() : $data['clock_in_time'];
         $shift = $this->checkUserShift($data['user_id'], $essentials_settings, $clock_in_time);
         
+
         if (empty($shift)) {
             $available_shifts = $this->getAllAvailableShiftsForGivenUser($data['business_id'], $data['user_id']);
 
