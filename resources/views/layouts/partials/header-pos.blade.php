@@ -26,12 +26,15 @@
 <div class="col-md-12 no-print pos-header">
   <input type="hidden" id="pos_redirect_url" value="{{$pos_redirect_url}}">
   <div class="row">
-    <div class="col-md-6">
+
+    <div class="col-md-7">
       <div class="m-6 mt-5" style="display: flex;">
+        
+        <p ><strong>@lang('business.register_number'): {{  $register_number }} &nbsp;&nbsp;</strong> 
         <p ><strong>@lang('sale.location'): &nbsp;</strong> 
           @if(empty($transaction->location_id))
             @if(count($business_locations) > 1)
-            <div style="width: 28%;margin-bottom: 5px;">
+            <div style="width: 20;margin-bottom: 5px;">
                {!! Form::select('select_location_id', $business_locations, $default_location->id ?? null , ['class' => 'form-control input-sm',
                 'id' => 'select_location_id', 
                 'required', 'autofocus'], $bl_attributes); !!}
@@ -113,7 +116,7 @@
 
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-5">
 
       {{--
       <a href="{{$go_back_url}}" title="{{ __('lang_v1.go_back') }}" class="btn btn-info btn-flat m-6 btn-xs m-5 pull-right">

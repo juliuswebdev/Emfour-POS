@@ -26,5 +26,6 @@ return [
     'added_success' => 'Business IP added success!',
     'update_success' => 'Business IP update success!',
     'delete_success' => 'Business IP delete success!',
+    'register_number' => 'Register Number',
     
 ];

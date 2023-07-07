@@ -48,6 +48,15 @@
             </select>
           </div>
         </div>
+        
+        <div class="col-sm-12">
+          <div class="form-group">
+            {!! Form::label('register_number', __('business_ip.register_number') . ':*') !!}
+              {!! Form::text('register_number', $business_ip->register_number, ['class' => 'form-control', 'required',
+              'placeholder' => __('business_ip.register_number')]); !!}
+          </div>
+        </div>
+
         <div class="col-sm-12">
           <div class="form-group">
             {!! Form::label('description', __('business_ip.description') . ':') !!}

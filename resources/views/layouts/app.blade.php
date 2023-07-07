@@ -128,6 +128,8 @@
                 @includeIf($additional_view)
             @endforeach
         @endif
+
+        @yield('scripts')
     </body>
 
 </html>
