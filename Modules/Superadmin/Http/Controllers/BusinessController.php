@@ -357,6 +357,7 @@ class BusinessController extends BaseController
      */
     public function show($business_id)
     {
+        
         if (! auth()->user()->can('superadmin')) {
             abort(403, 'Unauthorized action.');
         }
@@ -368,8 +369,8 @@ class BusinessController extends BaseController
         $created_by = ! empty($created_id) ? User::find($created_id) : null;
 
         $modules = $this->moduleUtil->availableModules();
-        //dd($modules);
         $permissions = $this->moduleUtil->getModuleData('superadmin_package', true);
+        
         //Inject HRIS Module
         $permissions['HRIS/Payroll'][0]['name'] = "hris_module";
         $permissions['HRIS/Payroll'][0]['label'] = "HRIS/Payroll Module";
@@ -379,7 +380,8 @@ class BusinessController extends BaseController
         $permissions['DynamicPrice'][0]['label'] = "Dynamic Pricing Module";
         
         $subscription = Subscription::where('business_id', $business_id)->first();
-  
+        
+        
         return view('superadmin::business.show')
             ->with(compact('business', 'modules', 'permissions', 'subscription', 'created_by'));
     }

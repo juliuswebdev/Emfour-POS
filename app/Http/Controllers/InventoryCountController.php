@@ -251,7 +251,13 @@ class InventoryCountController extends Controller
             $products = $products_query->select([
                 DB::raw('CONCAT("'.$count_header->id.'") AS count_header_id'),
                 'variations.id AS product_id',
-                'products.sku AS sku',
+                DB::raw('
+                    IF(
+                        products.type = "variable",
+                        variations.sub_sku, 
+                        products.sku
+                    )
+                AS sku'),
                 DB::raw('products.upc AS upc'),
                 DB::raw('CURRENT_TIMESTAMP() AS created_at')
             ]);
@@ -287,10 +293,16 @@ class InventoryCountController extends Controller
 
             $products = $products_query->select([
                 DB::raw('CONCAT("'.$count_header->id.'") AS count_header_id'),
-                'products.sku AS sku',
-                'products.id AS product_id',
+                DB::raw('
+                    IF(
+                        products.type = "variable",
+                        variations.sub_sku, 
+                        products.sku
+                    )
+                AS sku'),
+                'variations.id AS product_id',
                 DB::raw('products.upc AS upc'),
-                DB::raw("( SELECT COALESCE(SUM(qty_available), 0) FROM variation_location_details WHERE product_id = products.id
+                DB::raw("( SELECT COALESCE(SUM(qty_available), 0) FROM variation_location_details WHERE variation_id = variations.id
                     ) as frozen_quantity"),
                 DB::raw('CURRENT_TIMESTAMP() AS created_at'),
                 DB::raw('CURRENT_TIMESTAMP() AS updated_at')
@@ -298,8 +310,8 @@ class InventoryCountController extends Controller
 
             CountFrozenInventoryBalance::insertUsing([
                 'count_header_id',
-                'product_id',
                 'sku',
+                'product_id',
                 'upc',
                 'frozen_quantity',
                 'created_at',
@@ -327,7 +339,21 @@ class InventoryCountController extends Controller
         $file_name = $count_header->count_reference ?? 'sc-'.$id;
         Config::set('excel.exports.csv.delimiter', ',');
         return Excel::download(new StockCountExport($this->filter_products($count_header), $count_header->count_type), $file_name.'.csv');
-
+        // echo '<pre>';
+        // print_r($this->filter_products($count_header)->select([
+        //     DB::raw('CONCAT("'.$count_header->id.'") AS count_header_id'),
+        //     'variations.id AS product_id',
+        //     DB::raw('
+        //         IF(
+        //             products.type = "variable",
+        //             variations.sub_sku, 
+        //             products.sku
+        //         )
+        //     AS sku'),
+        //     DB::raw('products.upc AS upc'),
+        //     DB::raw('CURRENT_TIMESTAMP() AS created_at')
+        // ])->get());
+        // echo '</pre>';
     }
 
     /**
@@ -380,18 +406,15 @@ class InventoryCountController extends Controller
         })->leftJoin('product_locations', function($join) {
             $join->on('product_locations.product_id', '=', 'products.id');
         })->where('product_locations.location_id', $count_header->business_location_id);
-
         if($count_header->count_sku_with_zero_stock_onhand == 1) {
             $products_query->whereNull('variation_location_details.qty_available');
         }
-
         if($count_header->count_type == 'partial') {
             $products_query->whereIn('products.category_id', [$count_header->categories])
                     ->orWhereIn('products.sub_category_id', [$count_header->sub_categories])
                     ->orWhereIn('products.brand_id', [$count_header->brands]);
         }
-
-        return $products_query;
+        return $products_query->groupBy('variations.id');
     }
 
     /**
@@ -410,8 +433,11 @@ class InventoryCountController extends Controller
                         ->first();
 
             $count_detail = CountDetail::where('count_detail.count_header_id', $count_header->id)
+                    ->leftJoin('variations', function($join){
+                        $join->on('variations.id', 'count_detail.product_id');
+                    })
                     ->leftJoin('products', function($join){
-                        $join->on('products.id', 'count_detail.product_id');
+                        $join->on('products.id', 'variations.product_id');
                     })
                     ->select([
                         'count_detail.sku as sku',
@@ -489,7 +515,6 @@ class InventoryCountController extends Controller
     */
     public function qty_adjustment($id) 
     {
-    
         $count_header = CountHeader::find($id);
 
         if ($count_header == null || $count_header->status == 4) {
@@ -565,10 +590,12 @@ class InventoryCountController extends Controller
                     $count_detail->count_quantity = $count_quantity;
                     $count_detail->save();
 
-                    $product_id  = Variation::find($count_detail->product_id)->product_id ?? 0;
-                    $product_variation_id = Variation::where('product_id', $product_id)->first()->id ?? 0;
+                    $variation_qry = Variation::find($count_detail->product_id);
+                    $product_id  = $variation_qry->product_id;
+                    $variation_id = $variation_qry->id;
+                    $product_variation_id = $variation_qry->product_variation_id;
 
-                    $variation_location_details = VariationLocationDetails::where('product_id', $product_id)->where('product_variation_id', $product_variation_id)->first(); 
+                    $variation_location_details = VariationLocationDetails::where('product_id', $product_id)->where('product_variation_id', $variation_id)->first(); 
 
                     $old_qty_available = $variation_location_details->qty_available ?? 0;
 
@@ -578,27 +605,32 @@ class InventoryCountController extends Controller
                     $product_q->enable_stock = 1;
                     $product_q->save();
 
+                    //$product_variation_qry  = ProductVariation::where('product_id', $product_id)->get();
                     //Add quantity in VariationLocationDetails
-                    $variation_location_d = VariationLocationDetails::where('variation_id', $product_variation_id)
-                            ->where('product_id', $product_id)
-                            ->where('product_variation_id', $product_variation_id)
-                            ->where('location_id', $count_header->business_location_id)
-                            ->first();
 
-                    if (empty($variation_location_d)) {
-                    $variation_location_d = new VariationLocationDetails();
-                    $variation_location_d->variation_id = $product_variation_id;
-                    $variation_location_d->product_id = $product_id;
-                    $variation_location_d->location_id = $count_header->business_location_id;
-                    $variation_location_d->product_variation_id = $product_variation_id;
-                    $variation_location_d->qty_available = $count_quantity;
-                    }
+                    //foreach($product_variation_qry as $pv) {
+                        
+                        $variation_location_d = VariationLocationDetails::where('variation_id', $variation_id)
+                                ->where('product_id', $product_id)
+                                ->where('product_variation_id', $product_variation_id)
+                                ->where('location_id', $count_header->business_location_id)
+                                ->first();
 
-                    $variation_location_d->qty_available = $count_quantity;
-                    $variation_location_d->save();
+                        if (empty($variation_location_d)) {
+                            $variation_location_d = new VariationLocationDetails();
+                            $variation_location_d->variation_id = $variation_id;
+                            $variation_location_d->product_id = $product_id;
+                            $variation_location_d->location_id = $count_header->business_location_id;
+                            $variation_location_d->product_variation_id = $product_variation_id;
+                            $variation_location_d->qty_available = $count_quantity;
+                            $variation_location_d->save();
+                        }
 
+                        $variation_location_d->qty_available = $count_quantity;
+                        $variation_location_d->save();
+                    //}
 
-                    if($count_quantity != $old_qty_available) {
+                    
                 
                         $transaction_date = request()->session()->get('financial_year.start');
                         $transaction_date = \Carbon::createFromFormat('Y-m-d', $transaction_date)->toDateTimeString();
@@ -622,7 +654,7 @@ class InventoryCountController extends Controller
                             [
                                 'transaction_id' => $transaction->id,
                                 'product_id' => $product_id,
-                                'variation_id' => $product_variation_id,
+                                'variation_id' => $variation_id,
                                 'quantity' => $count_quantity
                             ]
                         );
@@ -632,18 +664,18 @@ class InventoryCountController extends Controller
                             [
                                 'transaction_id' => $transaction->id,
                                 'product_id' => $product_id,
-                                'variation_id' => $product_variation_id,
+                                'variation_id' => $variation_id,
                                 'quantity' => $count_quantity
                             ]
                         );
 
-                    }
+                    
                 }
 
             }
             return redirect()->route('inventory_count');
         } catch (\Exception $e) {
-            return redirect()->route('inventory_count');
+            throw new \Exception(__('lang_v1.invalid_date_format_at', ['row' => $row_index]));
         }
     }
 }

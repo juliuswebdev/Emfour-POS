@@ -124,7 +124,7 @@ return [
     'search_product_placeholder' => 'Enter Product name / SKU / Scan bar code',
     'fixed' => 'Fixed',
     'percentage' => 'Percentage',
-    'select_location' => 'Select location',
+    'select_location' => 'Select Location',
     'add_description' => 'Add Description',
     'cash' => 'Cash',
     'card' => 'Card',
@@ -1607,11 +1607,12 @@ return [
     'you_have_already_clockedin' => 'You have already clocked in.',
     'you_have_already_clockedout' => 'You have already clocked out.',
     'essentials_settings' => 'Essentials settings',
-    'hrm_settings' => 'HRM settings',
+    'hrm_settings' => 'HRIS settings',
     'enable_pin_protection_on_expense_button' => 'Enable Pin Protection on Expense Button',
 
     'title_security_pin' => 'Security Pin',
     'enter_security_pin' => 'Enter Security Pin',
     'dynamic_price' => 'Dynamic Pricing',
+    'please_select_the_location' => 'Please select the business location.'
 
 ];

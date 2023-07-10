@@ -42,11 +42,20 @@
             <select name="location_id" class="form-control select2" required>
                 <option value="">@lang('business_ip.select_business_locations')</option>
                 @foreach($business_locations as $item)
-                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                <option value="{{ $item->id }}">{{ $item->name }} - {{ $item->location_id }}</option>
                 @endforeach
             </select>
           </div>
         </div>
+
+        <div class="col-sm-12">
+          <div class="form-group">
+            {!! Form::label('register_number', __('business_ip.register_number') . ':*') !!}
+              {!! Form::text('register_number', null, ['class' => 'form-control', 'required',
+              'placeholder' => __('business_ip.register_number')  ]); !!}
+          </div>
+        </div>
+
         <div class="col-sm-12">
           <div class="form-group">
             {!! Form::label('description', __('business_ip.description') . ':') !!}

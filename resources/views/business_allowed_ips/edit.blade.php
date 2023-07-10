@@ -43,11 +43,20 @@
                 <option value="">@lang('business_ip.select_business_locations')</option>
                 @foreach($business_locations as $item)
                 
-                <option value="{{ $item->id }}" @if($business_ip->location_id == $item->id) selected @endif>{{ $item->name }}</option>
+                <option value="{{ $item->id }}" @if($business_ip->location_id == $item->id) selected @endif>{{ $item->name }} - {{ $item->location_id }}</option>
                 @endforeach
             </select>
           </div>
         </div>
+        
+        <div class="col-sm-12">
+          <div class="form-group">
+            {!! Form::label('register_number', __('business_ip.register_number') . ':*') !!}
+              {!! Form::text('register_number', $business_ip->register_number, ['class' => 'form-control', 'required',
+              'placeholder' => __('business_ip.register_number')]); !!}
+          </div>
+        </div>
+
         <div class="col-sm-12">
           <div class="form-group">
             {!! Form::label('description', __('business_ip.description') . ':') !!}

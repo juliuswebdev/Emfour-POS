@@ -4,6 +4,7 @@ namespace Modules\Essentials\Http\Controllers;
 
 use App\User;
 use App\Business;
+use App\BusinessLocation;
 use App\BusinessAllowedIP;
 use App\Utils\ModuleUtil;
 use DB;
@@ -796,11 +797,139 @@ class AttendanceController extends Controller
         return view('essentials::attendance.attendance_row')->with(compact('attendance', 'shifts', 'user'));
     }
 
-    public function getEmployeeClockInOut() {
+    public function getEmployeeClockInOut($slug, $location_id) {
 
-        $business_id = request()->session()->get('user.business_id');
-        $business = Business::find($business_id);
-        return view('essentials::attendance.employee_clockinout')->with(compact('business'));
+        $business = Business::where('slug', $slug)->first();
+        $allowed = false;
+        if($business) {
+            $location = BusinessLocation::where('business_id', $business->id)->where('location_id', $location_id)->first();
+            if($location) {
+                $business_allowed_ips = BusinessAllowedIP::where('business_id', $business->id)->where('location_id', $location->id)->get();
+                
+                $clientIP = \Request::getClientIp(true);
+                
+                $whitelist_ips = [];
+                foreach($business_allowed_ips as $item) {
+                    $ip = $item->ip_address;
+                    array_push($whitelist_ips, $ip);
+                }
+                
+                $client_ip = $clientIP;
+                $allowed = false;
+
+                if(in_array($client_ip, $whitelist_ips)) {
+                    $allowed = true;
+                }
+            }
+        }
+        if($allowed) {
+            return view('essentials::attendance.employee_clockinout')->with(compact('business', 'location_id'));
+        } else {
+            echo 'Invalid IP Address';
+        }
+    }
+
+    public function employeeClockInClockOut(Request $request, $slug, $location_id)
+    {
+    
+        $business = Business::where('slug', $slug)->first();
+        $business_id = $business->id;
+        
+        $settings = [];
+
+        //Check Input Pin exit In Our user table
+        $input_user_pin = $request->input('user_pin');
+        $user = User::with('business')->where('security_pin', $input_user_pin)->first();
+        if($user == null){
+            return [
+                'success' => false,
+                'msg' => __('business.invalid_pin'),
+            ];
+        }
+        
+
+        //Check for business validation
+        if($user->business->id != $business_id){
+            return [
+                'success' => false,
+                'msg' => __('business.not_allowed_to_access_cico'),
+            ];
+        }
+
+        //Check business location validation
+        $business_location_id = BusinessLocation::where('business_id', $business_id)->where('location_id', $location_id)->pluck('id')->first();
+        $access_all_locations = $user->hasPermissionTo('access_all_locations');
+        if($access_all_locations == false){
+            $check_specific_business_location = $user->hasPermissionTo('location.'.$business_location_id);
+            if($check_specific_business_location == false){
+                return [
+                    'success' => false,
+                    'msg' => __('business.not_allowed_to_access_cico'),
+                ];
+            }
+        }
+        
+        
+
+        try {
+            
+            $user->role = $user->getRoleNames()->first();
+            if($request->has('cico_action') && $request->filled('cico_action')){
+                $type = $request->input('cico_action');
+
+                if ($type == 'clock_in') {
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => $user->id,
+                        'clock_in_time' => \Carbon::now(),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        //'clock_in_note' => $request->input('clock_in_note'),
+                        //'clock_in_location' => $request->input('clock_in_out_location'),
+                    ];
+
+                    
+                    $output = $this->essentialsUtil->clockin($data, $settings);
+                    if(isset($output['current_shift'])){
+                        $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                    }else{
+                        $output['current_shift'] = "";
+                    }
+                }else{
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => $user->id,
+                        'clock_out_time' => \Carbon::now(),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        //'clock_out_note' => $request->input('clock_out_note'),
+                        //'clock_out_location' => $request->input('clock_in_out_location'),
+                    ];
+                    $output = $this->essentialsUtil->clockout($data, $settings);
+                    if(isset($output['current_shift'])){
+                        $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                    }else{
+                        $output['current_shift'] = "";
+                    }
+                }
+            }else{
+                $output = [
+                    'success' => true,
+                    'msg' => "",
+                    'data' => $user
+                ];
+            }
+
+            
+        
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = ['success' => false,
+                'msg' => __('messages.something_went_wrong'),
+                'type' => $type,
+            ];
+        }
+
+        return $output;
     }
 
 }

@@ -22,7 +22,7 @@ class ModuleUtil extends Util
     public function isModuleInstalled($module_name)
     {
         
-        $is_available = ($module_name == "HRIS/Payroll") ? true : Module::has($module_name);
+        $is_available = ($module_name == "HRIS/Payroll" || $module_name == "DynamicPrice") ? true : Module::has($module_name);
         
         if ($is_available) {
             //Check if installed by checking the system table {module_name}_version
@@ -63,6 +63,14 @@ class ModuleUtil extends Util
         $essentials_module['name'] = "HRIS/Payroll";
         $essentials_module['alias'] = "hris";
         $modules['HRIS/Payroll'] = $essentials_module;
+        
+        //Inject Dynamic Pricing Module
+        $dp_module = [];
+        $dp_module['name'] = "DynamicPrice";
+        $dp_module['alias'] = "dynamic_price_module";
+        $modules['DynamicPrice'] = $dp_module;
+        
+        
         
         $installed_modules = [];
         foreach ($modules as $module => $details) {
@@ -592,4 +600,47 @@ class ModuleUtil extends Util
 
         return $module_data;
     }
+
+    public function filterIP($ip) {
+        // $ip_arr = explode('.', $ip);
+        // array_pop($ip_arr);
+        // $ip = implode('.', $ip_arr);
+        return $ip;
+    }
+
+    public function userAllowed($user) {
+        
+        $is_admin = $this->is_admin($user);
+        $enable_ip_restriction = $user->business->enable_ip_restriction;
+        $allowed = false;
+        if( (!$is_admin) && ($enable_ip_restriction) ){
+            
+            $clientIP = \Request::getClientIp(true);
+            $user_locations = $user->permitted_locations($user->business_id);
+            if($user_locations == 'all') {
+                $business_allowed_ips = BusinessAllowedIP::where('business_id', $user->business_id)->get();
+            } else {
+                $business_allowed_ips = BusinessAllowedIP::whereIn('location_id', $user_locations)->get();
+            }
+
+            $whitelist_ips = [];
+            foreach($business_allowed_ips as $item) {
+                $ip = $this->filterIP($item->ip_address);
+                array_push($whitelist_ips, $ip);
+            }
+            
+            $client_ip = $this->filterIP($clientIP);
+            $allowed = false;
+
+            if(in_array($client_ip, $whitelist_ips)) {
+                $allowed = true;
+            }
+        } else {
+            $allowed = true;
+        }
+
+        return $allowed;
+
+    }
+
 }

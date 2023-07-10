@@ -28,8 +28,9 @@
                 <thead>
                     <tr>
                         <th style="width: 100px">@lang('business_ip.name')</th>
+                        <th style="width: 200px">@lang('business_ip.register_number')</th>
                         <th style="width: 200px">@lang('business_ip.ip_address')</th>
-                        <th style="width: 100px">@lang('business_ip.location')</th>
+                        <th style="width: 300px">@lang('business_ip.location')</th>
                         <th>@lang('business_ip.description')</th>
                         <th style="width: 100px">@lang('messages.action')</th>
                     </tr>
@@ -58,6 +59,7 @@
             aaSorting: [[1, 'desc']],
             columns: [
                 { data: 'name', name: 'name' },
+                { data: 'register_number', name: 'register_number' },
                 { data: 'ip_address', ip_address: 'name' },
                 { data: 'location', name: 'location' },
                 { data: 'description', name: 'description' },

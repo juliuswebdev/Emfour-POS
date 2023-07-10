@@ -10,7 +10,7 @@ use Illuminate\Routing\Controller;
 use App\BusinessAllowedIP;
 use App\BusinessLocation;
 use App\User;
-
+use DB;
 use App\Utils\ModuleUtil;
 use Illuminate\Support\Facades\Http;
 
@@ -52,8 +52,9 @@ class BusinessAllowedIPController extends Controller
             ->select(
                 'business_allowed_ips.id as id',
                 'business_allowed_ips.name as name',
+                'business_allowed_ips.register_number as register_number',
                 'business_allowed_ips.ip_address as ip_address',
-                'business_locations.name as location',
+                DB::raw("CONCAT(business_locations.name, '-', business_locations.location_id) as location"),
                 'business_allowed_ips.description as description',
             )->orderBy('business_allowed_ips.location_id', 'ASC'); 
 
@@ -114,13 +115,13 @@ class BusinessAllowedIPController extends Controller
         try {
 
             $user_id = request()->session()->get('user.id');
-
             $business_ip = new BusinessAllowedIP;
             $business_ip->name = $request->input('name');
             $business_ip->business_id = $business_id;
             $business_ip->location_id = $request->input('location_id');
             $business_ip->description = $request->input('description');
             $business_ip->ip_address = $request->input('ip_address');
+            $business_ip->register_number = "11"; //$request->input('register_number');
             $business_ip->created_by = $user_id;
             $business_ip->save();
 
@@ -190,6 +191,7 @@ class BusinessAllowedIPController extends Controller
             $business_ip->location_id = $request->input('location_id');
             $business_ip->description = $request->input('description');
             $business_ip->ip_address = $request->input('ip_address');
+            $business_ip->register_number = $request->input('register_number');
             $business_ip->update();
 
             $output = ['success' => 1,

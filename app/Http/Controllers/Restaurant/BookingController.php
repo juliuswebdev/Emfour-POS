@@ -109,7 +109,7 @@ class BookingController extends Controller
             if ($request->ajax()) {
                 $business_id = request()->session()->get('user.business_id');
                 $user_id = request()->session()->get('user.id');
-
+                
                 $input = $request->input();
                 $booking_start = $this->commonUtil->uf_date($input['booking_start'], true);
                 $booking_end = $this->commonUtil->uf_date($input['booking_end'], true);
@@ -147,6 +147,7 @@ class BookingController extends Controller
                     $booking_detail_input['phone'] = '';
                     $booking_details = BookingDetail::create($booking_detail_input);
 
+                    
                     // $contact = [];
                     // $contact['']
 
@@ -495,6 +496,7 @@ class BookingController extends Controller
      */
     public function postPublicBooking(Request $request)
     {
+        
         try {
             $input = $request->input();
             $business_location = BusinessLocation::find($input['location_id']);
@@ -502,16 +504,18 @@ class BookingController extends Controller
             $business = Business::find($business_id);
 
             $business_location_id = $business_location->location_id ?? 'NA';
-
+            
             $user = User::where('business_id', $business_id)->first();
             $user_id = $user->id ?? 0;
 
-            $booking_start = $this->commonUtil->uf_date($input['booking_start'], true);
-            $booking_end = $this->commonUtil->uf_date($input['booking_end'], true);
-            $time = $input['time'];
-            $time_details = 'Start: '. $booking_start. ' , End: ' .$booking_end. ', @ '.$time;
-            $full_name = $input['first_name']. ' ' .$input['last_name'];
+            $booking_time = $input['booking_time'];
 
+            //$booking_start = $this->commonUtil->uf_date($input['booking_start'], true);
+            //$booking_end = $this->commonUtil->uf_date($input['booking_end'], true);
+            //$time = $input['time'];
+            //$time_details = 'Start: '. $booking_start. ' , End: ' .$booking_end. ', @ '.$time;
+
+            $full_name = $input['first_name']. ' ' .$input['last_name'];
             $contact = Contact::where('email', $input['email'])->first();
             if(!$contact) {
                 $contact_input['business_id'] = $business_id;
@@ -528,8 +532,9 @@ class BookingController extends Controller
             $input['contact_id'] = $contact->id;
             $input['business_id'] = $business_id;
             $input['created_by'] = $user_id;
-            $input['booking_start'] = $booking_start;
-            $input['booking_end'] = $booking_end;
+            $input['booking_time'] = $booking_time;
+            //$input['booking_start'] = $booking_start;
+            //$input['booking_end'] = $booking_end;
             $input['correspondent'] = $input['staff'];
             $input['booking_note'] = $input['booking_note'];
             $input['booking_status'] = 'waiting';
@@ -546,7 +551,7 @@ class BookingController extends Controller
             $booking_detail_input['phone'] = $input['phone'];
             $booking_detail_input['email'] = $input['email'];
             $booking_details = BookingDetail::create($booking_detail_input);
-
+            
 
             $services = Variation::whereIn('id', explode(',', $booking_details->product_id))->with(['product'])->get();
             $services_text = '';
@@ -595,6 +600,7 @@ class BookingController extends Controller
                 ]
             );
         } catch (\Exception $e) {
+            //dd($e->getMessage());
             return redirect()->back()->with(
                 [
                     'status' => false

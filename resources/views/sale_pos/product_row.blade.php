@@ -26,6 +26,7 @@
 	data-cat-slug="{{ $product_cat1_slug }}"
 	data-sub-cat-slug="{{ $product_cat2_slug }}"
 	data-sku="{{ $product->sub_sku }}"
+	data-has-dp="0"
 	data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif
 >
 	<td>
@@ -40,7 +41,7 @@
 		@endphp
 
 		@if( ($edit_price || $edit_discount) && empty($is_direct_sell) )
-		<div title="@lang('lang_v1.pos_edit_product_price_help')">
+		<div title="@lang('lang_v1.pos_edit_product_price_help')" class="title">
 		<span class="text-link text-info cursor-pointer" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}">
 			{!! $product_name !!}
 			&nbsp;<i class="fa fa-info-circle"></i>
@@ -302,6 +303,8 @@
 		<input type="hidden" class="base_unit_multiplier" name="products[{{$row_count}}][base_unit_multiplier]" value="{{$multiplier}}">
 
 		<input type="hidden" class="hidden_base_unit_sell_price" value="{{$product->default_sell_price / $multiplier}}">
+
+		<input type="hidden" class="original_price" value="{{@num_format($unit_price_inc_tax)}}">
 		
 		{{-- Hidden fields for combo products --}}
 		@if($product->product_type == 'combo'&& !empty($product->combo_products))

@@ -114,5 +114,8 @@ return [
     'user_no_pin' => 'User doesn\'t have PIN',
     'security_pin' => 'Security Pin',
     'sale_return_pin' => 'Sale Return Pin',
-    'user_pin' => 'User Pin'
+    'user_pin' => 'User Pin',
+    'enable_ip_restriction' => 'Enable IP Restriction',
+    'not_allowed_to_access_cico' => 'Not allowed to access clock in clock out.',
+    'register_number' => 'Register Number'
 ];

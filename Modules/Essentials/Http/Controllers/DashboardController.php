@@ -2,6 +2,8 @@
 
 namespace Modules\Essentials\Http\Controllers;
 
+use App\Business;
+use App\BusinessLocations;
 use App\Category;
 use App\User;
 use App\Utils\ModuleUtil;
@@ -157,8 +159,10 @@ class DashboardController extends Controller
 
         $target_achieved_last_month = ! empty($settings['calculate_sales_target_commission_without_tax']) && $settings['calculate_sales_target_commission_without_tax'] == 1 ? $sale_totals['total_sales_without_tax'] : $sale_totals['total_sales'];
 
+        $business = Business::find($business_id);
+      
         return view('essentials::dashboard.hrm_dashboard')
-                ->with(compact('users', 'departments', 'users_by_dept', 'todays_holidays', 'todays_leaves', 'upcoming_leaves', 'is_admin', 'users_leaves', 'upcoming_holidays', 'todays_attendances', 'sales_targets', 'target_achieved_this_month', 'target_achieved_last_month'));
+                ->with(compact('business','users', 'departments', 'users_by_dept', 'todays_holidays', 'todays_leaves', 'upcoming_leaves', 'is_admin', 'users_leaves', 'upcoming_holidays', 'todays_attendances', 'sales_targets', 'target_achieved_this_month', 'target_achieved_last_month'));
     }
 
     public function getUserSalesTargets()

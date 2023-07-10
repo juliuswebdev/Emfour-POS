@@ -2,6 +2,7 @@
     <head>
         <title>Booking | {{ $business->name }}</title>
         <link rel="stylesheet" href="{{ asset('css/vendor.css?v='.$asset_v) }}">
+        <link rel="stylesheet" href="{{ asset('css/public-datetime-picker.css?v='.$asset_v) }}">
         @if( in_array(session()->get('user.language', config('app.locale')), config('constants.langs_rtl')) )
             <link rel="stylesheet" href="{{ asset('css/rtl.css?v='.$asset_v) }}">
         @endif
@@ -116,6 +117,9 @@
             .ref_no {
                 font-size: 20px;
                 font-weight: 700;
+            }
+            .ui-datepicker {
+                display:none;
             }
             @media (min-width: 1200px) {
                 .container {
@@ -243,32 +247,8 @@
                                 <div class="form-group">
                                     <h4 class="tab-title">Date and Time</h4>
                                     <div class="row">
-                                        <div class="col-md-4">
-                                            <label for="status">Start time:<span class="required">*</span></label>
-                                            <div class='input-group date' >
-                                                <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-calendar"></span>
-                                                </span>
-                                                <input class="form-control" placeholder="Start time"  id="start_time" readonly name="booking_start" type="text">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">                                    
-                                            <label for="status">End time:<span class="required">*</span></label>
-                                            <div class="input-group date">
-                                                <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-calendar"></span>
-                                                </span>
-                                                <input class="form-control" placeholder="End time"  id="end_time" readonly="" name="booking_end" type="text" aria-required="true">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="status">Time:<span class="required">*</span></label>
-                                            <div class="input-group date">
-                                                <span class="input-group-addon">
-                                                    <span class="glyphicon glyphicon-calendar"></span>
-                                                </span>
-                                                <input class="form-control" placeholder="Time"  id="time" readonly="" name="time" type="text" aria-required="true">
-                                            </div>
+                                        <div class="col-md-12">
+                                            <input type="text" name="booking_time" id="booking_time" required value="<?= date('Y-m-d H:i:s') ?>">
                                         </div>
                                     </div>
                                 </div>
@@ -301,7 +281,7 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group input-group">
-                                                <label>Note:<span class="required">*</span></label>
+                                                <label>Note:</label>
                                                 <textarea name="booking_note" class="form-control" ></textarea>
                                             </div>
                                         </div>
@@ -376,7 +356,7 @@
     </body>
     
     <script src="{{ asset('js/vendor.js?v=' . $asset_v) }}"></script>
-
+    <script src="{{ asset('js/public-datetime-picker.js?v=' . $asset_v) }}"></script>
     @if(file_exists(public_path('js/lang/' . session()->get('user.language', config('app.locale')) . '.js')))
         <script src="{{ asset('js/lang/' . session()->get('user.language', config('app.locale') ) . '.js?v=' . $asset_v) }}"></script>
     @else
@@ -387,9 +367,13 @@
         var moment_date_format = "MM/DD/YYYY";
         var moment_time_format = "HH:mm";
         var moment_12_hour_format = "hh:mm a";
+        
     </script>
     <script type="text/javascript">
         $(document).ready( function(){
+
+            var today = new Date();
+
             $('.tab-link').click(function(e) {
                 e.preventDefault();
                 var id = $(this).attr('href');
@@ -397,22 +381,32 @@
                 $(id).addClass('active').siblings().removeClass('active');
             });
 
-            $('#time').datetimepicker({
-                format: moment_12_hour_format,
-                minDate: moment(),
-                ignoreReadonly: true,
-            });
-       
-            $('#start_time').datetimepicker({
-                format: moment_date_format + ' ' +moment_time_format,
-                minDate: moment(),
-                ignoreReadonly: true
-            });
-            
-            $('#end_time').datetimepicker({
-                format: moment_date_format + ' ' +moment_time_format,
-                minDate: moment(),
-                ignoreReadonly: true,
+            // $('#booking_date').datepicker({
+            //     format: datepicker_date_format,
+            //     startDate: today,
+            //     setDate : today,
+            // }).on('changeDate',function(ev){
+            //     var date = moment(ev.date).format('YYYY-MM-DD');
+            //     setDate(date);
+            // });
+            // $('#booking_date').datepicker('setDate', today);
+            // var date = moment(today).format('YYYY-MM-DD');
+            // setDate(date);
+
+            // $('#booking_time').timepicker({
+            //     timeFormat: 'h:mm p',
+            //     interval: 60,
+            //     defaultTime: '11',
+            //     startTime: '10:00',
+            //     dynamic: false,
+            //     dropdown: true,
+            //     scrollbar: true
+            // });
+
+            $('#booking_time').datetimepicker({
+                inline:true,
+                minDate:'-1970/01/02',
+                format: 'Y-m-d H:i:s' 
             });
 
             $('#add_booking_form').validate({ // initialize the plugin
@@ -426,13 +420,7 @@
                     'location_id' : {
                         required: true
                     },
-                    'booking_start' : {
-                        required: true
-                    },
-                    'booking_end' : {
-                        required: true
-                    },
-                    'time' : {
+                    'booking_time' : {
                         required: true
                     },
                     'first_name' : {
@@ -446,9 +434,6 @@
                     },
                     'email' : {
                         required: true
-                    },
-                    'booking_note' : {
-                        required: true
                     }
                 },
                 messages: {
@@ -458,6 +443,11 @@
                 }
             });
 
+            function setDate(date) {
+                $('#booking_start').val(date);
+                $('#booking_end').val(date);
+            }
+            
         });
     </script>
 

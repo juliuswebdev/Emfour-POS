@@ -37,15 +37,23 @@ class StockCountExport implements FromCollection, WithHeadings, WithColumnWidths
         } else {
             $products = $this->data
                 ->select([
-                    'products.sku AS sku',
+                    DB::raw('
+                        IF(
+                            products.type = "variable",
+                            variations.sub_sku, 
+                            products.sku
+                        )
+                    AS sku'),
+                    'products.type AS type',
                     DB::raw('CONCAT(products.upc) AS upc_code'),
                     DB::raw('
-                        IF(variations.name = "DUMMY",
+                        IF(
+                            variations.name = "DUMMY",
                             CONCAT(products.name),
                             CONCAT(products.name," - ",variations.name)  
                         )
                     AS product_name'),
-                    DB::raw("( SELECT COALESCE(SUM(qty_available), 0) FROM variation_location_details WHERE product_id = products.id
+                    DB::raw("( SELECT COALESCE(SUM(qty_available), 0) FROM variation_location_details WHERE variation_id = variations.id
                     ) as expected"),
                     DB::raw('CONCAT("") AS counted')
                 ])
@@ -61,7 +69,7 @@ class StockCountExport implements FromCollection, WithHeadings, WithColumnWidths
     */
     public function headings(): array
     {
-        return ["SKU", "UPC CODE", "PRODUCT NAME", "EXPECTED", "COUNTED"];
+        return ["SKU", "TYPE", "UPC CODE", "PRODUCT NAME", "EXPECTED", "COUNTED"];
     }
 
     public function columnWidths(): array
@@ -69,9 +77,10 @@ class StockCountExport implements FromCollection, WithHeadings, WithColumnWidths
         return [
             'A' => 170,
             'B' => 170,
-            'C' => 1150,
-            'D' => 170,
-            'E' => 710            
+            'C' => 170,
+            'D' => 1150,
+            'E' => 170,
+            'F' => 710            
         ];
     }
 

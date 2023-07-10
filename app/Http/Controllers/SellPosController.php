@@ -45,6 +45,8 @@ use App\TransactionPayment;
 use App\TransactionSellLine;
 use App\TypesOfService;
 use App\User;
+use App\BusinessAllowedIP;
+
 use App\Utils\BusinessUtil;
 use App\Utils\CashRegisterUtil;
 use App\Utils\ContactUtil;
@@ -181,6 +183,13 @@ class SellPosController extends Controller
         }
 
         $register_details = $this->cashRegisterUtil->getCurrentCashRegister(auth()->user()->id);
+        //Register number get
+        $register_number = "";
+        if($register_details != null){
+            if($register_details->business_allowed_ip_id != ""){
+                $register_number = BusinessAllowedIP::where('id', $register_details->business_allowed_ip_id)->pluck('register_number')->first();
+            }
+        }
 
         $walk_in_customer = $this->contactUtil->getWalkInCustomer($business_id);
 
@@ -195,7 +204,7 @@ class SellPosController extends Controller
         $bl_attributes = $business_locations['attributes'];
         $business_locations = $business_locations['locations'];
 
-        //set first location as default locaton
+        //Set first location as default locaton
         if (empty($default_location)) {
             foreach ($business_locations as $id => $name) {
                 $default_location = BusinessLocation::findOrFail($id);
@@ -314,7 +323,8 @@ class SellPosController extends Controller
                 'default_invoice_schemes',
                 'invoice_layouts',
                 'users',
-                'payment_device'
+                'payment_device',
+                'register_number'
             ));
     }
 
@@ -1278,6 +1288,16 @@ class SellPosController extends Controller
                                 ->where('user_id', auth()->user()->id)
                                 ->whereNull('clock_out_time')
                                 ->first();
+
+        $register_details = $this->cashRegisterUtil->getCurrentCashRegister(auth()->user()->id);
+        //Register number get
+        $register_number = "";
+        if($register_details != null){
+            if($register_details->business_allowed_ip_id != ""){
+                $register_number = BusinessAllowedIP::where('id', $register_details->business_allowed_ip_id)->pluck('register_number')->first();
+            }
+        }
+
         return view('sale_pos.edit')
             ->with(compact('__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
@@ -1285,7 +1305,7 @@ class SellPosController extends Controller
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
             'shipping_statuses', 'warranties', 'sub_type', 'pos_module_data', 'invoice_schemes',
             'default_invoice_schemes', 'invoice_layouts', 'featured_products', 'customer_due',
-            'users', 'only_payment', 'payment_device'));
+            'users', 'only_payment', 'payment_device', 'register_number'));
     }
 
     /**
@@ -3538,6 +3558,26 @@ class SellPosController extends Controller
 		$variation = \App\Variation::where('product_id', $product->id)->first();
         return response($variation, 200);
     }
+    /**
+     * Function is use for verify 9 digits pin in pos screen.
+     */
+    public function securityPinVerify(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('security_pin') && $request->filled('security_pin')){
+
+            if($request->security_pin == auth()->user()->security_pin){
+                return response()->json(['status' => true, 'message' => __('lang_v1.verified_success'), 'data' => '']);
+            }else{
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.security_pin_incorrect'), 'data' => '']);   
+            }
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_security_pin'), 'data' => '']);    
+        }
+    }
+
 
 
 }
