@@ -2275,6 +2275,7 @@ class ProductUtil extends Util
         $active_rules = [];
         $module_util = new ModuleUtil();
         $is_dp_pricing_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'dynamic_price_module');
+        $is_dp_pricing_enabled = true;
         if($is_dp_pricing_enabled == false){
             return $active_rules;
         }else{

@@ -1792,7 +1792,7 @@ function get_recent_transactions(status, element_obj) {
 }
 
 //variation_id is null when weighing_scale_barcode is used.
-function pos_product_row(variation_id = null, purchase_line_id = null, weighing_scale_barcode = null, quantity = 1) {
+function pos_product_row(variation_id = null, purchase_line_id = null, weighing_scale_barcode = null, quantity = 1, dp = []) {
 
     //Get item addition method
     var item_addtn_method = 0;
@@ -1907,53 +1907,75 @@ function pos_product_row(variation_id = null, purchase_line_id = null, weighing_
             },
             dataType: 'json',
             success: function(result) {
+             
                 if (result.success) {
                     $('table#pos_table tbody')
                         .append(result.html_content)
                         .find('input.pos_quantity');
                     //increment row count
-                    $('input#product_row_count').val(parseInt(product_row) + 1);
-                    var this_row = $('table#pos_table tbody')
-                        .find('tr')
-                        .last();
-                    pos_each_row(this_row);
+                    setTimeout(function(){
+                        if(!isEmpty(dp)) {
+                            var qty = quantity;
+                            var product_class = '.product_row_'+dp.product_sku;
+                            var final_item_price = dp.product_price;
+                            $(product_class+' .pos_line_total_text').text(__currency_trans_from_en(final_item_price * parseFloat(qty), true));
+                            $(product_class+' .pos_unit_price_inc_tax').attr('value', final_item_price);
+                            $(product_class+' .pos_unit_price').val(final_item_price);
+                            $(product_class+' .hidden_base_unit_sell_price').val(final_item_price);
+                            $(product_class+' .pos_line_total').val(final_item_price * parseFloat(qty));
+                            $(product_class+' .original_price').val(final_item_price * parseFloat(qty));
+                            $(product_class+' .title').append('<strong>('+dp.product_suffix+')</strong>');
+                        }             
 
-                    //For initial discount if present
-                    var line_total = __read_number(this_row.find('input.pos_line_total'));
-                    this_row.find('span.pos_line_total_text').text(line_total);
-
-                    pos_total_row();
-
-                    //Check if multipler is present then multiply it when a new row is added.
-                    if(__getUnitMultiplier(this_row) > 1){
-                        this_row.find('select.sub_unit').trigger('change');
-                    }
-
-                    if (result.enable_sr_no == '1') {
-                        var new_row = $('table#pos_table tbody')
+                        $('input#product_row_count').val(parseInt(product_row) + 1);
+                        var this_row = $('table#pos_table tbody')
                             .find('tr')
                             .last();
-                        new_row.find('.row_edit_product_price_model').modal('show');
-                    }
+                        pos_each_row(this_row);
 
-                    round_row_to_iraqi_dinnar(this_row);
-                    __currency_convert_recursively(this_row);
+                        //For initial discount if present
+                        var line_total = __read_number(this_row.find('input.pos_line_total'));
+                        this_row.find('span.pos_line_total_text').text(line_total);
 
-                    $('input#search_product')
-                        .focus()
-                        .select();
+                        if(!isEmpty(dp)) {
+                            pos_total_row_a();
+                        } else {
+                            pos_total_row();
+                        }
 
-                    //Used in restaurant module
-                    if (result.html_modifier) {
-                        $('table#pos_table tbody')
-                            .find('tr')
-                            .last()
-                            .find('td:first')
-                            .append(result.html_modifier);
-                    }
+                        //Check if multipler is present then multiply it when a new row is added.
+                        if(__getUnitMultiplier(this_row) > 1){
+                            this_row.find('select.sub_unit').trigger('change');
+                        }
 
-                    //scroll bottom of items list
-                    $(".pos_product_div").animate({ scrollTop: $('.pos_product_div').prop("scrollHeight")}, 1000);
+                        if (result.enable_sr_no == '1') {
+                            var new_row = $('table#pos_table tbody')
+                                .find('tr')
+                                .last();
+                            new_row.find('.row_edit_product_price_model').modal('show');
+                        }
+
+                        round_row_to_iraqi_dinnar(this_row);
+                        __currency_convert_recursively(this_row);
+
+                        $('input#search_product')
+                            .focus()
+                            .select();
+
+                        //Used in restaurant module
+                        if(isEmpty(dp)) {
+                            if (result.html_modifier) {
+                                $('table#pos_table tbody')
+                                    .find('tr')
+                                    .last()
+                                    .find('td:first')
+                                    .append(result.html_modifier);
+                            }
+                        }
+
+                        //scroll bottom of items list
+                        $(".pos_product_div").animate({ scrollTop: $('.pos_product_div').prop("scrollHeight")}, 1000);
+                    },100);
                 } else {
                     toastr.error(result.msg);
                     $('input#search_product')
@@ -1967,7 +1989,15 @@ function pos_product_row(variation_id = null, purchase_line_id = null, weighing_
 
 
 
-
+function isEmpty(obj) {
+    for (const prop in obj) {
+      if (Object.hasOwn(obj, prop)) {
+        return false;
+      }
+    }
+  
+    return true;
+  }
 
 //Update values for each row
 function pos_each_row(row_obj) {
@@ -2038,6 +2068,7 @@ function pos_total_row_a() {
 
     //$('span.unit_price_total').html(unit_price_total);
     $('span.price_total').html(__currency_trans_from_en(price_total, false));
+    calculate_billing_details(price_total, false);
 }
 
 function get_subtotal() {
@@ -2058,7 +2089,8 @@ function get_subtotal() {
     return price_total;
 }
 
-function calculate_billing_details(price_total) {
+function calculate_billing_details(price_total, dp = true) {
+  
     var discount = pos_discount(price_total);
 
     var html_total_payable = $('span#total_payable');
@@ -2202,10 +2234,10 @@ function calculate_billing_details(price_total) {
     //     }
     // }
 
-    var condition_bool = true;
-    if(dp_rules && dp_rules.length > 0) {
+    
+    if(dp_rules && dp_rules.length > 0 && dp) {
         dp_rules.forEach(function(rule){
-          
+            var condition_bool = true;
             var start_date = rule['start-date'];
             var end_date = rule['end-date'];
 
@@ -2231,6 +2263,8 @@ function calculate_billing_details(price_total) {
                                     $('#pos_table tbody tr').each(function() {
                                         var sku = $(this).attr('data-sku');
                                         if(condition['product_sku'].includes(sku)) {
+                                         
+                                 
                                             shown_total = dp_rule_prices(rule['prices'], shown_total);
                                         }
                                     });
@@ -2245,6 +2279,7 @@ function calculate_billing_details(price_total) {
                                 var limit = condition['limit_numb'];
                                 var operator = condition['operator'];
                                 if(eval(conditions_operator(value, limit, operator))) {
+                              
                                     shown_total = dp_rule_prices(rule['prices'], shown_total);
                                 } 
                             }
@@ -2253,6 +2288,7 @@ function calculate_billing_details(price_total) {
                                 var limit = condition['limit_numb'];
                                 var operator = condition['operator'];
                                 if(eval(conditions_operator(value, limit, operator))) {
+                               
                                     shown_total = dp_rule_prices(rule['prices'], shown_total);
                                 } 
                             }
@@ -2269,6 +2305,7 @@ function calculate_billing_details(price_total) {
                                                 var operator = item.operator_items;
                                                 if(elem_sku == item_sku) {
                                                     if(eval(conditions_operator(value, limit, operator))) {
+                                                   
                                                         shown_total = dp_rule_prices(rule['prices'], shown_total);
                                                     }
                                                 }
@@ -2309,9 +2346,13 @@ function calculate_billing_details(price_total) {
                 } else {
                     condition_bool = true;
                 }
-                if(condition_bool) {
+                if(rule['prices'] && condition_bool) {
+              
                     shown_total = dp_rule_prices(rule['prices'], shown_total);
                     pos_total_row_a();
+                    // $('.product_row').each(function(){
+                    //     $(this).attr('data-has-dp', 0);
+                    // });
                 }
                
             }
@@ -2379,10 +2420,11 @@ function dp_rule_prices(prices, shown_total){
                             $('#pos_table tbody tr').each(function() {
                                 var sku = $(this).attr('data-sku');
                                 var has_dp = $(this).attr('data-has-dp');
-                                var product_class = '.product_row_'+ sku + '[data-has-dp="0"]';
+                                //var product_class = '.product_row_'+ sku + '[data-has-dp="0"]';
+                                var product_class = '.product_row_'+ sku;
                                 if(has_dp == 0) {
-                                    if($(product_class).length && $sale) {
-                                        var orig_price = $(product_class+' .hidden_base_unit_sell_price').attr('value');
+                                    if(($(product_class).length && $sale) && price['product_sku'].includes(sku)) {
+                                        var orig_price = $(product_class+' .original_price').attr('value');
                                         var item_price = orig_price;
                                         var data_dp_type = price['type'] ?? 0;
                                         var data_dp_percent = price['percent'] ?? 0;
@@ -2410,10 +2452,11 @@ function dp_rule_prices(prices, shown_total){
                                         var final_item_price = item_price;
                                         var final_orig_price = orig_price;
                                         $(product_class+' .pos_line_total_text').text(__currency_trans_from_en(final_item_price * parseFloat(qty), true));
-                                        $(product_class+' .pos_unit_price_inc_tax').attr('value', final_item_price);
+                                        $(product_class+' .pos_unit_price_inc_tax').val(final_item_price);
                                         $(product_class+' .pos_unit_price').val(final_item_price);
                                         $(product_class+' .hidden_base_unit_sell_price').val(final_item_price);
                                         $(product_class+' .pos_line_total').val(final_item_price * parseFloat(qty));
+                                        
 
                                         if(parseFloat(final_orig_price) > parseFloat(final_item_price)) {
                                             shown_total = shown_total + ( parseFloat(final_orig_price) - parseFloat(final_item_price) );
@@ -2438,9 +2481,10 @@ function dp_rule_prices(prices, shown_total){
                                 if(has_dp == 0) {
                                     if( (price['product_cat_slug'].includes(cat_slug) || price['product_cat_slug'].includes(sub_cat_slug)) ) {
                                         var sku = $(this).attr('data-sku');
-                                        var product_class = '.product_row_'+ sku + '[data-has-dp="0"]';
+                                        //var product_class = '.product_row_'+ sku + '[data-has-dp="0"]';
+                                        var product_class = '.product_row_'+ sku;
                                         if($(product_class).length) {
-                                            var orig_price = $(product_class+' .hidden_base_unit_sell_price').attr('value');
+                                            var orig_price = $(product_class+' .original_price').attr('value');
                                             var item_price = orig_price;
                                             var data_dp_type = price['type'] ?? 0;
                                             var data_dp_percent = price['percent'] ?? 0;
@@ -2469,10 +2513,12 @@ function dp_rule_prices(prices, shown_total){
                                             var final_item_price = item_price;
                                             var final_orig_price = orig_price;
                                             $(product_class+' .pos_line_total_text').text(__currency_trans_from_en(final_item_price * parseFloat(qty), true));
-                                            $(product_class+' .pos_unit_price_inc_tax').attr('value', final_item_price);
+                                            $(product_class+' .pos_unit_price_inc_tax').val(final_item_price);
                                             $(product_class+' .pos_unit_price').val(final_item_price);
                                             $(product_class+' .hidden_base_unit_sell_price').val(final_item_price);
                                             $(product_class+' .pos_line_total').val(final_item_price * parseFloat(qty));
+                                           
+                                            
 
 
                                             if(parseFloat(final_orig_price) > parseFloat(final_item_price)) {
@@ -2499,32 +2545,32 @@ function dp_rule_prices(prices, shown_total){
 
                         if(data_dp_type == 'discount') {
                             if(data_dp_percent) {
-                                item_price = parseFloat(item_price) - (parseFloat(item_price) * (parseFloat(data_dp_amount)/100));
+                                shown_total = parseFloat(shown_total) - (parseFloat(shown_total) * (parseFloat(data_dp_amount)/100));
                             } else {
-                                item_price = parseFloat(item_price) - parseFloat(data_dp_amount);
+                                shown_total = parseFloat(shown_total) - parseFloat(data_dp_amount);
                             }
                         } else if(data_dp_type == 'increase') {
                             
                             if(data_dp_percent) {
-                                item_price = parseFloat(item_price) + (parseFloat(item_price) * (parseFloat(data_dp_amount)/100));
+                                shown_total = parseFloat(shown_total) + (parseFloat(shown_total) * (parseFloat(data_dp_amount)/100));
                       
                             } else {
-                                item_price = parseFloat(item_price) + parseFloat(data_dp_amount);
+                                shown_total = parseFloat(shown_total) + parseFloat(data_dp_amount);
                             }
                         } else if(data_dp_type == 'fixed_price') {
-                            item_price =  parseFloat(data_dp_amount);
+                            shown_total =  parseFloat(data_dp_amount);
                         }
                 
-                        var price_total = $('.price_total').text();
-                        if(data_dp_cart_include_tax == 0 && data_dp_type != 'fixed_price') {
-                            var order_tax = $('#order_tax').text();
-                            shown_total = (price_total - (price_total * (data_dp_amount/100))) + parseFloat(order_tax);
-                        }
+                        // var price_total = $('.price_total').text();
+                        // if(data_dp_cart_include_tax == 0 && data_dp_type != 'fixed_price') {
+                        //     var order_tax = $('#order_tax').text();
+                        //     shown_total = (price_total - (price_total * (data_dp_amount/100))) + parseFloat(order_tax);
+                        // }
 
-                        if(data_dp_cart_include_shipping == 0 && data_dp_type != 'fixed_price') {
-                            var shipping_fee = $('#shipping_charges_amount').text();
-                            shown_total = (price_total - (price_total * (data_dp_amount/100))) + parseFloat(shipping_fee);
-                        }
+                        // if(data_dp_cart_include_shipping == 0 && data_dp_type != 'fixed_price') {
+                        //     var shipping_fee = $('#shipping_charges_amount').text();
+                        //     shown_total = (price_total - (price_total * (data_dp_amount/100))) + parseFloat(shipping_fee);
+                        // }
                 
                     }
                     if(shown_total < 0) {
@@ -2532,10 +2578,11 @@ function dp_rule_prices(prices, shown_total){
                     }
                 }
                 if(price['target'] == 'promo_products') {
+                 
                     price['promo_product_sku'].forEach(function(product, id) {
-                        if($('#pos_table tbody tr').length == 0 ) {
-                            pos_product_row(product.product_variation_id, null, null, product.product_qty);
-                        }
+
+                           pos_product_row(product.product_variation_id, null, null, product.product_qty, product);
+                     
                     });
                 }
             }
@@ -2545,59 +2592,7 @@ function dp_rule_prices(prices, shown_total){
     }
 }
 
-dp_rule_promos();
-function dp_rule_promos() {
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
-    today = mm + '-' + dd + '-' + yyyy;
-    var dp_rules;
-    $.ajax({
-        type: 'GET',
-        url: '/sells/pos/get-dp-rules',
-        dataType: 'json',
-        async:false,
-        success: function(result) {
-            dp_rules = result;
-        }
-    });
-    if(dp_rules && dp_rules.length > 0) {
-        dp_rules.forEach(function(rule){
-          
-            var start_date = rule['start-date'];
-            var end_date = rule['end-date'];
 
-            var d1 = start_date.split("-");
-            var d2 = end_date.split("-");
-            var c = today.split("-");
-
-            var start_d = new Date(d1[2], parseInt(d1[0])-1, d1[1]);  // -1 because months are from 0 to 11
-            var end_d   = new Date(d2[2], parseInt(d2[0])-1, d2[1]);
-            var today_d = new Date(c[2], parseInt(c[1])-1, c[0]);
-
-            if(
-                (today_d > start_d && today_d < end_d) &&
-                (rule['active'])
-            ) {
-       
-                if(rule['prices']) {
-					rule['prices'].forEach(function(price, id) {
-						if(price['active']) {
-
-							if(price['target'] == 'promo_products') {
-								price['promo_product_sku'].forEach(function(product, id) {
-                                    pos_product_row(product.product_variation_id, null, null, product.product_qty);
-								});
-							}
-						}
-					});
-				}
-            }
-         
-        });
-    }
-}
 
 function pos_discount(total_amount) {
     var calculation_type = $('#discount_type').val();
@@ -2793,7 +2788,7 @@ function reset_pos_form(){
     localStorage.setItem('amount_change', 0);
 
     $(document).trigger('sell_form_reset');
-    dp_rule_promos();
+    calculate_billing_details(0, true);
 }
 
 function set_default_customer() {
