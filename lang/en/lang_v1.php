@@ -124,7 +124,7 @@ return [
     'search_product_placeholder' => 'Enter Product name / SKU / Scan bar code',
     'fixed' => 'Fixed',
     'percentage' => 'Percentage',
-    'select_location' => 'Select location',
+    'select_location' => 'Select Location',
     'add_description' => 'Add Description',
     'cash' => 'Cash',
     'card' => 'Card',
@@ -1613,5 +1613,6 @@ return [
     'title_security_pin' => 'Security Pin',
     'enter_security_pin' => 'Enter Security Pin',
     'dynamic_price' => 'Dynamic Pricing',
+    'please_select_the_location' => 'Please select the business location.'
 
 ];

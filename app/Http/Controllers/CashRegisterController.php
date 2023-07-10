@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\BusinessLocation;
 use App\CashRegister;
+use App\BusinessAllowedIP;
 use App\Utils\CashRegisterUtil;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
@@ -55,8 +56,8 @@ class CashRegisterController extends Controller
         }
         $business_id = request()->session()->get('user.business_id');
         $business_locations = BusinessLocation::forDropdown($business_id);
-
-        return view('cash_register.create')->with(compact('business_locations', 'sub_type'));
+        $business_register_numbers = BusinessAllowedIP::where('business_id', $business_id)->get();
+        return view('cash_register.create')->with(compact('business_locations', 'sub_type', 'business_register_numbers'));
     }
 
     /**
@@ -81,6 +82,7 @@ class CashRegisterController extends Controller
             $register = CashRegister::create([
                 'business_id' => $business_id,
                 'user_id' => $user_id,
+                'business_allowed_ip_id' => $request->input('register_number'),
                 'status' => 'open',
                 'location_id' => $request->input('location_id'),
                 'created_at' => \Carbon::now()->format('Y-m-d H:i:00'),
