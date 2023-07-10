@@ -97,6 +97,11 @@ class RoleController extends Controller
 
         $module_permissions = $this->moduleUtil->getModuleData('user_permissions');
 
+        //Remove Module in module permission array
+        unset($module_permissions['HRIS/Payroll']);
+        unset($module_permissions['DynamicPrice']);
+        
+
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 
         return view('role.create')
@@ -211,6 +216,11 @@ class RoleController extends Controller
                                     ->get();
 
         $module_permissions = $this->moduleUtil->getModuleData('user_permissions');
+        
+        //Remove Module in module permission array
+        unset($module_permissions['HRIS/Payroll']);
+        unset($module_permissions['DynamicPrice']);
+        
 
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 

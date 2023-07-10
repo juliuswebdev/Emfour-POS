@@ -46,6 +46,7 @@ use App\TransactionSellLine;
 use App\TypesOfService;
 use App\User;
 use App\BusinessAllowedIP;
+use App\CashRegister;
 
 use App\Utils\BusinessUtil;
 use App\Utils\CashRegisterUtil;
@@ -186,9 +187,12 @@ class SellPosController extends Controller
         //Register number get
         $register_number = "";
         if($register_details != null){
+            $register_number = $register_details->register_number;
+            /*
             if($register_details->business_allowed_ip_id != ""){
                 $register_number = BusinessAllowedIP::where('id', $register_details->business_allowed_ip_id)->pluck('register_number')->first();
             }
+            */
         }
 
         $walk_in_customer = $this->contactUtil->getWalkInCustomer($business_id);
@@ -878,6 +882,12 @@ class SellPosController extends Controller
         ];
         $receipt_details->currency = $currency_details;
 
+        $receipt_details->register_number = CashRegister::select('register_number')->leftJoin('cash_register_transactions', 'cash_registers.id', '=', 'cash_register_transactions.cash_register_id')
+                                        ->where('transaction_id', $transaction_id)
+                                        ->pluck('register_number')
+                                        ->first();
+        
+        
         if ($is_package_slip) {
             $output['html_content'] = view('sale_pos.receipts.packing_slip', compact('receipt_details'))->render();
 
@@ -889,6 +899,8 @@ class SellPosController extends Controller
 
             return $output;
         }
+
+        //dd($receipt_details);
 
         $output['print_title'] = $receipt_details->invoice_no;
         //If print type browser - return the content, printer - return printer config data, and invoice format config
@@ -957,7 +969,14 @@ class SellPosController extends Controller
         ];
         $receipt_details->currency = $currency_details;
         $receipt_details->online_sale_payment = TransactionPayment::where('transaction_id', $transaction_id)->pluck('payment_collect_response')->first();
+        $receipt_details->register_number = CashRegister::select('register_number')->leftJoin('cash_register_transactions', 'cash_registers.id', '=', 'cash_register_transactions.cash_register_id')
+                                        ->where('transaction_id', $transaction_id)
+                                        ->pluck('register_number')
+                                        ->first();
         
+        
+
+
         $output['print_title'] = $receipt_details->invoice_no;
         //If print type browser - return the content, printer - return printer config data, and invoice format config
         $layout = 'sale_pos.receipts.thermal_print_for_sale_slip';
@@ -1287,9 +1306,12 @@ class SellPosController extends Controller
         //Register number get
         $register_number = "";
         if($register_details != null){
+            $register_number = $register_details->register_number;
+            /*
             if($register_details->business_allowed_ip_id != ""){
                 $register_number = BusinessAllowedIP::where('id', $register_details->business_allowed_ip_id)->pluck('register_number')->first();
             }
+            */
         }
 
         return view('sale_pos.edit')

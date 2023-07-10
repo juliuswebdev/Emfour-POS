@@ -56,7 +56,14 @@ class CashRegisterController extends Controller
         }
         $business_id = request()->session()->get('user.business_id');
         $business_locations = BusinessLocation::forDropdown($business_id);
-        $business_register_numbers = BusinessAllowedIP::where('business_id', $business_id)->get();
+        $business_location_ids = [];
+        if(!empty($business_locations)){
+            $business_location_ids = array_keys($business_locations->toArray());
+        }
+        
+        $business_register_numbers = BusinessAllowedIP::where('business_id', $business_id)
+                                        ->whereIn('location_id', $business_location_ids)
+                                        ->where('register_number', '!=', '')->get();
         return view('cash_register.create')->with(compact('business_locations', 'sub_type', 'business_register_numbers'));
     }
 
@@ -79,10 +86,18 @@ class CashRegisterController extends Controller
             $user_id = $request->session()->get('user.id');
             $business_id = $request->session()->get('user.business_id');
 
+            $unique_register_number = null;
+            if($request->has('register_number') && $request->filled('register_number')){
+                $unique_register_number = BusinessAllowedIP::where('id', $request->input('register_number'))
+                                        ->pluck('register_number')->first();
+            }            
+
+
             $register = CashRegister::create([
                 'business_id' => $business_id,
                 'user_id' => $user_id,
                 'business_allowed_ip_id' => $request->input('register_number'),
+                'register_number' => $unique_register_number,
                 'status' => 'open',
                 'location_id' => $request->input('location_id'),
                 'created_at' => \Carbon::now()->format('Y-m-d H:i:00'),

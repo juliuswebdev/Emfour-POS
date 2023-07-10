@@ -304,7 +304,8 @@ class CashRegisterUtil extends Util
             DB::raw("SUM(IF(pay_method='card', 1, 0)) as total_card_slips"),
             DB::raw("CONCAT(COALESCE(surname, ''), ' ', COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as user_name"),
             'u.email',
-            'bl.name as location_name'
+            'bl.name as location_name',
+            'cash_registers.register_number',
         )->first();
 
         return $register_details;

@@ -9422,6 +9422,9 @@ justify-content: space-between;
 .custom-p-0{
   padding:0px !important;
 }
+.c-font-size-18{
+  font-size: 18px;
+}
 /*!
  * FullCalendar v3.10.2
  * Docs & License: https://fullcalendar.io/

@@ -49,7 +49,7 @@
         <div class="col-sm-8 col-sm-offset-2">
           <div class="form-group">
             {!! Form::label('register_number', __('business.register_number') . ':') !!}
-            <select name="register_number" id="register_number" class="form-control select2">
+            <select name="register_number" id="register_number" class="form-control select2" required="required">
               <option value="">Select @lang('business.register_number') </option>
               @foreach ($business_register_numbers as $b_row)
                 <option data-location-id="{{ $b_row->location_id }}" value="{{  $b_row->id }}">{{  $b_row->register_number }}</option>

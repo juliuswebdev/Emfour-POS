@@ -45,6 +45,7 @@
                             <th>@lang('report.open_time')</th>
                             <th>@lang('report.close_time')</th>
                             <th>@lang('sale.location')</th>
+                            <th>@lang('report.register_label')</th>
                             <th>@lang('report.user')</th>
                             <th>@lang('cash_register.total_card_slips')</th>
                             <th>@lang('cash_register.total_cheques')</th>
@@ -65,7 +66,7 @@
                     </thead>
                     <tfoot>
                         <tr class="bg-gray font-17 text-center footer-total">
-                            <td colspan="4"><strong>@lang('sale.total'):</strong></td>
+                            <td colspan="5"><strong>@lang('sale.total'):</strong></td>
                             <td class="footer_total_card_payment"></td>
                             <td class="footer_total_cheque_payment"></td>
                             <td class="footer_total_cash_payment"></td>

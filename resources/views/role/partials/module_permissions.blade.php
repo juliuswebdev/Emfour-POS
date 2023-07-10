@@ -14,6 +14,7 @@
         </div>
         <div class="col-md-9">
           @foreach($value as $module_permission)
+              
               @php
                 if(empty($role_permissions) && $module_permission['default']) {
                   $module_role_permissions[] = $module_permission['value'];
