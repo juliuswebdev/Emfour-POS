@@ -2057,30 +2057,6 @@ function calculate_billing_details(price_total) {
     var yyyy = today.getFullYear();
     today = mm + '-' + dd + '-' + yyyy;
     
-
-    // var cart_total_item_count_temp = false;
-    // if(data_dp_enable_cart_total_item_count) {
-    //     var len = $('#pos_table .product_row').length;
-    //     var condition = data_dp_condition_operator.replace('$value', len);
-    //     if(eval(condition)) {
-    //         cart_total_item_count_temp = true;
-    //     } else {
-    //         cart_total_item_count_temp = false;
-    //     }
-    // }
-
-    // var has_items_in_cart = $('.has_items_in_cart');
-    // if(
-    //     (data_dp_enable_items_in_cart && has_items_in_cart.length <= 0) ||
-    //     (data_dp_enable_cart_total_item_count && !cart_total_item_count_temp )
-    // ) {
-    //     data_dp_type = 0;
-    //     data_dp_percent = 0;
-    //     dp_amount = 0;
-    //     data_dp_cart_include_tax = 0;
-    // }
-
-
     if ($('#reward_point_enabled').length) {
         total_customer_reward = $('#rp_redeemed_amount').val();
         discount = parseFloat(discount) + parseFloat(total_customer_reward);
@@ -2090,11 +2066,8 @@ function calculate_billing_details(price_total) {
         }
     }
 
-
-
     var order_tax = pos_order_tax(price_total, discount);
     
-
     //Add shipping charges.
     var shipping_charges = __read_number($('input#shipping_charges'));
 
@@ -2165,18 +2138,6 @@ function calculate_billing_details(price_total) {
         curr_exchange_rate = __read_number($('#exchange_rate'));
     }
     var shown_total = total_payable_rounded * curr_exchange_rate;
-
-    
-    // if(data_dp_enable_cart_total_amount) {
-    //     var condition = data_dp_condition_operator.replace('$value', shown_total);
-    //     if(eval(condition)) {
-    //     } else {
-    //         data_dp_type = 0;
-    //         data_dp_percent = 0;
-    //         dp_amount = 0;
-    //         data_dp_cart_include_tax = 0;
-    //     }
-    // }
 
 
     if(dp_rules && dp_rules.length > 0) {
