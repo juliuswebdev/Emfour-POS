@@ -127,6 +127,11 @@
 				</td>
 				@endif
 
+				
+
+			</tr>
+			<tr>
+				<td><ul id="dp_cart_description"></ul></td>
 			</tr>
 		</table>
 	</div>

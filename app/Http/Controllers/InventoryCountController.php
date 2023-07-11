@@ -525,21 +525,39 @@ class InventoryCountController extends Controller
             ->select(['id', 'name', 'location_id'])
             ->get();
 
+        // $count_details = CountDetail::where('count_detail.count_header_id', $count_header->id)
+        //         ->leftJoin('products', function($join){
+        //             $join->on('products.id', 'count_detail.product_id');
+        //         })
+        //         ->select([
+        //             'count_detail.id as id',
+        //             'count_detail.count_header_id as count_header_id',
+        //             'count_detail.sku as sku',
+        //             'count_detail.upc as upc',
+        //             'count_detail.product_id as product_id',
+        //             'products.name as product_name',
+        //             'count_detail.frozen_quantity as frozen_quantity',
+        //             'count_detail.count_quantity as count_quantity'
+        //         ])
+        //         ->get();
         $count_details = CountDetail::where('count_detail.count_header_id', $count_header->id)
-                ->leftJoin('products', function($join){
-                    $join->on('products.id', 'count_detail.product_id');
-                })
-                ->select([
-                    'count_detail.id as id',
-                    'count_detail.count_header_id as count_header_id',
-                    'count_detail.sku as sku',
-                    'count_detail.upc as upc',
-                    'count_detail.product_id as product_id',
-                    'products.name as product_name',
-                    'count_detail.frozen_quantity as frozen_quantity',
-                    'count_detail.count_quantity as count_quantity'
-                ])
-                ->get();
+            ->leftJoin('variations', function($join){
+                $join->on('variations.id', 'count_detail.product_id');
+            })
+            ->leftJoin('products', function($join){
+                $join->on('products.id', 'variations.product_id');
+            })
+            ->select([
+                'count_detail.id as id',
+                'count_detail.count_header_id as count_header_id',
+                'count_detail.sku as sku',
+                'count_detail.upc as upc',
+                'count_detail.product_id as product_id',
+                'products.name as product_name',
+                'count_detail.frozen_quantity as frozen_quantity',
+                'count_detail.count_quantity as count_quantity'
+            ])
+            ->get();
 
         return view('inventory_count.qty_adjustment', [
             'count_header' => $count_header,
@@ -556,7 +574,7 @@ class InventoryCountController extends Controller
     */
     public function post_count(Request $request, $id)
     {
-        try {
+        //try {
             $count_header = CountHeader::find($id);
 
             $user_id = Auth::user()->id;
@@ -591,6 +609,8 @@ class InventoryCountController extends Controller
                     $count_detail->save();
 
                     $variation_qry = Variation::find($count_detail->product_id);
+
+
                     $product_id  = $variation_qry->product_id;
                     $variation_id = $variation_qry->id;
                     $product_variation_id = $variation_qry->product_variation_id;
@@ -599,8 +619,8 @@ class InventoryCountController extends Controller
 
                     $old_qty_available = $variation_location_details->qty_available ?? 0;
 
-                    $variation = Variation::find($product_id);
-                    $product_q = Product::find($variation->product_id);
+                    $variation = Variation::find($variation_id);
+                    $product_q = Product::find($product_id);
                     //$product_q = Product::find($product_id);
                     $product_q->enable_stock = 1;
                     $product_q->save();
@@ -674,8 +694,8 @@ class InventoryCountController extends Controller
 
             }
             return redirect()->route('inventory_count');
-        } catch (\Exception $e) {
-            throw new \Exception(__('lang_v1.invalid_date_format_at', ['row' => $row_index]));
-        }
+        // } catch (\Exception $e) {
+        //     throw new \Exception(__('lang_v1.invalid_date_format_at'));
+        // }
     }
 }
