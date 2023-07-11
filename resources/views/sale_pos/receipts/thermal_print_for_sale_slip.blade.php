@@ -85,6 +85,16 @@
 					<img style="width: 100%;margin-bottom: 10px;" src="{{$receipt_details->letter_head}}">
 				</div>
 			@endif
+			
+			@isset($receipt_details->register_number)
+			<div class="textbox-info">
+				<p class="f-left"><strong>@lang('business.register_number')</strong></p>
+				<p class="f-right">
+					{{$receipt_details->register_number}}
+				</p>
+			</div>
+			@endisset
+
 			<div class="textbox-info">
 				<p class="f-left"><strong>{!! $receipt_details->invoice_no_prefix !!}</strong></p>
 				<p class="f-right">

@@ -20,7 +20,20 @@
         }
       @endphp
       <div class="@if(!empty($export_custom_fields)) col-sm-3 @else col-sm-4 @endif">
-        <b>@if($sell->type == 'sales_order') {{ __('restaurant.order_no') }} @else {{ __('sale.invoice_no') }} @endif:</b> #{{ $sell->invoice_no }}<br>
+        @isset($register_number)
+        <b>
+          {{ __('business.register_number') }}:
+          </b>{{ $register_number }}
+          <br>
+        <b>    
+        @endisset
+        
+        @if($sell->type == 'sales_order') 
+          {{ __('restaurant.order_no') }} 
+          @else 
+          <b>{{ __('sale.invoice_no') }}</b> 
+          @endif:</> #{{ $sell->invoice_no }}
+          <br>
         <b>{{ __('sale.status') }}:</b> 
           @if($sell->status == 'draft' && $sell->is_quotation == 1)
             {{ __('lang_v1.quotation') }}

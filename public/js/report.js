@@ -298,6 +298,7 @@ $(document).ready(function() {
             { data: 'created_at', name: 'created_at' },
             { data: 'closed_at', name: 'closed_at' },
             { data: 'location_name', name: 'bl.name' },
+            { data: 'register_number', name: 'register_number' },
             { data: 'user_name', name: 'user_name' },
             { data: 'total_card_payment', name: 'total_card_payment', searchable: false },
             { data: 'total_cheque_payment', name: 'total_cheque_payment', searchable: false },

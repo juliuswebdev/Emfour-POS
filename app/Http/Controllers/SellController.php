@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Account;
 use App\Business;
 use App\BusinessLocation;
+use App\CashRegister;
 use App\Contact;
 use App\CustomerGroup;
 use App\InvoiceScheme;
@@ -811,8 +812,8 @@ class SellController extends Controller
         if (! auth()->user()->can('sell.view') && ! auth()->user()->can('direct_sell.access') && auth()->user()->can('view_own_sell_only')) {
             $query->where('transactions.created_by', request()->session()->get('user.id'));
         }
-
         $sell = $query->firstOrFail();
+    
 
         $activities = Activity::forSubject($sell)
            ->with(['causer', 'subject'])
@@ -861,6 +862,12 @@ class SellController extends Controller
         $status_color_in_activity = Transaction::sales_order_statuses();
         $sales_orders = $sell->salesOrders();
 
+        $register_number = CashRegister::select('register_number')->leftJoin('cash_register_transactions', 'cash_registers.id', '=', 'cash_register_transactions.cash_register_id')
+                                        ->where('transaction_id', $sell->id)
+                                        ->pluck('register_number')
+                                        ->first();
+                            
+
         return view('sale_pos.show')
             ->with(compact(
                 'taxes',
@@ -876,7 +883,8 @@ class SellController extends Controller
                 'status_color_in_activity',
                 'sales_orders',
                 'line_taxes',
-                'business_details'
+                'business_details',
+                'register_number'
             ));
     }
 

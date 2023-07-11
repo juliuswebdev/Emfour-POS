@@ -86,6 +86,12 @@
 		<!-- Invoice  number, Date  -->
 		<p style="width: 100% !important" class="word-wrap">
 			<span class="pull-left text-left word-wrap">
+				@isset($receipt_details->register_number)
+					<b>@lang('business.register_number')</b>
+					{{  $receipt_details->register_number }}
+					<br>
+				@endisset
+				
 				@if(!empty($receipt_details->invoice_no_prefix))
 					<b>{!! $receipt_details->invoice_no_prefix !!}</b>
 				@endif

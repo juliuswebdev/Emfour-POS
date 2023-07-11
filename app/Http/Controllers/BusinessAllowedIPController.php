@@ -58,6 +58,8 @@ class BusinessAllowedIPController extends Controller
                 'business_allowed_ips.description as description',
             )->orderBy('business_allowed_ips.location_id', 'ASC'); 
 
+            
+
             return Datatables::of($business_ips)
                 ->addColumn(
                     'action',
@@ -69,6 +71,11 @@ class BusinessAllowedIPController extends Controller
                 )
                 ->removeColumn(['id'])
                 ->rawColumns(['action'])
+                ->filterColumn('location', function($query, $keyword) {
+                    //$query->whereRaw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) like ?", ["%{$keyword}%"]);
+                   
+                    $query->whereRaw("CONCAT(business_locations.name, '-', business_locations.location_id)  like ?", ["%{$keyword}%"]);
+                })
                 ->make(true);
         }
 
