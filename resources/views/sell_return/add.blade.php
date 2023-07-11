@@ -22,6 +22,7 @@
 		<div class="box-body">
 			<div class="row">
 				<div class="col-sm-4">
+					<strong>@lang('business.register_number'):</strong> {{ $sell->register_number }} <br>
 					<strong>@lang('sale.invoice_no'):</strong> {{ $sell->invoice_no }} <br>
 					<strong>@lang('messages.date'):</strong> {{@format_date($sell->transaction_date)}}
 				</div>

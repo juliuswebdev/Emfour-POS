@@ -9,6 +9,8 @@ use App\Transaction;
 use App\TransactionPayment;
 use App\TransactionSellLine;
 use App\User;
+use App\CashRegister;
+
 use App\Utils\BusinessUtil;
 use App\Utils\ContactUtil;
 use App\Utils\ModuleUtil;
@@ -244,7 +246,6 @@ class SellReturnController extends Controller
         $sell = Transaction::where('business_id', $business_id)
                             ->with(['sell_lines', 'location', 'return_parent', 'contact', 'tax', 'sell_lines.sub_unit', 'sell_lines.product', 'sell_lines.product.unit'])
                             ->find($id);
-
         foreach ($sell->sell_lines as $key => $value) {
             if (! empty($value->sub_unit_id)) {
                 $formated_sell_line = $this->transactionUtil->recalculateSellLineTotals($business_id, $value);
@@ -253,6 +254,12 @@ class SellReturnController extends Controller
 
             $sell->sell_lines[$key]->formatted_qty = $this->transactionUtil->num_f($value->quantity, false, null, true);
         }
+
+        $sell->register_number = CashRegister::select('register_number')->leftJoin('cash_register_transactions', 'cash_registers.id', '=', 'cash_register_transactions.cash_register_id')
+        ->where('transaction_id', $sell->id)
+        ->pluck('register_number')
+        ->first();
+        
 
         return view('sell_return.add')
             ->with(compact('sell'));
@@ -499,9 +506,9 @@ class SellReturnController extends Controller
 
             //Check if printer setting is provided.
             $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
-
             $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-
+            
+            
             //If print type browser - return the content, printer - return printer config data, and invoice format config
             $output['print_title'] = $receipt_details->invoice_no;
             if ($receipt_printer_type == 'printer') {
@@ -588,7 +595,6 @@ class SellReturnController extends Controller
                 ];
 
                 $business_id = $request->session()->get('user.business_id');
-
                 $transaction = Transaction::where('business_id', $business_id)
                                 ->where('id', $transaction_id)
                                 ->first();
