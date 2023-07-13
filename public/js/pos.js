@@ -186,6 +186,11 @@ $(document).ready(function() {
         if ($('#types_of_service_id').length && $('#types_of_service_id').val()) {
             $('#types_of_service_id').change();
         }
+
+        //Check register is open or not for this location
+        check_location_is_open();
+
+
     });
 
     //get customer
@@ -4084,4 +4089,59 @@ $('body').on('change', '.payment_types_dropdown', function() {
 	$(this).find('option').removeAttr('selected');
 	$(this).find('option[value="'+selected_val+'"]').attr('selected', 'selected');
 });
+
+//Check location is open
+function check_location_is_open(){
+    
+    var location_id = $('#location_id').val();
+    if(location_id != ""){
+        $.ajax({
+            method: 'POST',
+            url: '/sells/pos/check-location-is-open/' + location_id,
+            success: function(result) {
+
+                //Selected Option Restore
+                var active_location_id = result.data.active_location_id;
+                $('#select_location_id').find('option').removeAttr('selected');
+                $('#select_location_id').find('option[value='+active_location_id+']').attr('selected', 'selected');
+                reset_pos_form();
+                set_payment_type_dropdown();
+
+                //Product sidebar reset
+                $('input#suggestion_page').val(1);
+                $('div#category-list-wrapper').show();
+                $('div#subcategory-list-wrapper').hide();
+                $('.back-event').addClass('d-none');
+                $('div#product_list_body').html('');
+                get_featured_products();
+                
+
+                if(result.status == true){
+                    //Open confirm popup
+                    swal({
+                        title: result.message,
+                        text: "",
+                        icon: 'warning',
+                        buttons: true,
+                        dangerMode: true,
+                        buttons: ['No', 'Yes']
+                    }).then((result) => {
+                        if (result) {
+                            $('#close_register').trigger('click');
+                        }
+                    })
+
+                }else{
+                    if(result.data.is_popup_open == 1){
+                        swal({
+                            title: result.message,
+                            text: "",
+                            icon: 'error'
+                        });
+                    }
+                }
+            },
+        });
+    }
+}
 

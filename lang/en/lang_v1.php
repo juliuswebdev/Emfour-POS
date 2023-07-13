@@ -1612,6 +1612,8 @@ return [
     'title_security_pin' => 'Security Pin',
     'enter_security_pin' => 'Enter Security Pin',
     'dynamic_price' => 'Dynamic Price',
-    'please_select_the_location' => 'Please select the business location.'
+    'please_select_the_location' => 'Please select the business location.',
+    'selected_location_is_open_to_another_machine' => 'Selected Location is Open to another Machine.'
+    
 
 ];

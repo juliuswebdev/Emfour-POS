@@ -9425,6 +9425,9 @@ justify-content: space-between;
 .c-font-size-18{
   font-size: 18px;
 }
+.invoice-info{
+  margin-bottom: 15px;
+}
 /*!
  * FullCalendar v3.10.2
  * Docs & License: https://fullcalendar.io/
