@@ -304,6 +304,24 @@
             </tr>
             @endif
 
+
+            @if( !empty($sell->dp_discount) )
+						@php
+						$dp_discount = json_decode($sell->dp_discount);
+						$dp_discount_label = $dp_discount->label;
+						$dp_discount_discount = $dp_discount->discount;
+						@endphp
+						<tr class="flex-box">
+							<th>
+								{!! $dp_discount_label !!}:
+							</th>
+              <td></td>
+							<td class="text-right">
+								{{$dp_discount_discount}}
+							</td>
+						</tr>
+					@endif
+
             <tr>
               <th>{{ __('sale.discount') }}:</th>
               <td><b>(-)</b></td>

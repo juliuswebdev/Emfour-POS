@@ -141,10 +141,13 @@ class TransactionUtil extends Util
             'additional_expense_key_3' => ! empty($input['additional_expense_key_3']) ? $input['additional_expense_key_3'] : null,
             'additional_expense_key_4' => ! empty($input['additional_expense_key_4']) ? $input['additional_expense_key_4'] : null,
             'tips_amount' => isset($input['tips_amount']) ? $input['tips_amount'] : 0,
+            'dp_discount' => isset($input['dp_discount']) ? $input['dp_discount'] : null,
             'gratuity_label' => isset($input['gratuity_label']) ? $input['gratuity_label'] : null, 
             'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
             'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
         ]);
+
+
 
         return $transaction;
     }
@@ -1957,6 +1960,7 @@ class TransactionUtil extends Util
         $output['gratuity_charges'] = ($transaction->gratuity_charge_amount > 0) ? $this->num_f($transaction->gratuity_charge_amount, $show_currency, $business_details) : 0;
         $output['tips_unformatted_amount'] = $transaction->tips_amount;
         $output['tips_amount'] = ($transaction->tips_amount > 0) ? $this->num_f($transaction->tips_amount, $show_currency, $business_details) : 0;
+        $output['dp_discount'] = $transaction->dp_discount;
         
         return (object) $output;
     }

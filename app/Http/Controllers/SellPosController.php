@@ -579,7 +579,7 @@ class SellPosController extends Controller
                 }
 
                 $input['dp_flag'] = $request->input('dp_flag');
-
+                $input['dp_discount'] = $request->input('dp_discount');
                 if($input['dp_flag']) {
                     $input['final_total'] = $request->input('final_total');
                 }

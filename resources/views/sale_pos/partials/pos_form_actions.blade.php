@@ -23,7 +23,7 @@
 					>0</span>
 				</div>
 				<input type="hidden" id="dp_flag" name="dp_flag" value="{{ $transaction->dp_flag ?? 0 }}">
-				
+				<input type="hidden" id="dp_discount" name="dp_discount" value="">
 			</div>
 			@endif
 		</div>

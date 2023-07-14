@@ -601,6 +601,25 @@
 					</div>
 				@endif
 
+				@if( !empty($receipt_details->dp_discount) )
+					@php
+					 $dp_discount = json_decode($receipt_details->dp_discount);
+					 $dp_discount_label = $dp_discount->label;
+					 $dp_discount_discount = $dp_discount->discount;
+					@endphp
+					<div class="flex-box">
+						<p class="sub-headings">
+							{!! $dp_discount_label !!}
+						</p>
+
+						<p class="width-50 text-right">
+							{{$dp_discount_discount}}
+						</p>
+					</div>
+				@endif
+
+			
+
 				@if( !empty($receipt_details->additional_expenses) )
 					@foreach($receipt_details->additional_expenses as $key => $val)
 						<div class="flex-box">
