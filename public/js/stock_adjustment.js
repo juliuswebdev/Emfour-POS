@@ -124,6 +124,8 @@ $(document).ready(function() {
             { data: 'adjustment_type', name: 'adjustment_type' },
             { data: 'final_total', name: 'final_total' },
             { data: 'total_amount_recovered', name: 'total_amount_recovered' },
+            { data: 'cost_of_the_item_adjusted', name: 'cost_of_the_item_adjusted' },
+            { data: 'vendor_number', name: 'vendor_number' },
             { data: 'additional_notes', name: 'additional_notes' },
             { data: 'added_by', name: 'u.first_name' },
         ],

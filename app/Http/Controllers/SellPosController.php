@@ -3600,6 +3600,40 @@ class SellPosController extends Controller
         }
     }
 
+    //That function is use for check the location is open on pos screen when location dropdown is change.
+    public function checkLocationIsOpen($location_id){
+        $user_id = auth()->user()->id;
+        $business_id = request()->session()->get('user.business_id');
+        $current_active_location_id = CashRegister::select('location_id')
+                                                ->where('user_id', $user_id)
+                                                ->where('business_id', $business_id)
+                                                ->where('closed_at', NULL)
+                                                ->where('status', 'open')
+                                                ->pluck('location_id')
+                                                ->first();
+        if($current_active_location_id == $location_id){
+            $data = array('is_popup_open' => 0, 'is_allowed_to_switch' => 0, 'active_location_id' => $current_active_location_id);
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.success'), 'data' => $data]);   
+        }else{
+            $is_exit = CashRegister::select('id')
+                                    ->where('business_id', $business_id)
+                                    ->where('location_id', $location_id)
+                                    ->where('closed_at', NULL)
+                                    ->where('status', 'open')
+                                    ->pluck('id')
+                                    ->first();  
+            if($is_exit == null){
+                $data = array('is_popup_open' => 1, 'is_allowed_to_switch' => 1, 'active_location_id' => $current_active_location_id);
+                $active_location = BusinessLocation::select('id', 'name', 'location_id')->where('id', $current_active_location_id)->first();
+                $message = "Do you want to close Location: ".$active_location->name.' ('.$active_location->location_id.') and open new one ?';
+
+                return response()->json(['status' => true, 'message' =>  $message, 'data' => $data]);
+            }else{
+                $data = array('is_popup_open' => 1, 'is_allowed_to_switch' => 0, 'active_location_id' => $current_active_location_id);
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.selected_location_is_open_to_another_machine'), 'data' => $data]);
+            }
+        }
+    }
 
 
 }

@@ -683,6 +683,7 @@ class ProductController extends Controller
         if (! auth()->user()->can('product.update')) {
             abort(403, 'Unauthorized action.');
         }
+       
 
         try {
             $business_id = $request->session()->get('user.business_id');
@@ -698,10 +699,12 @@ class ProductController extends Controller
             $module_form_fields = $this->moduleUtil->getModuleFormField('product_form_fields');
             if (! empty($module_form_fields)) {
                 foreach ($module_form_fields as $column) {
-                    $product->$column = $request->input($column);
+                    if(!is_array($column)) {
+                        $product->$column = $request->input($column);
+                    }
                 }
             }
-
+            
             $product->name = $product_details['name'];
             $product->brand_id = $product_details['brand_id'];
             $product->unit_id = $product_details['unit_id'];
@@ -778,6 +781,8 @@ class ProductController extends Controller
 
             $product->save();
             $product->touch();
+
+           
 
             //Add product locations
             $product_locations = ! empty($request->input('product_locations')) ?

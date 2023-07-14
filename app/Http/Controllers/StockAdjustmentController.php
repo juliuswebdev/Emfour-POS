@@ -70,6 +70,8 @@ class StockAdjustmentController extends Controller
                         'total_amount_recovered',
                         'additional_notes',
                         'transactions.id as DT_RowId',
+                        'transactions.vendor_number',
+                        'transactions.cost_of_the_item_adjusted',
                         DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by")
                     );
 
@@ -107,6 +109,12 @@ class StockAdjustmentController extends Controller
                         return $this->transactionUtil->num_f($row->total_amount_recovered, true);
                     }
                 )
+                ->editColumn(
+                    'cost_of_the_item_adjusted',
+                    function ($row) {
+                        return $this->transactionUtil->num_f($row->cost_of_the_item_adjusted, true);
+                    }
+                )
                 ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')
                 ->editColumn('adjustment_type', function ($row) {
                     return __('stock_adjustment.'.$row->adjustment_type);
@@ -115,7 +123,7 @@ class StockAdjustmentController extends Controller
                     'data-href' => function ($row) {
                         return  action([\App\Http\Controllers\StockAdjustmentController::class, 'show'], [$row->id]);
                     }, ])
-                ->rawColumns(['final_total', 'action', 'total_amount_recovered'])
+                ->rawColumns(['final_total', 'action', 'total_amount_recovered', 'cost_of_the_item_adjusted'])
                 ->make(true);
         }
 
@@ -162,7 +170,7 @@ class StockAdjustmentController extends Controller
         try {
             DB::beginTransaction();
 
-            $input_data = $request->only(['location_id', 'transaction_date', 'adjustment_type', 'additional_notes', 'total_amount_recovered', 'final_total', 'ref_no']);
+            $input_data = $request->only(['location_id', 'transaction_date', 'adjustment_type', 'additional_notes', 'total_amount_recovered', 'final_total', 'ref_no', 'cost_of_the_item_adjusted', 'vendor_number']);
             $business_id = $request->session()->get('user.business_id');
 
             //Check if subscribed or not
@@ -177,6 +185,8 @@ class StockAdjustmentController extends Controller
             $input_data['created_by'] = $user_id;
             $input_data['transaction_date'] = $this->productUtil->uf_date($input_data['transaction_date'], true);
             $input_data['total_amount_recovered'] = $this->productUtil->num_uf($input_data['total_amount_recovered']);
+            $input_data['vendor_number'] = $request->input('vendor_number');
+            $input_data['cost_of_the_item_adjusted'] = $request->input('cost_of_the_item_adjusted');
 
             //Update reference count
             $ref_count = $this->productUtil->setAndGetReferenceCount('stock_adjustment');
@@ -195,7 +205,7 @@ class StockAdjustmentController extends Controller
                         'product_id' => $product['product_id'],
                         'variation_id' => $product['variation_id'],
                         'quantity' => $this->productUtil->num_uf($product['quantity']),
-                        'unit_price' => $this->productUtil->num_uf($product['unit_price']),
+                        'unit_price' => $this->productUtil->num_uf($product['unit_price'])
                     ];
                     if (! empty($product['lot_no_line_id'])) {
                         //Add lot_no_line_id to stock adjustment line

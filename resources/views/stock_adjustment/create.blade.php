@@ -112,6 +112,24 @@
 							{!! Form::text('total_amount_recovered', 0, ['class' => 'form-control input_number', 'placeholder' => __('stock_adjustment.total_amount_recovered')]); !!}
 					</div>
 				</div>
+				
+
+				<div class="col-sm-4">
+					<div class="form-group">
+							{!! Form::label('cost_of_the_item_adjusted', __('stock_adjustment.cost_of_the_item_adjusted') . ':') !!} 
+							{!! Form::text('cost_of_the_item_adjusted', 0, ['class' => 'form-control input_number', 'placeholder' => __('stock_adjustment.cost_of_the_item_adjusted')]); !!}
+					</div>
+				</div>
+
+				<div class="col-sm-4">
+					<div class="form-group">
+							{!! Form::label('vendor_number', __('stock_adjustment.vendor_number') . ':') !!} 
+							{!! Form::text('vendor_number', null, ['class' => 'form-control', 'placeholder' => __('stock_adjustment.vendor_number')]); !!}
+					</div>
+				</div>				
+			</div>
+
+			<div class="row">
 				<div class="col-sm-4">
 					<div class="form-group">
 							{!! Form::label('additional_notes', __('stock_adjustment.reason_for_stock_adjustment') . ':') !!}

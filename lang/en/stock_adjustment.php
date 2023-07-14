@@ -27,4 +27,6 @@ return [
     'search_products' => 'Search Products',
     'delete_success' => 'Stock adjustment deleted successfully',
     'view_details' => 'View stock adjustment details',
+    'cost_of_the_item_adjusted' => 'Cost of the item adjusted',
+    'vendor_number' => 'Vendor Number',
 ];

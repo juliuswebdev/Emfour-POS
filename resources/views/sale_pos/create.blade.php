@@ -278,10 +278,12 @@
 				showDeviceList($('#select_location_id').val());
 			})
 
+			/*
 			$('#select_location_id').change(function(){
 				showDeviceList($(this).val());
 			});
-
+			*/
+			
 			$(document).on('click', '.btn-select_device', function(){
 				var payment_device = $('input[name="payment_device"]:checked').val();
 				var device_name = $('label[for="d_'+payment_device+'"]').text();

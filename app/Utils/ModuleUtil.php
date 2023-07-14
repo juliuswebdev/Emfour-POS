@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Account;
 use App\BusinessLocation;
+use App\BusinessAllowedIP;
 use App\Product;
 use App\System;
 use App\Transaction;

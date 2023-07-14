@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-xl" role="document">
+ˀ<div class="modal-dialog modal-xl" role="document">
 	<div class="modal-content">
 		<div class="modal-header">
 		    <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -37,6 +37,7 @@
 			      	<b>@lang('messages.date'):</b> {{ @format_date($stock_adjustment->transaction_date) }}<br/>
 			      	<b>@lang('stock_adjustment.adjustment_type'):</b> {{ __('stock_adjustment.' . $stock_adjustment->adjustment_type) }}<br>
 			      	<b>@lang('stock_adjustment.reason_for_stock_adjustment'):</b> {{ $stock_adjustment->additional_notes }}<br>
+					<b>@lang('stock_adjustment.vendor_number'):</b> {{ $stock_adjustment->vendor_number }}<br>
 			    </div>
     		</div>
 
@@ -89,6 +90,10 @@
 				          	<tr>
 				            	<th>@lang('stock_adjustment.total_amount_recovered'): </th>
 				            	<td><span class="display_currency pull-right" data-currency_symbol="true">{{ $stock_adjustment->total_amount_recovered }}</span></td>
+				          	</tr>
+							<tr>
+				            	<th>@lang('stock_adjustment.cost_of_the_item_adjusted'): </th>
+				            	<td><span class="display_currency pull-right" data-currency_symbol="true">{{ $stock_adjustment->cost_of_the_item_adjusted }}</span></td>
 				          	</tr>
 				      	</table>
 				  	</div>
