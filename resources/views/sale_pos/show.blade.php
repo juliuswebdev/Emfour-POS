@@ -306,21 +306,21 @@
 
 
             @if( !empty($sell->dp_discount) )
-						@php
-						$dp_discount = json_decode($sell->dp_discount);
-						$dp_discount_label = $dp_discount->label;
-						$dp_discount_discount = $dp_discount->discount;
-						@endphp
-						<tr class="flex-box">
-							<th>
-								{!! $dp_discount_label !!}:
-							</th>
-              <td></td>
-							<td class="text-right">
-								{{$dp_discount_discount}}
-							</td>
-						</tr>
-					@endif
+              @php
+                $dp_discount = json_decode($sell->dp_discount);
+              @endphp
+              @foreach($dp_discount as $item)
+                <tr class="flex-box">
+                  <th>
+                    {!! $item->label !!}:
+                  </th>
+                  <td></td>
+                  <td class="text-right">
+                    {{$item->discount}}
+                  </td>
+                </tr>
+              @endforeach
+            @endif
 
             <tr>
               <th>{{ __('sale.discount') }}:</th>

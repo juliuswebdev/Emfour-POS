@@ -22,11 +22,12 @@
 	$product_cat2_slug = $product_cat2->slug ?? '';
 @endphp
 
-<tr class="product_row product_row_{{$product->product_id}} product_row_{{ $product->sub_sku }}"  
+<tr class="product_row product_row_{{$product->product_id}} product_row_{{ $product->sub_sku }} has_dp"  
 	data-cat-slug="{{ $product_cat1_slug }}"
 	data-sub-cat-slug="{{ $product_cat2_slug }}"
 	data-sku="{{ $product->sub_sku }}"
 	data-has-dp="0"
+	data-dp-index="x"
 	data-promo="0"
 	data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif
 >

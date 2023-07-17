@@ -563,21 +563,7 @@
 						</tr>
 					@endif
 
-					@if( !empty($receipt_details->dp_discount) )
-						@php
-						$dp_discount = json_decode($receipt_details->dp_discount);
-						$dp_discount_label = $dp_discount->label;
-						$dp_discount_discount = $dp_discount->discount;
-						@endphp
-						<tr class="flex-box">
-							<th>
-								{!! $dp_discount_label !!}:
-							</th>
-							<td class="text-right">
-								{{$dp_discount_discount}}
-							</td>
-						</tr>
-					@endif
+
 
 					@if( !empty($receipt_details->additional_expenses) )
 						@foreach($receipt_details->additional_expenses as $key => $val)
@@ -627,6 +613,23 @@
 							</td>
 						</tr>
 					@endif
+					
+					@if( !empty($receipt_details->dp_discount) )
+						@php
+							$dp_discount = json_decode($receipt_details->dp_discount);
+						@endphp
+						@foreach($dp_discount as $item)
+							<tr class="flex-box">
+								<th class="sub-headings">
+									{!! $item->label !!}
+								</th>
+								<td class="text-right">
+									{{$item->discount}}
+								</td>
+							</tr>
+					
+						@endforeach
+					@endif
 
 					<!-- Total -->
 					<tr>
@@ -641,6 +644,9 @@
 							@endif
 						</td>
 					</tr>
+
+
+
 				</tbody>
         	</table>
         </div>

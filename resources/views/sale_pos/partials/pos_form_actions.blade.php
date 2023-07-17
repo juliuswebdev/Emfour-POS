@@ -19,7 +19,7 @@
 				</div>
 				<div>
 					<input type="hidden" name="final_total" id="final_total_input" value=0>
-					<span id="total_payable" class="number" 
+					<span id="total_payable" class="number has_dp" 
 					>0</span>
 				</div>
 				<input type="hidden" id="dp_flag" name="dp_flag" value="{{ $transaction->dp_flag ?? 0 }}">
