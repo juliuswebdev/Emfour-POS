@@ -133,6 +133,7 @@ class ScheduleController extends Controller
                     $q->where('user_id', $user_id);
                 });
             }
+            
 
             return Datatables::of($schedules)
                 ->addColumn('action', function ($row) {
@@ -193,19 +194,34 @@ class ScheduleController extends Controller
                 ->editColumn('end_datetime', '
                     @if(!empty($end_datetime)){{@format_datetime($end_datetime)}} @endif
                 ')
-                ->editColumn('contact', '
-                    @if(!empty($biz_name)) {{$biz_name}},<br>@endif {{$contact}}
-                    <br>
-                    @if($contact_type == "lead")
-                        <a href="{{action(\'\Modules\Crm\Http\Controllers\LeadController@show\', [\'lead\' => $contact_id])}}" target="_blank">
-                            <i class="fas fa-external-link-square-alt text-info"></i>
-                        </a>
-                    @else
-                    <a href="{{action(\'App\Http\Controllers\ContactController@show\', [$contact_id])}}" target="_blank">
-                            <i class="fas fa-external-link-square-alt text-info"></i>
-                        </a>
-                    @endif
-                ')
+                // ->editColumn('contact', '
+                //     @if(!empty($biz_name)) {{$biz_name}},<br>@endif {{$contact}}
+                //     <br>
+                //     @if($contact_type == "lead")
+                //         <a href="{{action(\'\Modules\Crm\Http\Controllers\LeadController@show\', [\'lead\' => $contact_id])}}" target="_blank">
+                //             <i class="fas fa-external-link-square-alt text-info"></i>
+                //         </a>
+                //     @else
+                //     <a href="{{action(\'App\Http\Controllers\ContactController@show\', [$contact_id])}}" target="_blank">
+                //             <i class="fas fa-external-link-square-alt text-info"></i>
+                //         </a>
+                //     @endif
+                // ')
+                ->addColumn('contact', function ($row) {
+                    $html = "";
+                    if(!empty($row->biz_name)){
+                        $html .= $row->biz_name.',<br>';
+                    }
+                    $html .= $row->contact.'<br>';
+                    if($row->contact_type == "lead"){
+                        $action = action('Modules\Crm\Http\Controllers\LeadController@show', ['lead' => $row->contact_id]);
+                        $html .= '<a href="'.$action.'" target="_blank"><i class="fas fa-external-link-square-alt text-info"></i></a>';
+                    }else{
+                        $action = ($row->contact_id == null) ? 'javascript:;' : action('App\Http\Controllers\ContactController@show', ['contact' => $row->contact_id]);
+                        $html .= '<a href="'.$action.'" target="_blank"><i class="fas fa-external-link-square-alt text-info"></i></a>';
+                    }
+                    return $html;
+                })
                 ->addColumn('added_by', function ($row) {
                     return "{$row->surname} {$row->first_name} {$row->last_name}";
                 })
@@ -303,7 +319,7 @@ class ScheduleController extends Controller
         $default_followup_category_id = request()->input('followup_category_id', null);
 
         $followup_category = Category::forDropdown($business_id, 'followup_category');
-
+        
         return view('crm::schedule.index')
             ->with(compact(
                 'contacts',

@@ -170,6 +170,7 @@
     @include('crm::schedule.partial.advance_followup_modal')
 @endsection
 @section('javascript')
+	
 	<script src="{{ asset('modules/crm/js/crm.js?v=' . $asset_v) }}"></script>
 	<script type="text/javascript">
 		$(function () {
