@@ -7,6 +7,7 @@ use App\CashRegister;
 use App\BusinessAllowedIP;
 use App\Utils\CashRegisterUtil;
 use App\Utils\ModuleUtil;
+use App\Utils\ProductUtil;
 use Illuminate\Http\Request;
 
 class CashRegisterController extends Controller
@@ -18,16 +19,19 @@ class CashRegisterController extends Controller
 
     protected $moduleUtil;
 
+    protected $productUtil;
+
     /**
      * Constructor
      *
      * @param  CashRegisterUtil  $cashRegisterUtil
      * @return void
      */
-    public function __construct(CashRegisterUtil $cashRegisterUtil, ModuleUtil $moduleUtil)
+    public function __construct(CashRegisterUtil $cashRegisterUtil, ModuleUtil $moduleUtil, ProductUtil $productUtil,)
     {
         $this->cashRegisterUtil = $cashRegisterUtil;
         $this->moduleUtil = $moduleUtil;
+        $this->productUtil = $productUtil;
     }
 
     /**
@@ -110,8 +114,20 @@ class CashRegisterController extends Controller
                     'transaction_type' => 'initial',
                 ]);
             }
+            $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+            $output = ['success' => 1,
+                'url' => action([\App\Http\Controllers\SellPosController::class, 'create'], ['sub_type' => $sub_type]),
+                'dp_rules' => $dp_rules
+            ];
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $output = ['success' => 0,
+                'url' => '',
+            ];
+        }
+
+        if (request()->ajax()) {
+            return $output;
         }
 
         return redirect()->action([\App\Http\Controllers\SellPosController::class, 'create'], ['sub_type' => $sub_type]);

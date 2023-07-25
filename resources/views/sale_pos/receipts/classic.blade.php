@@ -618,17 +618,18 @@
 						@php
 							$dp_discount = json_decode($receipt_details->dp_discount);
 						@endphp
-						@foreach($dp_discount as $item)
-							<tr class="flex-box">
-								<th class="sub-headings">
-									{!! $item->label !!}
-								</th>
-								<td class="text-right">
-									{{$item->discount}}
-								</td>
+						@if($dp_discount)
+							@foreach($dp_discount as $item)
+								<tr class="flex-box">
+									<th class="sub-headings">
+										{!! $item->label !!}
+									</th>
+									<td class="text-right">
+										{{$item->discount}}
+									</td>
 							</tr>
-					
-						@endforeach
+							@endforeach
+						@endif
 					@endif
 
 					<!-- Total -->
