@@ -3151,6 +3151,11 @@ function reset_pos_form(){
 
     $(document).trigger('sell_form_reset');
     calculate_billing_details(0, true);
+
+    //waka
+    $('#dp_flag').val(0);
+    $('#dp_cart_description').html('');
+    $('#dp_discount').val('');
 }
 
 function set_default_customer() {
