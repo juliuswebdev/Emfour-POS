@@ -2244,7 +2244,6 @@ function calculate_billing_details(price_total, dp = true) {
     $('#dp_flag').val(has_dp);
 
     var has_dp_temp = 0;
-
     for(var x = 0; x <= 30; x++) {
         var has_dp = $('#total_payable').attr('data-dp-type-amount-description-'+x);
         if(has_dp) {
@@ -2327,7 +2326,7 @@ function dp_rules(shown_total, sub_total, dp, type="all", cart_total_amount = tr
     today = mm + '-' + dd + '-' + yyyy;
     var total_rules = 0;
     if(dp_rules && dp_rules.length > 0 && dp) {
-    
+        var location_select = $('#select_location_id option:selected').text();
         dp_rules.forEach(function(rule, index){
 
             var condition_bool = true;
@@ -2344,7 +2343,8 @@ function dp_rules(shown_total, sub_total, dp, type="all", cart_total_amount = tr
 
             if(
                 (today_d > start_d && today_d < end_d) &&
-                (rule['active'])
+                (rule['active']) &&
+                (rule['business-location'] === location_select.match(/\(([^)]+)\)/)[1])
             ) {
                 
                 if(rule['conditions']) {
@@ -2651,10 +2651,17 @@ function dp_rule_prices(prices, shown_total, index, sub_total, type_arr, conditi
                         
                     }
 
+                    if(sub_total <= 0) {
+                        $('#total_payable').removeAttr('data-dp-type-amount-'+index);
+                        $('#total_payable').removeAttr('data-dp-type-amount-description-'+index);
+                        $('#total_payable').removeAttr('data-has-dp');
+                    }
+
                 }
                 if(price['target'] == 'promo_products' && type_arr.includes('promo_products')) {
 
                     price['promo_product_sku'].forEach(function(product, id) {
+                        console.log('test');
                         var product_class = '.product_row[data-promo="1"][data-promo-index="'+index+'"]';
                         $(product_class).remove();
                         if( $(product_class).length == 0) {
@@ -2785,14 +2792,14 @@ function dp_rule_prices_reset(prices, index, condition = [], matched_products = 
                     }
                 }
                 if(price['target'] == 'cart') {
-                   
+            
                     $('#total_payable').removeAttr('data-dp-type-amount-'+index);
                     $('#total_payable').removeAttr('data-dp-type-amount-description-'+index);
                     $('#total_payable').removeAttr('data-has-dp');
                 }
                 if(price['target'] == 'promo_products') {
                     price['promo_product_sku'].forEach(function(product, id) {
-                        var product_class = '.product_row_'+ product.product_sku+'[data-promo="1"]';
+                        var product_class = '.product_row_'+ product.product_sku+'[data-promo="1"][data-promo-index="'+index+'"]';
                         $(product_class).remove();
                     });
                 }
