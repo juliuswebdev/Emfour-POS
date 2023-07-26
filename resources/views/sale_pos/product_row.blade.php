@@ -29,6 +29,7 @@
 	data-has-dp="0"
 	data-dp-index="0"
 	data-promo="0"
+	data-promo-index="x"
 	data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif
 >
 	<td>

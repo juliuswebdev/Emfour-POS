@@ -24,6 +24,7 @@
 				</div>
 				<input type="hidden" id="dp_flag" name="dp_flag" value="{{ $transaction->dp_flag ?? 0 }}">
 				<input type="hidden" id="dp_discount" name="dp_discount" value="">
+				<input type="hidden" id="dp_rules" name="dp_rules" value="{{ json_encode($dp_rules) }}">
 			</div>
 			@endif
 		</div>

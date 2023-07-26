@@ -309,17 +309,19 @@
               @php
                 $dp_discount = json_decode($sell->dp_discount);
               @endphp
-              @foreach($dp_discount as $item)
-                <tr class="flex-box">
-                  <th>
-                    {!! $item->label !!}:
-                  </th>
-                  <td></td>
-                  <td class="text-right">
-                    {{$item->discount}}
-                  </td>
-                </tr>
-              @endforeach
+              @if($dp_discount)
+                @foreach($dp_discount as $item)
+                  <tr class="flex-box">
+                    <th>
+                      {!! $item->label !!}:
+                    </th>
+                    <td></td>
+                    <td class="text-right">
+                      {{$item->discount}}
+                    </td>
+                  </tr>
+                @endforeach
+              @endif
             @endif
 
             <tr>

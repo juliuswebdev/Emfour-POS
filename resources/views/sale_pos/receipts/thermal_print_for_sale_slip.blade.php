@@ -605,6 +605,7 @@
 					@php
 					 	$dp_discount = json_decode($receipt_details->dp_discount);
 					@endphp
+					@if($dp_discount)
 					@foreach($dp_discount as $item)
 						<div class="flex-box">
 							<p class="sub-headings">
@@ -614,8 +615,8 @@
 								{{$item->discount}}
 							</p>
 						</div>
-						tae2
 					@endforeach
+					@endif
 				@endif
 
 				@if( !empty($receipt_details->additional_expenses) )

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             //
-            $table->string('dp_discount')->nullable()->after('tips_amount');
+            $table->longText('dp_discount')->nullable()->after('tips_amount');
         });
     }
 
