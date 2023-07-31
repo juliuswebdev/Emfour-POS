@@ -1218,6 +1218,8 @@ table.table-text-center td, table.table-text-center th{
   position: relative;   
 }
 #table-layout-map .table_circle {
+  position: relative;
+  z-index: 1;
   border-radius: 100%;
 }
 #table-layout-map div span {

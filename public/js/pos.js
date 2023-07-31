@@ -3156,6 +3156,10 @@ function reset_pos_form(){
     $('#dp_flag').val(0);
     $('#dp_cart_description').html('');
     $('#dp_discount').val('');
+
+    $('.table-chair-btn').each(function(){
+        $(this).removeClass('active');
+    });
 }
 
 function set_default_customer() {

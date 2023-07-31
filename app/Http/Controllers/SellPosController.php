@@ -436,6 +436,8 @@ class SellPosController extends Controller
                     $invoice_total['final_total'] = ($invoice_total['final_total'] + $tips_amount);
                 }
 
+                $input['table_chair_selected'] = json_encode($request->input('table_chair_selected'));
+            
                 // Card Charge J
                 /*
                 $card_charge = $business->card_charge ? $business->card_charge/100 : 0;

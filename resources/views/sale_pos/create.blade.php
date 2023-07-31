@@ -482,14 +482,67 @@
 	@endif
 
 	@if($business_details->wpc_reservation_site_link)
+	<style>
+		select[name="res_table_id"] option {
+			display: none;
+		}
+		.table-chair-btn {
+			cursor: pointer;
+		}
+		.table-chair-btn.active {
+			background-color: green!important;
+		}
+	</style>
 	<script>
 		$.ajax({
 			method: 'GET',
 			url: '/bookings/get-table-mapping',
 			success: function(result){
-				$('#restaurant_booking_table_modal').html(result).modal('show');
+				$('#restaurant_booking_table_modal').html(result);
 			}
 		});
+		$(document).on('click', 'select[name="res_table_id"]', function(e) {
+			e.preventDefault();
+			$.ajax({
+			method: 'GET',
+			url: '/bookings/get-table-chair-selected?location_id=' + $('#select_location_id').val(),
+				success: function(result){
+					console.log(result);
+					$('.table-chair-btn').each(function(){
+						var id = $(this).attr('id');
+						if(result.includes(id)) {
+							$(this).addClass('active locked');
+						}
+					});
+				}
+			});
+
+			$('#restaurant_booking_table_modal').modal('show');
+		});
+		
+		$(document).on('click', '.table-chair-btn:not(.locked)', function(e) {
+			e.preventDefault();
+			$(this).toggleClass('active');
+			var table_chair_selected = [];
+			var table_id = 0;
+			$('.table-chair-btn.active:not(.locked)').each(function(){
+				var id = $(this).attr('id');
+				table_id = $(this).attr('data-table-chair-id');
+				
+				table_chair_selected.push(id);
+			});
+			$('#table_chair_selected').val(JSON.stringify(table_chair_selected));
+			var res_table_id = 0;
+			$('select[name="res_table_id"] option').each(function(){
+				var text = $(this).text();
+				
+				if(text == table_id) {
+					res_table_id = $(this).attr('value');
+				}
+			})
+			$('select[name="res_table_id"]').val(res_table_id);
+		});
+
 	</script>
 	@endif
 @endsection

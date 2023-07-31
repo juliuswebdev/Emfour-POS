@@ -145,6 +145,7 @@ class TransactionUtil extends Util
             'gratuity_label' => isset($input['gratuity_label']) ? $input['gratuity_label'] : null, 
             'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
             'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
+            'table_chair_selected' => json_encode($input['table_chair_selected'])
         ]);
 
 
