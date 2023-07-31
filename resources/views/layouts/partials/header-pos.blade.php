@@ -28,7 +28,7 @@
   <div class="row">
 
     <div class="col-md-7">
-      <div class="m-6 mt-5" style="display: flex;">
+      <div class="m-6 mt-5 pos-time-location-register-number" style="display: flex;">
         
         <p ><strong>@lang('business.register_number'): {{  $register_number }} &nbsp;&nbsp;</strong> 
         <p ><strong>@lang('sale.location'): &nbsp;</strong> 
@@ -140,13 +140,13 @@
       @endcan
       
       @can('view_cash_register')
-      <button type="button" id="register_details" title="{{ __('cash_register.register_details') }}" class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right" data-container=".register_details_modal" 
+      <button type="button" id="register_details" title="{{ __('cash_register.register_details') }}" class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right mo-btn-hide" data-container=".register_details_modal" 
           data-href="{{ action([\App\Http\Controllers\CashRegisterController::class, 'getRegisterDetails'])}}">
             <strong><i class="fa fa-briefcase fa-lg" aria-hidden="true"></i></strong>
       </button>
       @endcan
 
-      <button title="@lang('lang_v1.calculator')" id="btnCalculator" type="button" class="btn btn-success btn-flat pull-right m-5 btn-xs mt-10 popover-default" data-toggle="popover" data-trigger="click" data-content='@include("layouts.partials.calculator")' data-html="true" data-placement="bottom">
+      <button title="@lang('lang_v1.calculator')" id="btnCalculator" type="button" class="btn btn-success btn-flat pull-right m-5 btn-xs mt-10 popover-default mo-btn-hide" data-toggle="popover" data-trigger="click" data-content='@include("layouts.partials.calculator")' data-html="true" data-placement="bottom">
             <strong><i class="fa fa-calculator fa-lg" aria-hidden="true"></i></strong>
       </button>
 
@@ -160,13 +160,13 @@
             <strong><i class="fa fa-window-maximize fa-lg"></i></strong>
       </button>
 
-      <button type="button" id="view_suspended_sales" title="{{ __('lang_v1.view_suspended_sales') }}" class="btn bg-yellow btn-flat m-6 btn-xs m-5 btn-modal pull-right" data-container=".view_modal" 
+      <button type="button" id="view_suspended_sales" title="{{ __('lang_v1.view_suspended_sales') }}" class="btn bg-yellow btn-flat m-6 btn-xs m-5 btn-modal pull-right mo-btn-hide" data-container=".view_modal" 
           data-href="{{$view_suspended_sell_url}}">
             <strong><i class="fa fa-pause-circle fa-lg"></i></strong>
       </button>
       @if(empty($pos_settings['hide_product_suggestion']) && isMobile())
         <button type="button" title="{{ __('lang_v1.view_products') }}"   
-          data-placement="bottom" class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right" data-toggle="modal" data-target="#mobile_product_suggestion_modal">
+          data-placement="bottom" class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right mo-btn-hide" data-toggle="modal" data-target="#mobile_product_suggestion_modal">
             <strong><i class="fa fa-cubes fa-lg"></i></strong>
         </button>
       @endif
@@ -208,7 +208,7 @@
         </button>
 
         <a 
-          class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right" 
+          class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right mo-btn-hide" 
           href="#" 
           onClick="window.open('{{action([\App\Http\Controllers\SellPosController::class, 'getPosPublic'])}}','winname','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=1000,height=1000');">
           <strong><i class="fa fa-tv fa-lg"></i></strong>

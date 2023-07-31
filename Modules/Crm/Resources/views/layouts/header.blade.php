@@ -15,7 +15,7 @@
 
         <!-- Navbar Right Menu -->
         <div class="navbar-custom-menu">
-            <button id="btnCalculator" title="@lang('lang_v1.calculator')" type="button" class="btn btn-success btn-flat pull-left m-8 hidden-xs btn-sm mt-10 popover-default" data-toggle="popover" data-trigger="click" data-content='@include("layouts.partials.calculator")' data-html="true" data-placement="bottom">
+            <button id="btnCalculator" title="@lang('lang_v1.calculator')" type="button" class="btn btn-success btn-flat pull-left m-8 hidden-xs btn-sm mt-10 popover-default mo-btn-hide" data-toggle="popover" data-trigger="click" data-content='@include("layouts.partials.calculator")' data-html="true" data-placement="bottom">
                 <strong>
                     <i class="fa fa-calculator fa-lg" aria-hidden="true"></i>
                 </strong>

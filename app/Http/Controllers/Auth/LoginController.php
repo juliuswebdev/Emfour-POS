@@ -95,6 +95,7 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+        
         $this->businessUtil->activityLog($user, 'login', null, [], false, $user->business_id);
 
         if (! $user->business->is_active) {
@@ -153,6 +154,7 @@ class LoginController extends Controller
             return 'contact/contact-dashboard';
         }
 
+       
         return '/home';
     }
 

@@ -62,6 +62,7 @@ use App\Http\Controllers\VariationTemplateController;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\PaymentDevicesController;
 use App\Http\Controllers\BusinessAllowedIPController;
+use App\Http\Controllers\WebviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -581,3 +582,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone'])
     Route::get('/sells/invoice-url/{id}', [SellPosController::class, 'showInvoiceUrl']);
     Route::get('/show-notification/{id}', [HomeController::class, 'showNotification']);
 });
+
+
+//Webview Initial Load
+Route::any('initial-webview', [WebviewController::class, 'initialWebview']);

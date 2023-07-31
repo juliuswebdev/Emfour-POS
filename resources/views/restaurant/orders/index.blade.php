@@ -6,10 +6,10 @@
 <!-- Main content -->
 <section class="content min-height-90hv no-print">
     <div class="row">
-        <div class="col-md-12 text-center">
+        <div class="col-md-12 text-center order-page-title">
             <h3>@lang( 'restaurant.orders' ) @show_tooltip(__('lang_v1.tooltip_serviceorder'))</h3>
         </div>
-        <div class="col-sm-12">
+        <div class="col-sm-12 row-no-padding">
             <button type="button" class="btn btn-sm btn-primary pull-right" id="refresh_orders"><i class="fas fa-sync"></i> @lang( 'restaurant.refresh' )</button>
         </div>
     </div>
@@ -17,9 +17,9 @@
     <div class="row">
     @if(!$is_service_staff)
         @component('components.widget')
-            <div class="col-sm-6">
+            <div class="col-sm-6 row-no-padding">
                 {!! Form::open(['url' => action([\App\Http\Controllers\Restaurant\OrderController::class, 'index']), 'method' => 'get', 'id' => 'select_service_staff_form' ]) !!}
-                <div class="form-group">
+                <div class="form-group mobile-mb-0">
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user-secret"></i>
