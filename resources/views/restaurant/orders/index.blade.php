@@ -6,10 +6,10 @@
 <!-- Main content -->
 <section class="content min-height-90hv no-print">
     <div class="row">
-        <div class="col-md-12 text-center">
-            <h3>@lang( 'restaurant.all_orders' ) @show_tooltip(__('lang_v1.tooltip_serviceorder'))</h3>
+        <div class="col-md-12 text-center order-page-title">
+            <h3>@lang( 'restaurant.orders' ) @show_tooltip(__('lang_v1.tooltip_serviceorder'))</h3>
         </div>
-        <div class="col-sm-12">
+        <div class="col-sm-12 row-no-padding">
             <button type="button" class="btn btn-sm btn-primary pull-right" id="refresh_orders"><i class="fas fa-sync"></i> @lang( 'restaurant.refresh' )</button>
         </div>
     </div>
@@ -17,28 +17,53 @@
     <div class="row">
     @if(!$is_service_staff)
         @component('components.widget')
-            <div class="col-sm-6">
+            <div class="col-sm-6 row-no-padding">
                 {!! Form::open(['url' => action([\App\Http\Controllers\Restaurant\OrderController::class, 'index']), 'method' => 'get', 'id' => 'select_service_staff_form' ]) !!}
-                <div class="form-group">
+                <div class="form-group mobile-mb-0">
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user-secret"></i>
                         </span>
-                        {!! Form::select('service_staff', $service_staff, request()->service_staff, ['class' => 'form-control select2', 'placeholder' => __('restaurant.select_service_staff'), 'id' => 'service_staff_id']); !!}
+                        @php
+                            $get_service_staff = request()->service_staff;
+                        @endphp
+                        <select name="service_staff" class="form-control select2" id="service_staff_id">
+                            <option value="all">All</option>
+                            @foreach($service_staff as $key => $item)
+                            <option value="{{ $key }}" @if($get_service_staff == $key) selected @endif>{{ $item }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 {!! Form::close() !!}
             </div>
         @endcomponent
+    @else
+        <div class="box box-solid">
+            <div class="box-body">
+                {!! Form::open(['url' => action([\App\Http\Controllers\Restaurant\OrderController::class, 'index']), 'method' => 'get', 'id' => 'select_service_staff_form' ]) !!}
+                <label for=""  style="margin-right: 20px;">All @lang('lang_v1.service_staff')</label>
+                @php
+                    $get_service_staff = request()->service_staff;
+                @endphp
+                <input type="checkbox" class="input-icheck" name="service_staff" value="all" @if($get_service_staff == 'all') checked @endif>
+                {!! Form::close() !!}
+            </div>
+        </div>
     @endif
+
+
+
+
+
     @component('components.widget', ['title' => __( 'lang_v1.line_orders' )])
         <input type="hidden" id="orders_for" value="waiter">
         <div class="row" id="line_orders_div">
          @include('restaurant.partials.line_orders', array('orders_for' => 'waiter'))   
         </div>
-        <div class="overlay hide">
+        <!-- <div class="overlay hide">
           <i class="fas fa-sync fa-spin"></i>
-        </div>
+        </div> -->
     @endcomponent
 
     @component('components.widget', ['title' => __( 'restaurant.all_your_orders' )])
@@ -46,9 +71,9 @@
         <div class="row" id="orders_div">
          @include('restaurant.partials.show_orders', array('orders_for' => 'waiter'))   
         </div>
-        <div class="overlay hide">
+        <!-- <div class="overlay hide">
           <i class="fas fa-sync fa-spin"></i>
-        </div>
+        </div> -->
     @endcomponent
     </div>
 </section>
@@ -65,7 +90,7 @@
                     {!! Form::open(['action' => '\App\Http\Controllers\Restaurant\OrderController@userCheckPin', 'id' => 'check_user_pin', 'method' => 'post']) !!}
                         <input id="user_id" name="user_id" type="hidden">
                         {!! Form::label('pin', __('business.digits_pin') . ':') !!}
-                        {!! Form::text('pin', null, ['class' => 'form-control', 'autoComplete' => 'false', 'placeholder' => __('business.digits_pin')]); !!}
+                        <input type="password" name="pin" id="pin" class="form-control" placeholder="{{  __('business.digits_pin') }}">
                         <br>
                         <button type="submit" class="btn btn-primary">@lang( 'messages.submit' )</button>
                     {!! Form::close() !!}
@@ -79,18 +104,23 @@
 
 @section('javascript')
     <script type="text/javascript">
+
+        $('input[name="service_staff"]').on('ifChanged', function(event){
+            $('form#select_service_staff_form').submit();
+        });
+
         $('select#service_staff_id').change( function(){
             $('form#select_service_staff_form').submit();
         });
         $(document).ready(function(){
-
             $(document).on('click', 'a.mark_as_served_btn', function(e){
                 e.preventDefault();
                 var _this = $(this);
                 var href = _this.data('href');
                 $('#check_user_pin').attr('mark-as-serve-url', href);
-                const urlParams = new URL(window.location.href).searchParams;
-                const service_staff = urlParams.get('service_staff');
+
+                var service_staff = $(this).parents('.order_div').attr('data-service-staff');
+
                 $('#check_user_pin #user_id').val(service_staff);
                 $.ajax({
                     context: this,
@@ -137,9 +167,9 @@
                             });
                         } else {
                             toastr.error(result.msg);
-                            $('#check_user_pin #pin').val('');
-                            $('#check_user_pin button').removeAttr('disabled');
                         }
+                        $('#check_user_pin #pin').val('');
+                        $('#check_user_pin button').removeAttr('disabled');
                     }
                 });
             });

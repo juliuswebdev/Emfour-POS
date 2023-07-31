@@ -6,8 +6,11 @@ use App\BusinessLocation;
 use App\Contact;
 use App\Events\TransactionPaymentDeleted;
 use App\Transaction;
+use App\TransactionPayment;
 use App\TransactionSellLine;
 use App\User;
+use App\CashRegister;
+
 use App\Utils\BusinessUtil;
 use App\Utils\ContactUtil;
 use App\Utils\ModuleUtil;
@@ -243,7 +246,6 @@ class SellReturnController extends Controller
         $sell = Transaction::where('business_id', $business_id)
                             ->with(['sell_lines', 'location', 'return_parent', 'contact', 'tax', 'sell_lines.sub_unit', 'sell_lines.product', 'sell_lines.product.unit'])
                             ->find($id);
-
         foreach ($sell->sell_lines as $key => $value) {
             if (! empty($value->sub_unit_id)) {
                 $formated_sell_line = $this->transactionUtil->recalculateSellLineTotals($business_id, $value);
@@ -252,6 +254,12 @@ class SellReturnController extends Controller
 
             $sell->sell_lines[$key]->formatted_qty = $this->transactionUtil->num_f($value->quantity, false, null, true);
         }
+
+        $sell->register_number = CashRegister::select('register_number')->leftJoin('cash_register_transactions', 'cash_registers.id', '=', 'cash_register_transactions.cash_register_id')
+        ->where('transaction_id', $sell->id)
+        ->pluck('register_number')
+        ->first();
+        
 
         return view('sell_return.add')
             ->with(compact('sell'));
@@ -285,7 +293,6 @@ class SellReturnController extends Controller
                 DB::beginTransaction();
 
                 $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
-
                 $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
 
                 DB::commit();
@@ -499,9 +506,9 @@ class SellReturnController extends Controller
 
             //Check if printer setting is provided.
             $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
-
             $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-
+            
+            
             //If print type browser - return the content, printer - return printer config data, and invoice format config
             $output['print_title'] = $receipt_details->invoice_no;
             if ($receipt_printer_type == 'printer') {
@@ -515,6 +522,63 @@ class SellReturnController extends Controller
 
         return $output;
     }
+
+
+      /**
+     * Returns the content for the receipt for thermal printer
+     *
+     * @param  int  $business_id
+     * @param  int  $location_id
+     * @param  int  $transaction_id
+     * @param  string  $printer_type = null
+     * @return array
+     */
+    private function receiptContentForThermal(
+        $business_id,
+        $location_id,
+        $transaction_id,
+        $printer_type = null, 
+        $payment_response_json
+    ) {
+        $output = ['is_enabled' => false,
+            'print_type' => 'browser',
+            'html_content' => null,
+            'printer_config' => [],
+            'data' => [],
+        ];
+
+        $business_details = $this->businessUtil->getDetails($business_id);
+        $location_details = BusinessLocation::find($location_id);
+
+        //Check if printing of invoice is enabled or not.
+        if ($location_details->print_receipt_on_invoice == 1) {
+            //If enabled, get print type.
+            $output['is_enabled'] = true;
+
+            $invoice_layout = $this->businessUtil->invoiceLayout($business_id, $location_details->invoice_layout_id);
+
+            //Check if printer setting is provided.
+            $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
+
+            $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
+            //$payment_response_json = Transaction::where('id', 376)->pluck('payment_refund_response')->first();
+            $receipt_details->payment_response_json = $payment_response_json;
+
+            //If print type browser - return the content, printer - return printer config data, and invoice format config
+            $output['print_title'] = $receipt_details->invoice_no;
+            if ($receipt_printer_type == 'printer') {
+                $output['print_type'] = 'printer';
+                $output['printer_config'] = $this->businessUtil->printerConfig($business_id, $location_details->printer_id);
+                $output['data'] = $receipt_details;
+            } else {
+                $output['html_content'] = view('sell_return.thermal_print_receipt', compact('receipt_details'))->render();
+            }
+        }
+
+        return $output;
+    }
+
+
 
     /**
      * Prints invoice for sell
@@ -531,7 +595,6 @@ class SellReturnController extends Controller
                 ];
 
                 $business_id = $request->session()->get('user.business_id');
-
                 $transaction = Transaction::where('business_id', $business_id)
                                 ->where('id', $transaction_id)
                                 ->first();
@@ -591,4 +654,144 @@ class SellReturnController extends Controller
             'redirect_url' => action([\App\Http\Controllers\SellReturnController::class, 'add'], [$sell->id]),
         ];
     }
+
+     /**
+     * Function use for create sale return transaction
+     */
+    public function makeSaleReturnTransaction($id, Request $request){
+        if (! auth()->user()->can('access_sell_return') && ! auth()->user()->can('access_own_sell_return')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+
+            $transaction_id = $id;
+            
+            $transation_row = Transaction::select('id', 'invoice_no', \DB::raw('DATE(created_at) AS transaction_date'))->where('id', $id)->where('type', 'sell')->first();
+           
+            $invoice_no = $transation_row->invoice_no;
+            $transaction_date = date('m/d/Y h:i');
+            $discount_type = "percentage";
+            $discount_amount = "0.00";
+            $tax_id = null;
+            $sale_return_via = $request->sale_return_via;
+            $tax_amount = $tax_percent = 0;
+
+            $products = $request->products;
+            if(empty($products)){
+
+                $output = [
+                    'success' => 0,
+                    'msg' =>  __('lang_v1.please_update_the_return_product'),
+                ];
+
+            }else{
+                $product_data = [];
+                foreach($products as $k => $product){
+                    $product_data[$k]['quantity'] = $product['quantity'];
+                    $product_data[$k]['unit_price_inc_tax'] = $product['unit_price_inc_tax'];
+                    $product_data[$k]['sell_line_id'] = $product['transaction_sell_lines_id'];
+                }
+
+                $business_id = $request->session()->get('user.business_id');
+                //Check if subscribed or not
+                if (! $this->moduleUtil->isSubscribed($business_id)) {
+                    return $this->moduleUtil->expiredResponse(action([\App\Http\Controllers\SellReturnController::class, 'index']));
+                }
+                $user_id = $request->session()->get('user.id');
+
+                $input = array();
+                $input['transaction_id'] = $transaction_id;
+                $input['invoice_no'] = $invoice_no;
+                $input['transaction_date'] = $transaction_date;
+                $input['discount_type'] = $discount_type;
+                $input['discount_amount'] = $discount_amount;
+                $input['tax_id'] = $tax_id;
+                $input['tax_amount'] = $tax_amount;
+                $input['tax_percent'] = $tax_percent;
+                $input['products'] = $product_data;
+                $input['sale_return_via'] = $sale_return_via;
+
+                DB::beginTransaction();
+
+                $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
+                
+
+                if($sale_return_via == "card"){
+                    
+                    $transaction_payment_method = TransactionPayment::where('transaction_id', $transation_row->id)->pluck('method')->first();
+                    
+                    if($transaction_payment_method == 'card'){
+
+                        if($transation_row->transaction_date == date('Y-m-d')){
+                            $transaction_type = "Void";
+                            $transaction_ref_no = $transation_row->id;
+                        }else{
+                            $transaction_type = "Return";
+                            $transaction_ref_no = $sell_return->id;
+                        }
+                    }else{
+                        $transaction_type = "Return";
+                        $transaction_ref_no = $sell_return->id;
+                    }
+                    
+
+                    $final_amount_for_payment = sprintf('%0.2f', $sell_return->final_total);
+                    $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                    $response_of_payment = $payment_device_init->paymentInit('Credit', $transaction_type, $final_amount_for_payment, $transaction_ref_no);
+
+                    if($response_of_payment['success'] == 0){
+                        //Payment Return Failed Rollback Transaction
+                        DB::rollback();
+                        $output = [
+                            'success' => 0,
+                            'msg' => $response_of_payment['msg']
+                        ];
+                        return $output;
+                    }else{
+                        
+                        //Store Payment Return Response
+                        $payment_response_json = json_encode($response_of_payment['data'], true);
+                        Transaction::where('id', $sell_return->id)
+                                            ->where('business_id', $business_id)
+                                            ->update(['payment_refund_response' => $payment_response_json]);
+
+                        $receipt = $this->receiptContentForThermal($business_id, $sell_return->location_id, $sell_return->id, "browser", $payment_response_json);
+                
+                        DB::commit();
+                        $output = ['success' => 1,
+                            'msg' => __('lang_v1.success'),
+                            'receipt' => $receipt,
+                        ];
+                    }
+                }else{
+                    DB::commit();
+                    $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
+                    $output = ['success' => 1,
+                        'msg' => __('lang_v1.success'),
+                        'receipt' => $receipt,
+                    ];
+                }
+            }
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            dd($e->getMessage());
+            if (get_class($e) == \App\Exceptions\PurchaseSellMismatch::class) {
+                $msg = $e->getMessage();
+            } else {
+                \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+                $msg = __('messages.something_went_wrong');
+            }
+
+            $output = ['success' => 0,
+                'msg' => $msg,
+            ];
+        }
+
+        return $output;
+
+    }
+
+
 }

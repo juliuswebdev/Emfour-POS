@@ -110,6 +110,7 @@ class ManageUserController extends Controller
 
         //Get user form part from modules
         $form_partials = $this->moduleUtil->getModuleData('moduleViewPartials', ['view' => 'manage_user.create']);
+        $form_partials['DynamicPrice'] = "";
 
         return view('manage_user.create')
                 ->with(compact('roles', 'username_ext', 'locations', 'form_partials'));
@@ -126,21 +127,41 @@ class ManageUserController extends Controller
         if (! auth()->user()->can('user.create')) {
             abort(403, 'Unauthorized action.');
         }
-
+        
         try {
-            if (! empty($request->input('dob'))) {
-                $request['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
+            if($request->has('security_pin') && $request->filled('security_pin')){
+                $validate_security_pin = true;
+            }else{
+                $validate_security_pin = false;
             }
 
-            $request['cmmsn_percent'] = ! empty($request->input('cmmsn_percent')) ? $this->moduleUtil->num_uf($request->input('cmmsn_percent')) : 0;
+            if($validate_security_pin){
+                $is_pin_validate_row = User::select('id')->where('security_pin', $request->security_pin)->first();
+                $is_pin_validate = ($is_pin_validate_row == null) ? true : false;
+            }else{
+                $is_pin_validate = true;
+            }
 
-            $request['max_sales_discount_percent'] = ! is_null($request->input('max_sales_discount_percent')) ? $this->moduleUtil->num_uf($request->input('max_sales_discount_percent')) : null;
 
-            $user = $this->moduleUtil->createUser($request);
+            if($is_pin_validate){
+                if (! empty($request->input('dob'))) {
+                    $request['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
+                }
 
-            $output = ['success' => 1,
-                'msg' => __('user.user_added'),
-            ];
+                $request['cmmsn_percent'] = ! empty($request->input('cmmsn_percent')) ? $this->moduleUtil->num_uf($request->input('cmmsn_percent')) : 0;
+
+                $request['max_sales_discount_percent'] = ! is_null($request->input('max_sales_discount_percent')) ? $this->moduleUtil->num_uf($request->input('max_sales_discount_percent')) : null;
+                $request['security_pin'] = $request->security_pin;
+                $user = $this->moduleUtil->createUser($request);
+                
+                $output = ['success' => 1,
+                    'msg' => __('user.user_added'),
+                ];
+            }else{
+                $output = ['success' => 0,
+                    'msg' => __('user.user_security_pin_exits'),
+                ];
+            }
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
@@ -172,6 +193,8 @@ class ManageUserController extends Controller
 
         //Get user view part from modules
         $view_partials = $this->moduleUtil->getModuleData('moduleViewPartials', ['view' => 'manage_user.show', 'user' => $user]);
+        $view_partials['DynamicPrice'] = "";
+        
 
         $users = User::forDropdown($business_id, false);
 
@@ -218,7 +241,8 @@ class ManageUserController extends Controller
 
         //Get user form part from modules
         $form_partials = $this->moduleUtil->getModuleData('moduleViewPartials', ['view' => 'manage_user.edit', 'user' => $user]);
-
+        $form_partials['DynamicPrice'] = "";
+        
         return view('manage_user.edit')
                 ->with(compact('roles', 'user', 'contact_access', 'is_checked_checkbox', 'locations', 'permitted_locations', 'form_partials', 'username_ext'));
     }
@@ -237,101 +261,129 @@ class ManageUserController extends Controller
         }
 
         try {
-            $user_data = $request->only(['surname', 'first_name', 'last_name', 'email', 'selected_contacts', 'marital_status',
-                'blood_group', 'contact_number', 'fb_link', 'twitter_link', 'social_media_1',
-                'social_media_2', 'permanent_address', 'current_address',
-                'guardian_name', 'custom_field_1', 'custom_field_2',
-                'custom_field_3', 'custom_field_4', 'id_proof_name', 'id_proof_number', 'cmmsn_percent', 'gender', 'max_sales_discount_percent', 'family_number', 'alt_number', 'sale_return_pin' ]);
 
-            $user_data['status'] = ! empty($request->input('is_active')) ? 'active' : 'inactive';
-            $business_id = request()->session()->get('user.business_id');
-
-            if (! isset($user_data['selected_contacts'])) {
-                $user_data['selected_contacts'] = 0;
+            if($request->has('security_pin') && $request->filled('security_pin')){
+                $validate_security_pin = true;
+            }else{
+                $validate_security_pin = false;
             }
 
-            if (empty($request->input('allow_login'))) {
-                $user_data['username'] = null;
-                $user_data['password'] = null;
-                $user_data['allow_login'] = 0;
-            } else {
-                $user_data['allow_login'] = 1;
+            if($validate_security_pin){
+                $is_pin_validate_row = User::select('id')->where('security_pin', $request->security_pin)->where('id', '!=', $id)->first();
+                $is_pin_validate = ($is_pin_validate_row == null) ? true : false;
+            }else{
+                $is_pin_validate = true;
             }
 
-            if (! empty($request->input('password'))) {
-                $user_data['password'] = $user_data['allow_login'] == 1 ? Hash::make($request->input('password')) : null;
-            }
 
-            //Sales commission percentage
-            $user_data['cmmsn_percent'] = ! empty($user_data['cmmsn_percent']) ? $this->moduleUtil->num_uf($user_data['cmmsn_percent']) : 0;
+            if($is_pin_validate){
 
-            $user_data['max_sales_discount_percent'] = ! is_null($user_data['max_sales_discount_percent']) ? $this->moduleUtil->num_uf($user_data['max_sales_discount_percent']) : null;
+                $user_data = $request->only(['surname', 'first_name', 'last_name', 'email', 'selected_contacts', 'marital_status',
+                    'blood_group', 'contact_number', 'fb_link', 'twitter_link', 'social_media_1',
+                    'social_media_2', 'permanent_address', 'current_address',
+                    'guardian_name', 'custom_field_1', 'custom_field_2',
+                    'custom_field_3', 'custom_field_4', 'id_proof_name', 'id_proof_number', 'cmmsn_percent', 'gender', 'max_sales_discount_percent', 'family_number', 'alt_number', 'security_pin' ]);
 
-            if (! empty($request->input('dob'))) {
-                $user_data['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
-            }
+                $user_data['status'] = ! empty($request->input('is_active')) ? 'active' : 'inactive';
+                $business_id = request()->session()->get('user.business_id');
 
-            if (! empty($request->input('bank_details'))) {
-                $user_data['bank_details'] = json_encode($request->input('bank_details'));
-            }
-
-            DB::beginTransaction();
-
-            if ($user_data['allow_login'] && $request->has('username')) {
-                $user_data['username'] = $request->input('username');
-                $ref_count = $this->moduleUtil->setAndGetReferenceCount('username');
-                if (blank($user_data['username'])) {
-                    $user_data['username'] = $this->moduleUtil->generateReferenceNumber('username', $ref_count);
+                if (! isset($user_data['selected_contacts'])) {
+                    $user_data['selected_contacts'] = 0;
                 }
 
-                $username_ext = $this->moduleUtil->getUsernameExtension();
-                if (! empty($username_ext)) {
-                    $user_data['username'] .= $username_ext;
-                }
-            }
-
-            $user = User::where('business_id', $business_id)
-                          ->findOrFail($id);
-            $user->update($user_data);
-            $role_id = $request->input('role');
-            $user_role = $user->roles->first();
-            $previous_role = ! empty($user_role->id) ? $user_role->id : 0;
-            if ($previous_role != $role_id) {
-                $is_admin = $this->moduleUtil->is_admin($user);
-                $all_admins = $this->getAdmins();
-                //If only one admin then can not change role
-                if ($is_admin && count($all_admins) <= 1) {
-                    throw new \Exception(__('lang_v1.cannot_change_role'));
-                }
-                if (! empty($previous_role)) {
-                    $user->removeRole($user_role->name);
+                if (empty($request->input('allow_login'))) {
+                    $user_data['username'] = null;
+                    $user_data['password'] = null;
+                    $user_data['allow_login'] = 0;
+                } else {
+                    $user_data['allow_login'] = 1;
                 }
 
-                $role = Role::findOrFail($role_id);
-                $user->assignRole($role->name);
+                if (! empty($request->input('password'))) {
+                    $user_data['password'] = $user_data['allow_login'] == 1 ? Hash::make($request->input('password')) : null;
+                }
+
+                //Sales commission percentage
+                $user_data['cmmsn_percent'] = ! empty($user_data['cmmsn_percent']) ? $this->moduleUtil->num_uf($user_data['cmmsn_percent']) : 0;
+
+                $user_data['max_sales_discount_percent'] = ! is_null($user_data['max_sales_discount_percent']) ? $this->moduleUtil->num_uf($user_data['max_sales_discount_percent']) : null;
+
+                if (! empty($request->input('dob'))) {
+                    $user_data['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
+                }
+
+                if (! empty($request->input('bank_details'))) {
+                    $user_data['bank_details'] = json_encode($request->input('bank_details'));
+                }
+
+                DB::beginTransaction();
+
+                if ($user_data['allow_login'] && $request->has('username')) {
+                    $user_data['username'] = $request->input('username');
+                    $ref_count = $this->moduleUtil->setAndGetReferenceCount('username');
+                    if (blank($user_data['username'])) {
+                        $user_data['username'] = $this->moduleUtil->generateReferenceNumber('username', $ref_count);
+                    }
+
+                    $username_ext = $this->moduleUtil->getUsernameExtension();
+                    if (! empty($username_ext)) {
+                        $user_data['username'] .= $username_ext;
+                    }
+                }
+
+                $user = User::where('business_id', $business_id)
+                            ->findOrFail($id);
+                
+                if( $request->input('security_pin') == ""){
+                    $user_data['security_pin'] = $user->security_pin;
+                }
+                
+                $user->update($user_data);
+                $role_id = $request->input('role');
+                $user_role = $user->roles->first();
+                $previous_role = ! empty($user_role->id) ? $user_role->id : 0;
+                if ($previous_role != $role_id) {
+                    $is_admin = $this->moduleUtil->is_admin($user);
+                    $all_admins = $this->getAdmins();
+                    //If only one admin then can not change role
+                    if ($is_admin && count($all_admins) <= 1) {
+                        throw new \Exception(__('lang_v1.cannot_change_role'));
+                    }
+                    if (! empty($previous_role)) {
+                        $user->removeRole($user_role->name);
+                    }
+
+                    $role = Role::findOrFail($role_id);
+                    $user->assignRole($role->name);
+                }
+
+                //Grant Location permissions
+                $this->moduleUtil->giveLocationPermissions($user, $request);
+
+                //Assign selected contacts
+                if ($user_data['selected_contacts'] == 1) {
+                    $contact_ids = $request->get('selected_contact_ids');
+                } else {
+                    $contact_ids = [];
+                }
+                $user->contactAccess()->sync($contact_ids);
+
+                //Update module fields for user
+                $this->moduleUtil->getModuleData('afterModelSaved', ['event' => 'user_saved', 'model_instance' => $user]);
+
+                $this->moduleUtil->activityLog($user, 'edited', null, ['name' => $user->user_full_name]);
+
+                $output = ['success' => 1,
+                    'msg' => __('user.user_update_success'),
+                ];
+
+                DB::commit();
+
+            }else{
+                $output = ['success' => 0,
+                    'msg' => __('user.user_security_pin_exits'),
+                ];
             }
-
-            //Grant Location permissions
-            $this->moduleUtil->giveLocationPermissions($user, $request);
-
-            //Assign selected contacts
-            if ($user_data['selected_contacts'] == 1) {
-                $contact_ids = $request->get('selected_contact_ids');
-            } else {
-                $contact_ids = [];
-            }
-            $user->contactAccess()->sync($contact_ids);
-
-            //Update module fields for user
-            $this->moduleUtil->getModuleData('afterModelSaved', ['event' => 'user_saved', 'model_instance' => $user]);
-
-            $this->moduleUtil->activityLog($user, 'edited', null, ['name' => $user->user_full_name]);
-
-            $output = ['success' => 1,
-                'msg' => __('user.user_update_success'),
-            ];
-
-            DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
 

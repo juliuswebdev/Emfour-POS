@@ -45,7 +45,8 @@ class OrderingAppController extends Controller
         if ($validator->fails()) {
             return response([
                 'message' => 'Username and password not matched.',
-                'errors' => $validator->messages()
+                'errors' => $validator->messages(),
+                'status' => 0
             ], 401);
         } else {
 
@@ -68,7 +69,8 @@ class OrderingAppController extends Controller
 
             if(!$user || !Hash::check($request->password, $user->password)) {
                 return response([
-                    'message' => 'Username and password not matched.'
+                    'message' => 'Username and password not matched.',
+                    'status' => 0
                 ], 401);
             }
 
@@ -82,7 +84,7 @@ class OrderingAppController extends Controller
                     short_code,
                     parent_id,
                     category_type,
-                    CONCAT('".env('APP_URL')."/uploads/category_logos/', logo) as banner
+                    logo
                 ")
                 ->where('parent_id', '=',  0)
                 ->with(['sub_categories'])
@@ -123,7 +125,8 @@ class OrderingAppController extends Controller
                 'categories' => $categories,
                 'business_locations' => $business_locations,
                 'tables' => $tables,
-                'token' => $token
+                'token' => $token,
+                'status' => 1
             ], 200);
         }
 
@@ -149,18 +152,20 @@ class OrderingAppController extends Controller
 
         } else {
 
-            $query = Product::leftJoin('product_locations', 'product_locations.product_id', '=', 'products.id');
+            $query = Product::leftJoin('product_locations', 'product_locations.product_id', '=', 'products.id')
+            ->where('product_locations.location_id', '=', $get['location_id'])
+            ->where('products.category_id', '=', $get['category_id'])
+            ->orWhere('products.sub_category_id', '=', $get['category_id']);
+            
                                 
             if(isset($get['q'])) {
                 $query->where('products.name', 'LIKE', "%{$get['q']}%");
             }
                         
-            $products = $query->where('product_locations.location_id', '=', $get['location_id'])
-            ->where('products.category_id', '=', $get['category_id'])
-            ->orWhere('products.sub_category_id', '=', $get['category_id'])->with(['variations'])->get();
+            $products = $query->get();
 
             return response([
-                $products,
+                'products' => $products,
             ], 200);
 
         }
@@ -168,7 +173,7 @@ class OrderingAppController extends Controller
 
     public function getProduct(Request $request, $product_id)
     {
-
+       
         $get = $request->all();
 
         $rules = [
@@ -189,15 +194,15 @@ class OrderingAppController extends Controller
 
             $product = Product::leftJoin('product_locations', 'product_locations.product_id', '=', 'products.id')
             ->where('products.id', $product_id)
-            ->where('product_locations.location_id', $get['location_id'])
+            //->orWhere('product_locations.location_id', $get['location_id'])
             ->with(['variations'])->first();
 
-
-            $modifier_sets_temp = DB::table('res_product_modifier_sets')->where('product_id', $product->id)->get();
-
             $modifier_sets = [];
-            foreach($modifier_sets_temp as $item) {
-                $modifier_sets[] = Product::where('id', $item->modifier_set_id)->with(['variations'])->first();
+            if($product) {
+                $modifier_sets_temp = DB::table('res_product_modifier_sets')->where('product_id', $product->id)->get();
+                foreach($modifier_sets_temp as $item) {
+                    $modifier_sets[] = Product::where('id', $item->modifier_set_id)->with(['variations'])->first();
+                }
             }
         
             return response([

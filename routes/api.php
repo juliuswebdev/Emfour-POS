@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\OrderingAppController;
+use App\Http\Controllers\WebviewController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -22,12 +24,26 @@ Route::post('/authorize-net', [App\Http\Controllers\AuthorizeNetController::clas
 
 Route::get('/get-locations/{id}', [App\Http\Controllers\Restaurant\BookingController::class, 'getLocations']);
 Route::post('/booking/store', [App\Http\Controllers\Restaurant\BookingController::class, 'postPublicBookingAPI']);
+Route::get('/get-locations/{id}', function($id) {
+    $locations = App\BusinessLocation::where('business_id', $id)->get();
+    return response($locations, 200);
+});
+
+Route::get('/sells/pos/get-product-variation/{business_id}/{sku}', [App\Http\Controllers\SellPosController::class, 'getProductVariation']);
+
+Route::middleware(['cors'])->group(function () {
+    Route::post('/dynamic-pricing/store', [App\Http\Controllers\DynamicPricingController::class, 'store']);
+    Route::get('/dynamic-pricing/test', [App\Http\Controllers\DynamicPricingController::class, 'test']);
+});
 
 
 // API Ordering APP
 Route::prefix('v1')->group(function() {
 
+    
     Route::post('/login', [OrderingAppController::class, 'login']);
+
+    
 
     Route::middleware('auth:api')->group(function() {
         Route::get('/products', [OrderingAppController::class, 'getProducts']);

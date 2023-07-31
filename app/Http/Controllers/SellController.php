@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Account;
 use App\Business;
 use App\BusinessLocation;
+use App\CashRegister;
 use App\Contact;
 use App\CustomerGroup;
 use App\InvoiceScheme;
@@ -244,6 +245,12 @@ class SellController extends Controller
                 $sells->whereNotNull('transactions.res_waiter_id');
             }
 
+            //Tips Where Cause
+            if (! empty(request()->list_for) && request()->list_for == 'sales_tips_report') {
+                $sells->whereNotNull('transactions.res_waiter_id'); 
+                $sells->where('transactions.tips_amount', '>', 0);           
+            }
+
             if (! empty(request()->res_waiter_id)) {
                 $sells->where('transactions.res_waiter_id', request()->res_waiter_id);
             }
@@ -327,6 +334,11 @@ class SellController extends Controller
             if ($this->businessUtil->isModuleEnabled('subscription')) {
                 $sells->addSelect('transactions.is_recurring', 'transactions.recur_parent_id');
             }
+
+            //Tips Column added in List
+            $sells->addSelect('transactions.tips_amount');
+            
+
             $sales_order_statuses = Transaction::sales_order_statuses();
             $datatable = Datatables::of($sells)
                 ->addColumn(
@@ -566,6 +578,10 @@ class SellController extends Controller
 
                     return $status;
                 })
+                ->editColumn(
+                    'tips_amount',
+                    '<span class="tip-amount" data-orig-value="{{$tips_amount}}">@format_currency($tips_amount)</span>'
+                )
                 ->editColumn('so_qty_remaining', '{{@format_quantity($so_qty_remaining)}}')
                 ->setRowAttr([
                     'data-href' => function ($row) {
@@ -576,7 +592,7 @@ class SellController extends Controller
                         }
                     }, ]);
 
-            $rawColumns = ['final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name', 'payment_methods', 'return_due', 'conatct_name', 'status'];
+            $rawColumns = ['final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name', 'payment_methods', 'return_due', 'conatct_name', 'status', 'tips_amount'];
 
             return $datatable->rawColumns($rawColumns)
                       ->make(true);
@@ -796,8 +812,8 @@ class SellController extends Controller
         if (! auth()->user()->can('sell.view') && ! auth()->user()->can('direct_sell.access') && auth()->user()->can('view_own_sell_only')) {
             $query->where('transactions.created_by', request()->session()->get('user.id'));
         }
-
         $sell = $query->firstOrFail();
+    
 
         $activities = Activity::forSubject($sell)
            ->with(['causer', 'subject'])
@@ -846,6 +862,12 @@ class SellController extends Controller
         $status_color_in_activity = Transaction::sales_order_statuses();
         $sales_orders = $sell->salesOrders();
 
+        $register_number = CashRegister::select('register_number')->leftJoin('cash_register_transactions', 'cash_registers.id', '=', 'cash_register_transactions.cash_register_id')
+                                        ->where('transaction_id', $sell->id)
+                                        ->pluck('register_number')
+                                        ->first();
+                            
+
         return view('sale_pos.show')
             ->with(compact(
                 'taxes',
@@ -861,7 +883,8 @@ class SellController extends Controller
                 'status_color_in_activity',
                 'sales_orders',
                 'line_taxes',
-                'business_details'
+                'business_details',
+                'register_number'
             ));
     }
 

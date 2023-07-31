@@ -52,7 +52,7 @@ return [
     'view_message' => 'Shiko mesazhin',
     'essentials_module' => 'Moduli i domosdoshëm',
     'new_message_notification' => 'Ju keni mesazhe të reja nga :sender',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'Lloji i Liferimit',
     'all_leave_types' => 'Të gjitha llojet e pushimeve',
     'max_leave_count' => 'Lëvizni Maksimin',

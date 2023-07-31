@@ -20,6 +20,8 @@ use App\VariationGroupPrice;
 use App\VariationLocationDetails;
 use App\VariationTemplate;
 use App\VariationValueTemplate;
+use App\DynamicPricing;
+use App\Utils\ModuleUtil;
 use Illuminate\Support\Facades\DB;
 
 class ProductUtil extends Util
@@ -491,8 +493,10 @@ class ProductUtil extends Util
             'p.id as product_id',
             'p.brand_id',
             'p.category_id',
+            'p.sub_category_id',
             'p.tax as tax_id',
             'p.enable_stock',
+            'p.sku as sku',
             'p.weighing_sale',
             'p.enable_sr_no',
             'p.type as product_type',
@@ -513,6 +517,7 @@ class ProductUtil extends Util
             'units.allow_decimal as unit_allow_decimal',
             'u.short_name as second_unit',
             'brands.name as brand',
+            DB::raw('MAX(variations.dpp_inc_tax) as max_purchase_price'),
             DB::raw('(SELECT purchase_price_inc_tax FROM purchase_lines WHERE 
                         variation_id=variations.id ORDER BY id DESC LIMIT 1) as last_purchased_price')
         )
@@ -2262,5 +2267,34 @@ class ProductUtil extends Util
             $vld->qty_available = $stock;
             $vld->save();
         }
+    }
+
+    public function getActiveDPRules($business_id)
+    {
+        //Check permission of DP rules
+        
+        $active_rules = [];
+        $module_util = new ModuleUtil();
+        $is_dp_pricing_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'dynamic_price_module');
+        $is_dp_pricing_enabled = true;
+        if($is_dp_pricing_enabled == false){
+            return $active_rules;
+        }else{
+            //Get DP Rules for business
+            $dp = DynamicPricing::where('business_id', $business_id)->first();
+            if($dp) {
+                $dp = $dp->toArray();
+                $rules = json_decode($dp['rules']);
+                $rules = ($rules->rules) ?? [];
+                foreach($rules as $rule) {
+                    if($rule->active) {
+                        $active_rules[] = $rule;
+                    }
+                }
+            } else {
+                $active_rules = [];
+            }
+        }
+        return $active_rules;
     }
 }

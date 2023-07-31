@@ -43,7 +43,7 @@ class TransactionUtil extends Util
         $sale_type = ! empty($input['type']) ? $input['type'] : 'sell';
         $invoice_scheme_id = ! empty($input['invoice_scheme_id']) ? $input['invoice_scheme_id'] : null;
         $invoice_no = ! empty($input['invoice_no']) ? $input['invoice_no'] : $this->getInvoiceNumber($business_id, $input['status'], $input['location_id'], $invoice_scheme_id, $sale_type);
-
+       
         $final_total = $uf_data ? $this->num_uf($input['final_total']) : $input['final_total'];
 
         $pay_term_number = isset($input['pay_term_number']) ? $input['pay_term_number'] : null;
@@ -60,6 +60,7 @@ class TransactionUtil extends Util
             'location_id' => $input['location_id'],
             'type' => $sale_type,
             'status' => $input['status'],
+            'dp_flag' => $input['dp_flag'],
             'sub_status' => ! empty($input['sub_status']) ? $input['sub_status'] : null,
             'contact_id' => $input['contact_id'],
             'customer_group_id' => ! empty($input['customer_group_id']) ? $input['customer_group_id'] : null,
@@ -139,8 +140,14 @@ class TransactionUtil extends Util
             'additional_expense_key_2' => ! empty($input['additional_expense_key_2']) ? $input['additional_expense_key_2'] : null,
             'additional_expense_key_3' => ! empty($input['additional_expense_key_3']) ? $input['additional_expense_key_3'] : null,
             'additional_expense_key_4' => ! empty($input['additional_expense_key_4']) ? $input['additional_expense_key_4'] : null,
-
+            'tips_amount' => isset($input['tips_amount']) ? $input['tips_amount'] : 0,
+            'dp_discount' => isset($input['dp_discount']) ? $input['dp_discount'] : null,
+            'gratuity_label' => isset($input['gratuity_label']) ? $input['gratuity_label'] : null, 
+            'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
+            'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
         ]);
+
+
 
         return $transaction;
     }
@@ -255,6 +262,10 @@ class TransactionUtil extends Util
             'additional_expense_key_2' => ! empty($input['additional_expense_key_2']) ? $input['additional_expense_key_2'] : null,
             'additional_expense_key_3' => ! empty($input['additional_expense_key_3']) ? $input['additional_expense_key_3'] : null,
             'additional_expense_key_4' => ! empty($input['additional_expense_key_4']) ? $input['additional_expense_key_4'] : null,
+            'tips_amount' => isset($input['tips_amount']) ? $input['tips_amount'] : 0,
+            'gratuity_label' => isset($input['gratuity_label']) ? $input['gratuity_label'] : null, 
+            'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
+            'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
         ];
 
         if (! empty($input['transaction_date'])) {
@@ -287,6 +298,7 @@ class TransactionUtil extends Util
         $combo_lines = [];
         $products_modified_combo = [];
         foreach ($products as $product) {
+
             $multiplier = 1;
             if (isset($product['sub_unit_id']) && $product['sub_unit_id'] == $product['product_unit_id']) {
                 unset($product['sub_unit_id']);
@@ -309,6 +321,7 @@ class TransactionUtil extends Util
                                 $edit_modifier = TransactionSellLine::find($product['modifier_sell_line_id'][$key]);
                                 $edit_modifier->quantity = isset($product['modifier_quantity'][$key]) ? $product['modifier_quantity'][$key] : 1;
                                 $modifiers_formatted[] = $edit_modifier;
+
                                 //Dont delete modifier sell line if exists
                                 $edit_ids[] = $product['modifier_sell_line_id'][$key];
                             } else {
@@ -323,9 +336,13 @@ class TransactionUtil extends Util
                                         'unit_price' => $this_price,
                                         'unit_price_inc_tax' => $this_price,
                                         'parent_sell_line_id' => $product['transaction_sell_lines_id'],
-                                        'children_type' => 'modifier',
+                                        'children_type' => 'modifieryy',
+                                        'cook_start' =>  date('Y-m-d H:i:s'), 
+                                        'cook_end' =>  date('Y-m-d H:i:s'),
+                                        'res_line_order_status' =>  'ready'
                                     ]);
                                 }
+                                
                             }
                         }
                     }
@@ -378,7 +395,13 @@ class TransactionUtil extends Util
                     'res_line_order_status' => ! empty($product['res_service_staff_id']) ? 'received' : null,
                     'so_line_id' => ! empty($product['so_line_id']) ? $product['so_line_id'] : null,
                     'secondary_unit_quantity' => ! empty($product['secondary_unit_quantity']) ? $this->num_uf($product['secondary_unit_quantity']) : 0,
+                    'cook_start' => ($product['product_custom_field1'] == 1) ? null : date('Y-m-d H:i:s'), 
+                    'cook_end' => ($product['product_custom_field1'] == 1) ? null : date('Y-m-d H:i:s')
                 ];
+
+                if($product['product_custom_field1'] != 1) {
+                    $line['res_line_order_status'] = 'ready';
+                }
 
                 foreach ($extra_line_parameters as $key => $value) {
                     $line[$key] = isset($product[$value]) ? $product[$value] : '';
@@ -405,6 +428,9 @@ class TransactionUtil extends Util
                                     'unit_price' => $this_price,
                                     'unit_price_inc_tax' => $this_price,
                                     'children_type' => 'modifier',
+                                    'cook_start' =>  date('Y-m-d H:i:s'), 
+                                    'cook_end' =>  date('Y-m-d H:i:s'),
+                                    'res_line_order_status' =>  'ready'
                                 ];
                             }
                         }
@@ -420,7 +446,7 @@ class TransactionUtil extends Util
                 $this->updateSalesOrderLine($line['so_line_id'], $line['quantity'], 0);
             }
         }
-
+       
         if (! is_object($transaction)) {
             $transaction = Transaction::findOrFail($transaction);
         }
@@ -438,7 +464,7 @@ class TransactionUtil extends Util
 
             $this->deleteSellLines($deleted_lines, $location_id, $adjust_qty);
         }
-
+        
         $combo_lines = [];
 
         if (! empty($lines_formatted)) {
@@ -767,19 +793,29 @@ class TransactionUtil extends Util
                         }
                     }
 
+                    
                     // Card Charge J
                     $business_id = $transaction->business_id;
+                    
                     if($payment['method']  == 'card'){
                         $business = Business::find($business_id);
+                        /*
                         $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
-
                         $card_charge_amount = ($payment_data['amount'] * $card_charge);
-
                         $payment_data['original_amount'] = $payment_data['amount'];
                         $payment_data['card_charge_amount'] = $card_charge_amount;
                         $payment_data['card_charge_percent'] = $business->card_charge;
                         $payment_data['amount'] = $payment_data['amount'] + $card_charge_amount; 
+                        */
 
+                        $card_charge = $business->card_charge;
+                        $card_charge_amount = ($transaction['total_before_tax'] * $card_charge / 100);
+                        $card_charge_amount = sprintf('%0.2f', $card_charge_amount);
+
+                        $payment_data['original_amount'] = $transaction['total_before_tax'];
+                        $payment_data['card_charge_amount'] = $card_charge_amount;
+                        $payment_data['card_charge_percent'] = $card_charge;
+                        $payment_data['amount'] = $payment_data['amount'] + $card_charge_amount;
                     }
                     
                     $payments_formatted[] = new TransactionPayment($payment_data);
@@ -1917,6 +1953,15 @@ class TransactionUtil extends Util
         $output['design'] = $il->design;
         $output['table_tax_headings'] = ! empty($il->table_tax_headings) ? array_filter(json_decode($il->table_tax_headings), 'strlen') : null;
 
+        //Gratuity & Tips Data
+        $output['gratuity_label'] = $transaction->gratuity_label;
+        $output['gratuity_percentage'] = $transaction->gratuity_charge_percentage;
+        $output['gratuity_unformatted_charges'] = $transaction->gratuity_charge_amount;
+        $output['gratuity_charges'] = ($transaction->gratuity_charge_amount > 0) ? $this->num_f($transaction->gratuity_charge_amount, $show_currency, $business_details) : 0;
+        $output['tips_unformatted_amount'] = $transaction->tips_amount;
+        $output['tips_amount'] = ($transaction->tips_amount > 0) ? $this->num_f($transaction->tips_amount, $show_currency, $business_details) : 0;
+        $output['dp_discount'] = $transaction->dp_discount;
+        
         return (object) $output;
     }
 
@@ -2989,18 +3034,19 @@ class TransactionUtil extends Util
     public function calculatePaymentStatus($transaction_id, $final_amount = null)
     {
         $total_paid = $this->getTotalPaid($transaction_id);
-
         if (is_null($final_amount)) {
             $final_amount = Transaction::find($transaction_id)->final_total;
         }
 
         $status = 'due';
-        if ($final_amount <= $total_paid) {
+        if($total_paid == null){
+            $status = 'due';
+        }else if ($final_amount <= $total_paid) {
             $status = 'paid';
         } elseif ($total_paid > 0 && $final_amount > $total_paid) {
             $status = 'partial';
         }
-
+        
         return $status;
     }
 
@@ -5895,7 +5941,7 @@ class TransactionUtil extends Util
         $input['tax_id'] = $input['tax_id'] ?? null;
 
         $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number);
-
+        
         //Get parent sale
         $sell = Transaction::where('business_id', $business_id)
                         ->with(['sell_lines', 'sell_lines.sub_unit'])
@@ -5916,7 +5962,7 @@ class TransactionUtil extends Util
             'total_before_tax' => $invoice_total['total_before_tax'],
             'final_total' => $invoice_total['final_total'],
         ];
-
+        
         if (! empty($input['transaction_date'])) {
             $sell_return_data['transaction_date'] = $uf_number ? $this->uf_date($input['transaction_date'], true) : $input['transaction_date'];
         }
@@ -5961,7 +6007,7 @@ class TransactionUtil extends Util
                 $sell->save();
             }
         }
-
+        
         //Update payment status
         $this->updatePaymentStatus($sell_return->id, $sell_return->final_total);
 

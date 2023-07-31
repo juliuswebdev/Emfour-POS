@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use Modules\Superadmin\Entities\Subscription;
+use Modules\Superadmin\Entities\Package;
 use App\BusinessType;
 
 class BusinessController extends Controller
@@ -289,6 +291,7 @@ class BusinessController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $business = Business::where('id', $business_id)->first();
+        
 
         $currencies = $this->businessUtil->allCurrencies();
         $tax_details = TaxRate::forBusinessDropdown($business_id);
@@ -317,7 +320,7 @@ class BusinessController extends Controller
         $shortcuts = json_decode($business->keyboard_shortcuts, true);
 
         $pos_settings = empty($business->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business->pos_settings, true);
-
+        
         $email_settings = empty($business->email_settings) ? $this->businessUtil->defaultEmailSettings() : $business->email_settings;
 
         $sms_settings = empty($business->sms_settings) ? $this->businessUtil->defaultSmsSettings() : $business->sms_settings;
@@ -338,7 +341,13 @@ class BusinessController extends Controller
 
         $payment_types = $this->moduleUtil->payment_types(null, false, $business_id);
 
-        return view('business.settings', compact('business', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types'));
+        $permissions = $this->moduleUtil->getModuleData('superadmin_package', true);
+        
+        $subscription = Subscription::where('business_id', $business_id)->first();
+        //dd($subscription);
+        $package = Package::find($subscription->package_id);
+
+        return view('business.settings', compact('package', 'permissions', 'subscription', 'business', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types'));
     }
 
     /**
@@ -352,7 +361,7 @@ class BusinessController extends Controller
         if (! auth()->user()->can('business_settings.access')) {
             abort(403, 'Unauthorized action.');
         }
-
+        
         try {
             $notAllowed = $this->businessUtil->notAllowedInDemo();
             if (! empty($notAllowed)) {
@@ -367,12 +376,16 @@ class BusinessController extends Controller
                 'redeem_amount_per_unit_rp', 'min_order_total_for_redeem',
                 'min_redeem_point', 'max_redeem_point', 'rp_expiry_period',
                 'rp_expiry_type', 'custom_labels', 'weighing_scale_setting',
-                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge', 'wpc_reservation_site_link']);
+                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge', 'custom_permissions', 'enable_ip_restriction', 'wpc_reservation_site_link']);
 
             if(!auth()->user()->can('superadmin')) {
                 unset($business_details['card_charge']);
             }
-                
+
+
+            //Ip Restriction setting
+            $business_details['enable_ip_restriction'] = ! empty($business_details['enable_ip_restriction']) ? $this->businessUtil->num_uf($business_details['enable_ip_restriction']) : 0;
+
             if (! empty($request->input('enable_rp')) && $request->input('enable_rp') == 1) {
                 $business_details['enable_rp'] = 1;
             } else {
@@ -431,7 +444,40 @@ class BusinessController extends Controller
             }
 
             $business_id = request()->session()->get('user.business_id');
-            $business = Business::where('id', $business_id)->first();
+            $business = Business::find($business_id);
+
+            $subscription = Subscription::where('business_id', $business_id)->first();
+  
+            $package = Package::find($subscription->package_id);
+    
+            $package_details_arr = [
+                'location_count' => $package->location_count,
+                'user_count' => $package->user_count,
+                'product_count' => $package->product_count,
+                'invoice_count' => $package->invoice_count,
+                'name' => $package->name,
+            ];
+
+            //$custom_permissions = $business_details['custom_permissions'] ?? [];
+            //Custom Permission Active
+            $custom_permissions = NULL;
+            if($request->has('custom_permissions') && $request->filled('custom_permissions')){
+                $custom_permissions = new \StdClass;
+                foreach($request->custom_permissions as $key => $permission_val){
+                    $custom_permissions->$key = 1;
+                }
+                $custom_permissions = json_decode(json_encode($custom_permissions, true), true);
+                $package_details = array_merge($package_details_arr, $custom_permissions);
+            }else{
+                $package_details = $package_details_arr;    
+            }
+
+            //$package_details = array_merge($package_details_arr, $custom_permissions);
+            //$package_details = $package_details_arr;
+        
+            $subscription->package_details = $package_details;
+            $subscription->custom_permissions_business_admin = $custom_permissions;
+            $subscription->update();
 
             //Update business settings
             if (! empty($business_details['logo'])) {
@@ -460,7 +506,30 @@ class BusinessController extends Controller
 
             //Enabled modules
             $enabled_modules = $request->input('enabled_modules');
-            $business_details['enabled_modules'] = ! empty($enabled_modules) ? $enabled_modules : null;
+            if($enabled_modules && auth()->user()->can('superadmin')) {
+                $business_details['enabled_modules'] = ! empty($enabled_modules) ? $enabled_modules : null;
+            }
+
+
+            // Gratuity setting
+            if($business->business_type_id == 1){ 
+                if($request->has('gratuity_setting_label') || $request->has('gratuity_setting_percentage')){
+                    $business_details['gratuity_settings'] = json_encode(array(
+                        'label' => $request->gratuity_setting_label,
+                        'percentage' => $request->gratuity_setting_percentage
+                    ));
+                }
+
+                //Order Undo Time Frame setting
+                if($request->has('kitchen_ui_undo_timeframe') && $request->filled('kitchen_ui_undo_timeframe')){
+                    $business_details['kitchen_screen_button_undo_timeframe'] = $request->kitchen_ui_undo_timeframe;
+                }
+
+                if($request->has('order_ui_undo_timeframe') && $request->filled('order_ui_undo_timeframe')){
+                    $business_details['order_screen_button_undo_timeframe'] = $request->order_ui_undo_timeframe;
+                }
+            }
+
             $business->fill($business_details);
             $business->save();
 

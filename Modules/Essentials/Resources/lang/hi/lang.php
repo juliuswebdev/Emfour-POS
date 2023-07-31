@@ -52,7 +52,7 @@ return [
     'view_message' => 'संदेश देखें',
     'essentials_module' => 'अनिवार्य मॉड्यूल',
     'new_message_notification' => 'आपके पास नए संदेश हैं :sender',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'टाइप छोड़ो',
     'all_leave_types' => 'सभी प्रकार छोड़ें',
     'max_leave_count' => 'मैक्स लीव काउंट',

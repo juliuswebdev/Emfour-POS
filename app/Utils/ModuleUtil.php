@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Account;
 use App\BusinessLocation;
+use App\BusinessAllowedIP;
 use App\Product;
 use App\System;
 use App\Transaction;
@@ -21,8 +22,9 @@ class ModuleUtil extends Util
      */
     public function isModuleInstalled($module_name)
     {
-        $is_available = Module::has($module_name);
-
+        
+        $is_available = ($module_name == "HRIS/Payroll" || $module_name == "DynamicPrice") ? true : Module::has($module_name);
+        
         if ($is_available) {
             //Check if installed by checking the system table {module_name}_version
             $module_version = System::getProperty(strtolower($module_name).'_version');
@@ -56,7 +58,21 @@ class ModuleUtil extends Util
     public function getModuleData($function_name, $arguments = null)
     {
         $modules = Module::toCollection()->toArray();
-
+        
+        //Inject HRIS Module
+        $essentials_module = $modules['Essentials'];
+        $essentials_module['name'] = "HRIS/Payroll";
+        $essentials_module['alias'] = "hris";
+        $modules['HRIS/Payroll'] = $essentials_module;
+        
+        //Inject Dynamic Pricing Module
+        $dp_module = [];
+        $dp_module['name'] = "DynamicPrice";
+        $dp_module['alias'] = "dynamic_price_module";
+        $modules['DynamicPrice'] = $dp_module;
+        
+        
+        
         $installed_modules = [];
         foreach ($modules as $module => $details) {
             if ($this->isModuleInstalled($details['name'])) {
@@ -64,24 +80,74 @@ class ModuleUtil extends Util
             }
         }
 
-        $data = [];
-        if (! empty($installed_modules)) {
-            foreach ($installed_modules as $module) {
-                $class = 'Modules\\'.$module['name'].'\Http\Controllers\DataController';
+        $business_id = auth()->user()->business_id ?? 0;
+        $is_admin = ($business_id) ? $this->is_admin(auth()->user(), $business_id) : false;
 
-                if (class_exists($class)) {
-                    $class_object = new $class();
-                    if (method_exists($class_object, $function_name)) {
-                        if (! empty($arguments)) {
-                            $data[$module['name']] = call_user_func([$class_object, $function_name], $arguments);
-                        } else {
-                            $data[$module['name']] = call_user_func([$class_object, $function_name]);
+        $data = [];
+        if($is_admin) {
+            
+            if (! empty($installed_modules)) {
+                foreach ($installed_modules as $module) {
+                    //Inject Hris module 
+                    if($module['name'] == "HRIS/Payroll"){
+                        $module_name = 'Essentials';
+                        $class = 'Modules\\'.$module_name.'\Http\Controllers\DataController';
+                        if (class_exists($class)) {
+                            $additional_data = array(
+                                "additional_js" => '',
+                                "additional_css" => '',
+                                "additional_html" => '',
+                                "additional_views" => '',
+                            );
+                            $class_object = new $class();
+                            if (method_exists($class_object, $function_name)) {
+                                if( ($function_name != "superadmin_package") && ($function_name != "moduleViewPartials") ){
+                                    $data[$module['name']] = $additional_data;
+                                }
+                            }
+                        }
+
+                        if(($function_name == "superadmin_package") && ($arguments == true)){
+                            $data[$module['name']][0]['name'] = "hris_module";
+                            $data[$module['name']][0]['label'] = "HRIS/Payroll Module";
+                            $data[$module['name']][0]['default'] = false;
+                        }
+                    }else if($module['name'] == "DynamicPrice"){ 
+                        //Inject Dynamic Price Module
+                        $data[$module['name']][0]['name'] = "dynamic_price_module";
+                        $data[$module['name']][0]['label'] = "Dynamic Pricing Module";
+                        $data[$module['name']][0]['default'] = false;
+                    }else{
+                        $module_name = $module['name'];
+                        $class = 'Modules\\'.$module_name.'\Http\Controllers\DataController';
+                        if (class_exists($class)) {
+                            $class_object = new $class();
+                            if (method_exists($class_object, $function_name)) {
+                                if (! empty($arguments)) {
+                                    $data[$module['name']] = call_user_func([$class_object, $function_name], $arguments);
+                                } else {
+                                    $data[$module['name']] = call_user_func([$class_object, $function_name]);
+                                }
+                            }
                         }
                     }
                 }
             }
+        } else {
+            
+            $module = 'Essentials';
+            $class = 'Modules\\'.$module.'\Http\Controllers\DataController';
+            if (class_exists($class)) {
+                $class_object = new $class();
+                if (method_exists($class_object, $function_name)) {
+                    if (! empty($arguments)) {
+                        $data[$module] = call_user_func([$class_object, $function_name], $arguments);
+                    } else {
+                        $data[$module] = call_user_func([$class_object, $function_name]);
+                    }
+                }
+            }
         }
-
         return $data;
     }
 
@@ -149,7 +215,6 @@ class ModuleUtil extends Util
                 if (! is_null($callback_function)) {
                     $obj = new ModuleUtil();
                     $permissions = $obj->getModuleData($callback_function);
-
                     $permission_formatted = [];
                     foreach ($permissions as $per) {
                         foreach ($per as $details) {
@@ -536,4 +601,47 @@ class ModuleUtil extends Util
 
         return $module_data;
     }
+
+    public function filterIP($ip) {
+        // $ip_arr = explode('.', $ip);
+        // array_pop($ip_arr);
+        // $ip = implode('.', $ip_arr);
+        return $ip;
+    }
+
+    public function userAllowed($user) {
+        
+        $is_admin = $this->is_admin($user);
+        $enable_ip_restriction = $user->business->enable_ip_restriction;
+        $allowed = false;
+        if( (!$is_admin) && ($enable_ip_restriction) ){
+            
+            $clientIP = \Request::getClientIp(true);
+            $user_locations = $user->permitted_locations($user->business_id);
+            if($user_locations == 'all') {
+                $business_allowed_ips = BusinessAllowedIP::where('business_id', $user->business_id)->get();
+            } else {
+                $business_allowed_ips = BusinessAllowedIP::whereIn('location_id', $user_locations)->get();
+            }
+
+            $whitelist_ips = [];
+            foreach($business_allowed_ips as $item) {
+                $ip = $this->filterIP($item->ip_address);
+                array_push($whitelist_ips, $ip);
+            }
+            
+            $client_ip = $this->filterIP($clientIP);
+            $allowed = false;
+
+            if(in_array($client_ip, $whitelist_ips)) {
+                $allowed = true;
+            }
+        } else {
+            $allowed = true;
+        }
+
+        return $allowed;
+
+    }
+
 }

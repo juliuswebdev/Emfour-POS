@@ -12,6 +12,7 @@
 				            {!! Form::label('additional_notes', __('lang_v1.suspend_note') . ':' ) !!}
 				            {!! Form::textarea('additional_notes', !empty($transaction->additional_notes) ? $transaction->additional_notes : null, ['class' => 'form-control','rows' => '4']); !!}
 				            {!! Form::hidden('is_suspend', 0, ['id' => 'is_suspend']); !!}
+							{!! Form::hidden('send_to_kitchen', 0, ['id' => 'send_to_kitchen']); !!}
 				        </div>
 				    </div>
 				</div>

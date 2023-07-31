@@ -61,6 +61,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationTemplateController;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\PaymentDevicesController;
+use App\Http\Controllers\BusinessAllowedIPController;
+use App\Http\Controllers\WebviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -218,6 +220,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/sells/draft-dt', 'SellController@getDraftDatables');
     Route::resource('sells', 'SellController')->except(['show']);
     Route::get('/sells/copy-quotation/{id}', [SellPosController::class, 'copyQuotation']);
+    //Check location is open or not
+    Route::post('/sells/pos/check-location-is-open/{location_id}', [SellPosController::class, 'checkLocationIsOpen']);
+    
 
     Route::post('/import-purchase-products', [PurchaseController::class, 'importPurchaseProducts']);
     Route::post('/purchases/update-status', [PurchaseController::class, 'updateStatus']);
@@ -248,10 +253,27 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/sells/pos/get-reward-details', [SellPosController::class, 'getRewardDetails']);
     Route::get('/sells/pos/get-recent-transactions', [SellPosController::class, 'getRecentTransactions']);
     Route::get('/sells/pos/get-product-suggestion', [SellPosController::class, 'getProductSuggestion']);
+
+    //Get product by filter
+    Route::get('/sells/pos/get-product-by-filter', [SellPosController::class, 'getProductByFilter']);
+
+    Route::get('/sells/pos/get-dp-rules', [SellPosController::class, 'getDPRules']);
+    
+
     Route::get('/sells/pos/get-featured-products/{location_id}', [SellPosController::class, 'getFeaturedProducts']);
+    Route::get('/sells/pos/get-product-by-filter', [SellPosController::class, 'getProductByFilter']);
     Route::get('/reset-mapping', [SellController::class, 'resetMapping']);
 
     Route::resource('pos', SellPosController::class);
+    Route::get('customer/pos', [SellPosController::class, 'getPosPublic']);
+
+    //Sale Return Pin Verify & Return Payment
+    Route::post('pos/sale-return/pin-verify', [SellPosController::class, 'saleReturnPinVerify']);
+    Route::post('pos/sale-return/invoice', [SellPosController::class, 'getSaleReturnInvoice']);
+    Route::any('sale-return/{id}/invoice', [SellReturnController::class, 'makeSaleReturnTransaction']);
+
+    //Comman security pin verify
+    Route::post('pos/security-pin-verify', [SellPosController::class, 'securityPinVerify']);
 
     Route::resource('roles', RoleController::class);
 
@@ -313,6 +335,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/get-profit/{by?}', [ReportController::class, 'getProfit']);
     Route::get('/reports/items-report', [ReportController::class, 'itemsReport']);
     Route::get('/reports/get-stock-value', [ReportController::class, 'getStockValue']);
+
+    //Tips Report
+    Route::get('/reports/sales-tips-report', [ReportController::class, 'getSalesTipsReport']);
 
     Route::get('business-location/activate-deactivate/{location_id}', [BusinessLocationController::class, 'activateDeactivateLocation']);
 
@@ -457,6 +482,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
         Route::get('tables-sync-wordpress', [Restaurant\TableController::class, 'syncWordpress']);
         
+        Route::resource('business-ips', BusinessAllowedIPController::class);
+
         Route::resource('modifiers', Restaurant\ModifierSetsController::class);
 
         //Map modifier to products
@@ -470,6 +497,10 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/kitchen/cook-progress/{stage}/{id}/{product_id}', [Restaurant\KitchenController::class, 'updateCookProgress']);
        
         Route::get('/kitchen/mark-as-cooked/{id}', [Restaurant\KitchenController::class, 'markAsCooked']);
+
+        //Item Not available 
+        Route::get('/kitchen/remove-from-kitchen/{id}/{product_id}', [Restaurant\KitchenController::class, 'removeFromKitchen']);
+
         Route::post('/refresh-orders-list', [Restaurant\KitchenController::class, 'refreshOrdersList']);
         Route::post('/refresh-line-orders-list', [Restaurant\KitchenController::class, 'refreshLineOrdersList']);
 
@@ -485,6 +516,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
 
     Route::get('bookings/get-table-mapping', [Restaurant\BookingController::class, 'loadTableMapping']);
+    Route::get('bookings/get-table-chair-selected', [Restaurant\BookingController::class, 'loadTableChairSelected']);
     Route::get('bookings/update-table-per-location', [Restaurant\BookingController::class, 'updateTablePerLocation']);
     Route::get('bookings/get-todays-bookings', [Restaurant\BookingController::class, 'getTodaysBookings']);
     Route::resource('bookings', Restaurant\BookingController::class);
@@ -557,3 +589,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone'])
     Route::get('/sells/invoice-url/{id}', [SellPosController::class, 'showInvoiceUrl']);
     Route::get('/show-notification/{id}', [HomeController::class, 'showNotification']);
 });
+
+
+//Webview Initial Load
+Route::any('initial-webview', [WebviewController::class, 'initialWebview']);

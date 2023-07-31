@@ -73,3 +73,8 @@
 @if(!empty($__system_settings['additional_css']))
     {!! $__system_settings['additional_css'] !!}
 @endif
+
+<!-- Use Style only on Mobile App -->
+@if(strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != false)
+<link rel="stylesheet" href="{{ asset('css/mobile.app.css?v='.$asset_v) }}">
+@endif

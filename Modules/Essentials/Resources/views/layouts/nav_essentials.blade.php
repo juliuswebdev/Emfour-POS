@@ -27,7 +27,7 @@
                     @endif
                     <li @if(request()->segment(2) == 'knowledge-base') class="active" @endif><a href="{{action([\Modules\Essentials\Http\Controllers\KnowledgeBaseController::class, 'index'])}}">@lang('essentials::lang.knowledge_base')</a></li>
                     @if (auth()->user()->can('edit_essentials_settings'))
-                        <li @if(request()->segment(2) == 'hrm' && request()->segment(2) == 'settings') class="active" @endif><a href="{{action([\Modules\Essentials\Http\Controllers\EssentialsSettingsController::class, 'edit'])}}">@lang('business.settings')</a></li>
+                        <li @if(request()->segment(2) == 'essentials' && request()->segment(2) == 'settings') class="active" @endif><a href="{{ url('essentials/settings') }}">@lang('business.settings')</a></li>
                     @endif
                 </ul>
 

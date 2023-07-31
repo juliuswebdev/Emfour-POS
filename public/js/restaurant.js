@@ -52,6 +52,13 @@ function getLocationTables(location_id) {
                 if ($("#repair_technician").length) {
                     $("select#res_waiter_id").val($("#repair_technician").val()).change();
                 }
+
+                //Sale Return Disable Dropdown.
+                var length_of_sale_return_btn = $('.wrapper-of-sale-return').length;
+                if(length_of_sale_return_btn != 0){
+                    $('span#restaurant_module_span').find('select').attr("disabled", "disabled")
+                }
+
             },
         });
     }
@@ -105,6 +112,9 @@ function refresh_orders() {
     var service_staff_id = '';
     if ($('select#service_staff_id').val()) {
         service_staff_id = $('select#service_staff_id').val();
+    } else {
+        const urlParams = new URL(window.location.href).searchParams;
+        service_staff_id = urlParams.get('service_staff');
     }
     $.ajax({
         method: 'POST',
@@ -113,7 +123,7 @@ function refresh_orders() {
         dataType: 'html',
         success: function(data) {
             $('#orders_div').html(data);
-            $('.overlay').addClass('hide');
+            //$('.overlay').addClass('hide');
         },
     });
 
@@ -124,7 +134,7 @@ function refresh_orders() {
         dataType: 'html',
         success: function(data) {
             $('#line_orders_div').html(data);
-            $('.overlay').addClass('hide');
+            //$('.overlay').addClass('hide');
         },
     });
 }

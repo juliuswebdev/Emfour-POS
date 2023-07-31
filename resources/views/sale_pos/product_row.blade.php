@@ -3,6 +3,7 @@
 	$multiplier = 1;
 
 	$action = !empty($action) ? $action : '';
+
 @endphp
 
 @foreach($sub_units as $key => $value)
@@ -13,7 +14,24 @@
 	@endif
 @endforeach
 
-<tr class="product_row product_row_{{$product->product_id}}"  data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif>
+@php
+	
+	$product_cat1 = \App\Category::find($product->category_id);
+	$product_cat1_slug = $product_cat1->slug ?? '';
+	$product_cat2 = \App\Category::find($product->sub_category_id);
+	$product_cat2_slug = $product_cat2->slug ?? '';
+@endphp
+
+<tr class="product_row product_row_{{$product->product_id}} product_row_{{ $product->sub_sku }} has_dp"  
+	data-cat-slug="{{ $product_cat1_slug }}"
+	data-sub-cat-slug="{{ $product_cat2_slug }}"
+	data-sku="{{ $product->sub_sku }}"
+	data-has-dp="0"
+	data-dp-index="0"
+	data-promo="0"
+	data-promo-index="x"
+	data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif
+>
 	<td>
 		@if(!empty($so_line))
 			<input type="hidden" 
@@ -26,7 +44,7 @@
 		@endphp
 
 		@if( ($edit_price || $edit_discount) && empty($is_direct_sell) )
-		<div title="@lang('lang_v1.pos_edit_product_price_help')">
+		<div title="@lang('lang_v1.pos_edit_product_price_help')" class="title">
 		<span class="text-link text-info cursor-pointer" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}">
 			{!! $product_name !!}
 			&nbsp;<i class="fa fa-info-circle"></i>
@@ -42,6 +60,8 @@
 			value="{{$product->product_type}}">
 
 		@php
+
+
 			$hide_tax = 'hide';
 	        if(session()->get('business.enable_inline_tax') == 1){
 	            $hide_tax = '';
@@ -61,6 +81,8 @@
 				$item_tax = $so_line->item_tax;
 				$unit_price_inc_tax = $so_line->unit_price_inc_tax;
 			}
+
+
 
 			$discount_type = !empty($product->line_discount_type) ? $product->line_discount_type : 'fixed';
 			$discount_amount = !empty($product->line_discount_amount) ? $product->line_discount_amount : 0;
@@ -96,6 +118,9 @@
 			}
 		@endphp
 
+
+		
+		
 		@if(empty($is_direct_sell))
 		<div class="modal fade row_edit_product_price_model" id="row_edit_product_price_modal_{{$row_count}}" tabindex="-1" role="dialog">
 			@include('sale_pos.partials.row_edit_product_price_modal')
@@ -189,7 +214,10 @@
 		@endif
 
 		<input type="hidden" name="products[{{$row_count}}][product_id]" class="form-control product_id" value="{{$product->product_id}}">
-
+		@php
+			$product_is_kitchen = \App\Product::where('id', $product->product_id)->select('product_custom_field1')->first()
+		@endphp
+		<input type="hidden" name="products[{{$row_count}}][product_custom_field1]" value="{{ $product_is_kitchen->product_custom_field1 ?? '' }}">
 		<input type="hidden" value="{{$product->variation_id}}" 
 			name="products[{{$row_count}}][variation_id]" class="row_variation_id">
 
@@ -278,6 +306,8 @@
 		<input type="hidden" class="base_unit_multiplier" name="products[{{$row_count}}][base_unit_multiplier]" value="{{$multiplier}}">
 
 		<input type="hidden" class="hidden_base_unit_sell_price" value="{{$product->default_sell_price / $multiplier}}">
+
+		<input type="hidden" class="original_price" value="{{@num_format($unit_price_inc_tax)}}">
 		
 		{{-- Hidden fields for combo products --}}
 		@if($product->product_type == 'combo'&& !empty($product->combo_products))
@@ -330,11 +360,14 @@
 			</td>
 		@endif
 		@php
-			$pos_unit_price = !empty($product->unit_price_before_discount) ? $product->unit_price_before_discount : $product->default_sell_price;
 
-			if(!empty($so_line) && $action !== 'edit') {
-				$pos_unit_price = $so_line->unit_price_before_discount;
-			}
+				$pos_unit_price = !empty($product->unit_price_before_discount) ? $product->unit_price_before_discount : $product->default_sell_price;
+
+				if(!empty($so_line) && $action !== 'edit') {
+					$pos_unit_price = $so_line->unit_price_before_discount;
+				}
+	
+
 		@endphp
 		<td class="@if(!auth()->user()->can('edit_product_price_from_sale_screen')) hide @endif">
 			<input type="text" name="products[{{$row_count}}][unit_price]" class="form-control pos_unit_price input_number mousetrap" value="{{@num_format($pos_unit_price)}}" @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$pos_unit_price}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($pos_unit_price)])}}" @endif> 
@@ -391,12 +424,19 @@
 	<td class="text-center">
 		@php
 			$subtotal_type = !empty($pos_settings['is_pos_subtotal_editable']) ? 'text' : 'hidden';
-
 		@endphp
-		<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
-		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
+
+
+			
+			<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
+			<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
+	
 	</td>
+
 	<td class="text-center v-center">
+		@if($product->res_line_order_status != 'received' && $product->res_line_order_status != 'ready' && $product->res_line_order_status != 'served')
 		<i class="fa fa-times text-danger pos_remove_row cursor-pointer" aria-hidden="true"></i>
+		@endif
 	</td>
+
 </tr>

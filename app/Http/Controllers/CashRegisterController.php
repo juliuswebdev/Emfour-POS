@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\BusinessLocation;
 use App\CashRegister;
+use App\BusinessAllowedIP;
 use App\Utils\CashRegisterUtil;
 use App\Utils\ModuleUtil;
+use App\Utils\ProductUtil;
 use Illuminate\Http\Request;
 
 class CashRegisterController extends Controller
@@ -17,16 +19,19 @@ class CashRegisterController extends Controller
 
     protected $moduleUtil;
 
+    protected $productUtil;
+
     /**
      * Constructor
      *
      * @param  CashRegisterUtil  $cashRegisterUtil
      * @return void
      */
-    public function __construct(CashRegisterUtil $cashRegisterUtil, ModuleUtil $moduleUtil)
+    public function __construct(CashRegisterUtil $cashRegisterUtil, ModuleUtil $moduleUtil, ProductUtil $productUtil,)
     {
         $this->cashRegisterUtil = $cashRegisterUtil;
         $this->moduleUtil = $moduleUtil;
+        $this->productUtil = $productUtil;
     }
 
     /**
@@ -55,8 +60,15 @@ class CashRegisterController extends Controller
         }
         $business_id = request()->session()->get('user.business_id');
         $business_locations = BusinessLocation::forDropdown($business_id);
-
-        return view('cash_register.create')->with(compact('business_locations', 'sub_type'));
+        $business_location_ids = [];
+        if(!empty($business_locations)){
+            $business_location_ids = array_keys($business_locations->toArray());
+        }
+        
+        $business_register_numbers = BusinessAllowedIP::where('business_id', $business_id)
+                                        ->whereIn('location_id', $business_location_ids)
+                                        ->where('register_number', '!=', '')->get();
+        return view('cash_register.create')->with(compact('business_locations', 'sub_type', 'business_register_numbers'));
     }
 
     /**
@@ -78,9 +90,18 @@ class CashRegisterController extends Controller
             $user_id = $request->session()->get('user.id');
             $business_id = $request->session()->get('user.business_id');
 
+            $unique_register_number = null;
+            if($request->has('register_number') && $request->filled('register_number')){
+                $unique_register_number = BusinessAllowedIP::where('id', $request->input('register_number'))
+                                        ->pluck('register_number')->first();
+            }            
+
+
             $register = CashRegister::create([
                 'business_id' => $business_id,
                 'user_id' => $user_id,
+                'business_allowed_ip_id' => $request->input('register_number'),
+                'register_number' => $unique_register_number,
                 'status' => 'open',
                 'location_id' => $request->input('location_id'),
                 'created_at' => \Carbon::now()->format('Y-m-d H:i:00'),
@@ -93,8 +114,20 @@ class CashRegisterController extends Controller
                     'transaction_type' => 'initial',
                 ]);
             }
+            $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+            $output = ['success' => 1,
+                'url' => action([\App\Http\Controllers\SellPosController::class, 'create'], ['sub_type' => $sub_type]),
+                'dp_rules' => $dp_rules
+            ];
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $output = ['success' => 0,
+                'url' => '',
+            ];
+        }
+
+        if (request()->ajax()) {
+            return $output;
         }
 
         return redirect()->action([\App\Http\Controllers\SellPosController::class, 'create'], ['sub_type' => $sub_type]);

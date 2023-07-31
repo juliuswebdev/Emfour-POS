@@ -2,7 +2,8 @@
 
 // use App\Http\Controllers\Modules;
 // use Illuminate\Support\Facades\Route;
-
+Route::get('hrm/{slug}/{location_id}/employee-clock-in-out', [Modules\Essentials\Http\Controllers\AttendanceController::class, 'getEmployeeClockInOut'])->name('employee.clockinout');
+Route::post('hrm/{slug}/{location_id}/employee-clock-in-clock-out', [Modules\Essentials\Http\Controllers\AttendanceController::class, 'employeeClockInClockOut']);
 Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu')->group(function () {
     Route::prefix('essentials')->group(function () {
         Route::get('/dashboard', [Modules\Essentials\Http\Controllers\DashboardController::class, 'essentialsDashboard']);
@@ -41,6 +42,12 @@ Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezon
         Route::resource('knowledge-base', 'Modules\Essentials\Http\Controllers\KnowledgeBaseController');
 
         Route::get('user-sales-targets', [Modules\Essentials\Http\Controllers\DashboardController::class, 'getUserSalesTargets']);
+    
+        
+        //Apply Essential Setting
+        Route::get('/settings', [Modules\Essentials\Http\Controllers\EssentialsSettingsController::class, 'edit']);
+        Route::post('/settings', [Modules\Essentials\Http\Controllers\EssentialsSettingsController::class, 'update']);
+
     });
 
     Route::prefix('hrm')->group(function () {
@@ -57,6 +64,7 @@ Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezon
         Route::post('/import-attendance', [Modules\Essentials\Http\Controllers\AttendanceController::class, 'importAttendance']);
         Route::resource('/attendance', 'Modules\Essentials\Http\Controllers\AttendanceController');
         Route::post('/clock-in-clock-out', [Modules\Essentials\Http\Controllers\AttendanceController::class, 'clockInClockOut']);
+        
 
         Route::post('/validate-clock-in-clock-out', [Modules\Essentials\Http\Controllers\AttendanceController::class, 'validateClockInClockOut']);
 

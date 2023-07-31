@@ -53,7 +53,7 @@ return [
     'view_message' => 'Mesajı görüntüle',
     'essentials_module' => 'Temel Modül',
     'new_message_notification' => 'Gönderenden yeni mesajlarınız var',
-    'hrm' => 'HRM',
+    'hrm' => 'HRIS',
     'leave_type' => 'Bırakma Türü',
     'all_leave_types' => 'Tüm izin türleri',
     'max_leave_count' => 'Maksimum İzin Sayısı',

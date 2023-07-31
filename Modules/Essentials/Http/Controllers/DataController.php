@@ -331,16 +331,22 @@ class DataController extends Controller
         if ($is_essentials_enabled) {
             Menu::modify('admin-sidebar-menu', function ($menu) {
                 $menu->url(
-                        action([\Modules\Essentials\Http\Controllers\DashboardController::class, 'hrmDashboard']),
-                        __('essentials::lang.hrm'),
-                        ['icon' => 'fa fas fa-users', 'active' => request()->segment(1) == 'hrm', 'style' => config('app.env') == 'demo' ? 'background-color: #605ca8 !important;' : '']
-                    )
-                ->order(87);
-
-                $menu->url(
                     action([\Modules\Essentials\Http\Controllers\ToDoController::class, 'index']),
                     __('essentials::lang.essentials'),
                     ['icon' => 'fa fas fa-check-circle', 'active' => request()->segment(1) == 'essentials', 'style' => config('app.env') == 'demo' ? 'background-color: #001f3f !important;' : '']
+                )
+                ->order(87);
+            });
+        }
+
+        //Inject Hris Module In Sidebar
+        $is_hris_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
+        if ($is_hris_enabled) {
+            Menu::modify('admin-sidebar-menu', function ($menu) {
+                $menu->url(
+                    action([\Modules\Essentials\Http\Controllers\DashboardController::class, 'hrmDashboard']),
+                    __('essentials::lang.hrm'),
+                    ['icon' => 'fa fas fa-users', 'active' => request()->segment(1) == 'hrm', 'style' => config('app.env') == 'demo' ? 'background-color: #605ca8 !important;' : '']
                 )
                 ->order(87);
             });

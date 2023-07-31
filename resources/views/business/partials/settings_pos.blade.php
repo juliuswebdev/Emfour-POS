@@ -327,6 +327,21 @@
                 </div>
             </div>
         </div>
+        
+        <div class="col-sm-4">
+            <div class="form-group">
+                <div class="checkbox">
+                <br>
+                  <label>
+                    {!! Form::checkbox('pos_settings[enable_pin_protection_on_expense_button]', 1,  
+                        !empty($pos_settings['enable_pin_protection_on_expense_button']) , 
+                    [ 'class' => 'input-icheck']); !!} {{ __( 'lang_v1.enable_pin_protection_on_expense_button' ) }}
+                  </label>
+                </div>
+            </div>
+        </div>
+
+
     </div>    
     <hr>
     @include('business.partials.settings_weighing_scale')

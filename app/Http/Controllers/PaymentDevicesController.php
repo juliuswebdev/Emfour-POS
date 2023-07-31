@@ -13,6 +13,8 @@ use App\PaymentDeviceModel;
 use App\PaymentDevice;
 use App\BusinessLocation;
 use App\User;
+use App\TransactionPayment;
+
 use Illuminate\Support\Facades\Http;
 
 class PaymentDevicesController extends Controller
@@ -358,7 +360,7 @@ class PaymentDevicesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
     */
-    public function paymentInit($payment_type, $trans_type, $amount, $invoice_num){
+    public function paymentInit($payment_type, $trans_type, $amount, $invoice_num, $tips_amount=0){
 
         try {
             $active_payment_device = PaymentDevice::select('settings')->where('id', auth()->user()->default_payment_device)->first();
@@ -369,13 +371,14 @@ class PaymentDevicesController extends Controller
             //$amount = "1.10";
 
             $check_terminal = $this->checkTerminalIsActive($register_id);
+            //$check_terminal = "Online";
             if($check_terminal == "Online"){
             
                 $xml = '<request>
                             <PaymentType>'. $payment_type .'</PaymentType>
                             <TransType>'. $trans_type .'</TransType>
                             <Amount>'. $amount .'</Amount>
-                            <Tip></Tip>
+                            <Tip>'.$tips_amount.'</Tip>
                             <CustomFee>0</CustomFee>
                             <Frequency>OneTime</Frequency>
                             <InvNum></InvNum>
@@ -385,7 +388,7 @@ class PaymentDevicesController extends Controller
                             <PrintReceipt>No</PrintReceipt>
                             <SigCapture>No</SigCapture>
                         </request>';
-
+            
                 $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
 
                 $response = Http::timeout(1000)->get($request_url);
@@ -394,8 +397,13 @@ class PaymentDevicesController extends Controller
                 $json_response = json_encode($xml_response);
                 $array_response = json_decode($json_response,TRUE);
 
+                /*
+                $t = TransactionPayment::where('id', '210')->pluck('payment_collect_response')->first();
+                $array_response = json_decode($t, true);
                 $payment_response_message = $array_response['response']['Message'];
-                //$payment_response_message = "Approved";
+                */
+
+                $payment_response_message = $array_response['response']['Message'];
                 if($payment_response_message == "Approved"){
                     $output = [
                         'success' => 1,

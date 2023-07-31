@@ -133,9 +133,14 @@
         </div>
         <div class="col-sm-3">
             <div class="form-group">
+                @if($business->business_type_id == 1)
+                    {!! Form::label('product_custom_field_1_label', __('restaurant.is_kitchen')); !!}<br>
+                    <input type="checkbox" class="input-icheck" disabled checked>
+                @else
                 {!! Form::label('product_custom_field_1_label', __('lang_v1.product_custom_field1')); !!}
                 {!! Form::text('custom_labels[product][custom_field_1]', !empty($custom_labels['product']['custom_field_1']) ? $custom_labels['product']['custom_field_1'] : null, 
                     ['class' => 'form-control', 'id' => 'product_custom_field_1_label']); !!}
+                @endif
             </div>
         </div>
         <div class="col-sm-3">

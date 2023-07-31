@@ -24,5 +24,6 @@ return [
     'deleted_success' => 'Category deleted successfully',
     'add_category' => 'Add Category',
     'edit_category' => 'Edit Category',
-
+    'already_exist' => 'Category already exist',
+    'slug' => 'Slug'
 ];

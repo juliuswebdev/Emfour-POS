@@ -11,8 +11,7 @@
     </div>
 </div>
 
-   
-	<div class="box">
+    <div class="box">
         <div class="box-header">
             <button type="button" class="btn btn-sm btn-primary pull-right" id="refresh_orders"><i class="fas fa-sync"></i> @lang( 'restaurant.refresh' )</button>
         </div>
@@ -22,9 +21,9 @@
                 @include('restaurant.partials.show_orders', array('orders_for' => 'kitchen', 'business_details' => $business_details))   
             </div>
         </div>
-        <div class="overlay hide">
+        <!-- <div class="overlay hide">
           <i class="fas fa-sync fa-spin"></i>
-        </div>
+        </div> -->
     </div>
 
 </section>
@@ -80,6 +79,42 @@
                     }
                 });
             });
+
+
+            //Item removed from kitchen ui
+            $(document).on('click', 'a.btn-not-available', function(e){
+                e.preventDefault();
+                var href = $(this).data('href');
+                swal({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    buttons: [
+                        'No, cancel it!',
+                        'Yes, I am sure!'
+                    ],
+                    //dangerMode: true,
+                }).then(function(isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            method: "GET",
+                            url: href,
+                            dataType: "json",
+                            success: function(result){
+                                if(result.success == true){
+                                    toastr.success(result.msg);
+                                    $('#refresh_orders').click();
+                                } else {
+                                    toastr.error(result.msg);
+                                }
+                            }
+                        });
+                    }    
+                })
+                
+            });
+            
+
         });
     </script>
 @endsection

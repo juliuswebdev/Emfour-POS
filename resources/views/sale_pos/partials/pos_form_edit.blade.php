@@ -201,15 +201,14 @@
 			</thead>
 			<tbody>
 				@foreach($sell_details as $sell_line)
-
-				@include('sale_pos.product_row', 
-					['product' => $sell_line, 
-					'row_count' => $loop->index, 
-					'tax_dropdown' => $taxes, 
-					'sub_units' => !empty($sell_line->unit_details) ? $sell_line->unit_details : [],
-					'action' => 'edit'
-				])
-			@endforeach
+					@include('sale_pos.product_row', 
+						['product' => $sell_line, 
+						'row_count' => $loop->index, 
+						'tax_dropdown' => $taxes, 
+						'sub_units' => !empty($sell_line->unit_details) ? $sell_line->unit_details : [],
+						'action' => 'edit'
+					])
+				@endforeach
 			</tbody>
 		</table>
 	</div>

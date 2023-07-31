@@ -199,5 +199,49 @@
             },
         });
     });
+
+
+
+    // $('.allow-decimal-number-only').keyup(function () {
+    //     if (this.value != this.value.replace(/[^0-9\.]/g, '')) {
+    //         this.value = this.value.replace(/[^0-9\.]/g, '');
+    //     }
+    // });
+
+    $(".allow-decimal-number-only").on("keypress", function (evt) {
+        var $txtBox = $(this);
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46)
+            return false;
+        else {
+            var len = $txtBox.val().length;
+            var index = $txtBox.val().indexOf('.');
+            if (index > 0 && charCode == 46) {
+              return false;
+            }
+            if (index > 0) {
+                var charAfterdot = (len + 1) - index;
+                if (charAfterdot > 3) {
+                    return false;
+                }
+            }
+        }
+        return $txtBox; //for chaining
+    });
+
+    
+    //Js Client Side Validation for kitchen & order ui undo button timeframe
+    $('input[name="kitchen_ui_undo_timeframe"],input[name="order_ui_undo_timeframe"]').on('input', function(){
+        if (/\D/g.test(this.value))
+        {
+            // Filter non-digits from input value.
+            this.value = this.value.replace(/\D/g, '');
+        }
+        var sec = parseInt(this.value);
+        if(sec > 120){
+            this.value = "";
+        }
+    });
+
 </script>
 @endsection

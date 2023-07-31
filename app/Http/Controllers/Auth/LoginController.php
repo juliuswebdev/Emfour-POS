@@ -9,6 +9,7 @@ use App\Utils\ModuleUtil;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\User;
+use App\BusinessAllowedIP;
 
 class LoginController extends Controller
 {
@@ -94,6 +95,7 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+        
         $this->businessUtil->activityLog($user, 'login', null, [], false, $user->business_id);
 
         if (! $user->business->is_active) {
@@ -128,6 +130,16 @@ class LoginController extends Controller
                     'status',
                     ['success' => 0, 'msg' => __('lang_v1.business_dont_have_crm_subscription')]
                 );
+
+        } else if( !$this->moduleUtil->userAllowed($user) ) {
+
+            \Auth::logout();
+            return redirect('/login')
+                ->with(
+                    'status',
+                    ['success' => 0, 'msg' => __('lang_v1.user_ip_login_failed')]
+                );
+
         }
     }
 
@@ -142,6 +154,9 @@ class LoginController extends Controller
             return 'contact/contact-dashboard';
         }
 
+       
         return '/home';
     }
+
+
 }

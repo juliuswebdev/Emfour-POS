@@ -45,6 +45,9 @@ use App\TransactionPayment;
 use App\TransactionSellLine;
 use App\TypesOfService;
 use App\User;
+use App\BusinessAllowedIP;
+use App\CashRegister;
+
 use App\Utils\BusinessUtil;
 use App\Utils\CashRegisterUtil;
 use App\Utils\ContactUtil;
@@ -55,6 +58,7 @@ use App\Utils\TransactionUtil;
 use App\Variation;
 use App\Warranty;
 use App\PaymentDevice;
+use App\DynamicPricing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -63,6 +67,7 @@ use Razorpay\Api\Api;
 use Stripe\Charge;
 use Stripe\Stripe;
 use Yajra\DataTables\Facades\DataTables;
+
 
 class SellPosController extends Controller
 {
@@ -179,6 +184,16 @@ class SellPosController extends Controller
         }
 
         $register_details = $this->cashRegisterUtil->getCurrentCashRegister(auth()->user()->id);
+        //Register number get
+        $register_number = "";
+        if($register_details != null){
+            $register_number = $register_details->register_number;
+            /*
+            if($register_details->business_allowed_ip_id != ""){
+                $register_number = BusinessAllowedIP::where('id', $register_details->business_allowed_ip_id)->pluck('register_number')->first();
+            }
+            */
+        }
 
         $walk_in_customer = $this->contactUtil->getWalkInCustomer($business_id);
 
@@ -193,7 +208,7 @@ class SellPosController extends Controller
         $bl_attributes = $business_locations['attributes'];
         $business_locations = $business_locations['locations'];
 
-        //set first location as default locaton
+        //Set first location as default locaton
         if (empty($default_location)) {
             foreach ($business_locations as $id => $name) {
                 $default_location = BusinessLocation::findOrFail($id);
@@ -267,10 +282,20 @@ class SellPosController extends Controller
         }else{
             $payment_device = null;
         }
-
-
+        $module_util = new ModuleUtil();
+        $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
+        $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
+        $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
+                                ->where('user_id', auth()->user()->id)
+                                ->whereNull('clock_out_time')
+                                ->first();
+        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
         return view('sale_pos.create')
             ->with(compact(
+                'dp_rules',
+                'clock_in',
+                '__is_essentials_enabled',
+                'is_employee_allowed',
                 'edit_discount',
                 'edit_price',
                 'business_locations',
@@ -302,7 +327,8 @@ class SellPosController extends Controller
                 'default_invoice_schemes',
                 'invoice_layouts',
                 'users',
-                'payment_device'
+                'payment_device',
+                'register_number'
             ));
     }
 
@@ -317,7 +343,7 @@ class SellPosController extends Controller
         if (! auth()->user()->can('sell.create') && ! auth()->user()->can('direct_sell.access') && ! auth()->user()->can('so.create')) {
             abort(403, 'Unauthorized action.');
         }
-
+       
         $is_direct_sale = false;
         if (! empty($request->input('is_direct_sale'))) {
             $is_direct_sale = true;
@@ -327,7 +353,7 @@ class SellPosController extends Controller
         if (! $is_direct_sale && $this->cashRegisterUtil->countOpenedRegister() == 0) {
             return redirect()->action([\App\Http\Controllers\CashRegisterController::class, 'create']);
         }
-
+        
         // try {
             $input = $request->except('_token');
 
@@ -384,9 +410,34 @@ class SellPosController extends Controller
                 ];
 
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+                
+                //Apply Service Charges
+                $business = Business::find($business_id);
+                $gratuity_charge_amount = 0;
+                if($business->business_type_id == 1){
+                    if($business->gratuity_settings != null){
+                        $gratuity_settings = json_decode($business->gratuity_settings, true);
+                        $gratuity_percentage = $gratuity_settings['percentage'];
+                        $gratuity_label = $gratuity_settings['label'];
+                        $gratuity_charge_amount = ($invoice_total['total_before_tax'] * $gratuity_percentage) / 100;
+                        $gratuity_charge_amount = sprintf('%0.2f', $gratuity_charge_amount);
+                        $input['gratuity_label'] = $gratuity_label;
+                        $input['gratuity_charge_percentage'] = $gratuity_percentage;
+                        $input['gratuity_charge_amount'] = $gratuity_charge_amount;
+                        $invoice_total['final_total'] = ($invoice_total['final_total'] + $gratuity_charge_amount);
+                    }
+                }
+
+                //Apply Tips
+                $tips_amount = 0;
+                if($request->has('tips_amount') && $request->filled('tips_amount')){
+                    $tips_amount = $request->tips_amount;
+                    $input['tips_amount'] = $tips_amount;
+                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $tips_amount);
+                }
 
                 // Card Charge J
-                $business = Business::find($business_id);
+                /*
                 $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
                 $input_final_total_temp = 0;
                 $invoice_total_total_before_tax_temp = 0;
@@ -405,9 +456,29 @@ class SellPosController extends Controller
                     }
                 }
                 $input['final_total'] = $input_final_total_temp;
-                $invoice_total['total_before_tax'] = $invoice_total_total_before_tax_temp;
+                $invoice_total['total_before_tax'] = ($invoice_total_total_before_tax_temp - ($gratuity_charge_amount + $tips_amount));
                 $invoice_total['final_total'] = $invoice_total_final_total_temp;
+                */
 
+                //Card Charges applied only sub total
+                if($business->card_charge > 0){
+                    $card_charge_percentage = $business->card_charge;
+                    foreach($input['payment'] as $payment) {
+                        if(isset($payment['method'])) {
+                            if($payment['method']  == 'card'){
+                                $total_card_charge = ($invoice_total['total_before_tax'] * $card_charge_percentage / 100);
+                                $total_card_charge = sprintf('%0.2f', $total_card_charge);
+                                $input['total_card_charge'] = $total_card_charge;
+                                $invoice_total['final_total'] = ($invoice_total['final_total'] + $total_card_charge);
+                            } 
+                        }
+                    }
+                }
+                
+                //Modify Final amount with include tip, card charge & gratuity
+                $input['final_total'] = $invoice_total['final_total'];
+
+                //dd($invoice_total);
                 DB::beginTransaction();
 
                 if (empty($request->input('transaction_date'))) {
@@ -507,10 +578,15 @@ class SellPosController extends Controller
                     $input['res_waiter_id'] = request()->get('res_waiter_id');
                 }
 
+                $input['dp_flag'] = $request->input('dp_flag');
+                $input['dp_discount'] = $request->input('dp_discount');
+                if($input['dp_flag']) {
+                    $input['final_total'] = $request->input('final_total');
+                }
+
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
-                
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
                 
                 //Upload Shipping documents
@@ -525,10 +601,12 @@ class SellPosController extends Controller
 
                 $is_credit_sale = isset($input['is_credit_sale']) && $input['is_credit_sale'] == 1 ? true : false;
 
-                if (! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale) {
+                $send_to_kitchen = ($request->has('send_to_kitchen') && $request->filled('send_to_kitchen')) ? $input['send_to_kitchen'] : 0;
+
+                if (! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale && $send_to_kitchen == 0) {
                     $this->transactionUtil->createOrUpdatePaymentLines($transaction, $input['payment']);
                 }
-
+                
                 //Check for final and do some processing.
                 if ($input['status'] == 'final') {
                     if (! $is_direct_sale) {
@@ -583,12 +661,13 @@ class SellPosController extends Controller
                     }
 
                     //Add payments to Cash Register
-                    if (! $is_direct_sale && ! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale) {
+                    if (! $is_direct_sale && ! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale && $send_to_kitchen == 0) {
                         $this->cashRegisterUtil->addSellPayments($transaction, $input['payment']);
                     }
 
                     //Update payment status
                     $payment_status = $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
+                    //dd($payment_status);
 
                     $transaction->payment_status = $payment_status;
 
@@ -625,12 +704,12 @@ class SellPosController extends Controller
                 $this->transactionUtil->activityLog($transaction, 'added');
                 
                 
-                if(isset($input['payment'][0]['method'])){
+                if(isset($input['payment'][0]['method']) && $send_to_kitchen == 0){
                     if($input['payment'][0]['method'] == "card"){
                         //Make Payment through card
                         $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
                         $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
-                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id);
+                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
                         if($response_of_payment['success'] == 0){
                             //Payment Failed Rollback Transaction
                             DB::rollback();
@@ -683,7 +762,16 @@ class SellPosController extends Controller
                 }
 
                 if ($print_invoice) {
-                    $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+
+                    if(isset($input['payment'][0]['method'])){
+                        if($input['payment'][0]['method'] == "card"){
+                            $receipt = $this->receiptContentForThermal($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+                        }else{
+                            $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);        
+                        }
+                    }else{
+                        $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+                    }
                 }
 
                 $output = ['success' => 1, 'msg' => $msg, 'receipt' => $receipt];
@@ -800,6 +888,12 @@ class SellPosController extends Controller
         ];
         $receipt_details->currency = $currency_details;
 
+        $receipt_details->register_number = CashRegister::select('register_number')->leftJoin('cash_register_transactions', 'cash_registers.id', '=', 'cash_register_transactions.cash_register_id')
+                                        ->where('transaction_id', $transaction_id)
+                                        ->pluck('register_number')
+                                        ->first();
+        
+        
         if ($is_package_slip) {
             $output['html_content'] = view('sale_pos.receipts.packing_slip', compact('receipt_details'))->render();
 
@@ -812,6 +906,8 @@ class SellPosController extends Controller
             return $output;
         }
 
+        //dd($receipt_details);
+
         $output['print_title'] = $receipt_details->invoice_no;
         //If print type browser - return the content, printer - return printer config data, and invoice format config
         if ($receipt_printer_type == 'printer') {
@@ -820,12 +916,81 @@ class SellPosController extends Controller
             $output['data'] = $receipt_details;
         } else {
             $layout = ! empty($receipt_details->design) ? 'sale_pos.receipts.'.$receipt_details->design : 'sale_pos.receipts.classic';
-
             $output['html_content'] = view($layout, compact('receipt_details'))->render();
         }
 
         return $output;
     }
+
+
+    /**
+     * Returns the content for the thermal print receipt
+     *
+     * @param  int  $business_id
+     * @param  int  $location_id
+     * @param  int  $transaction_id
+     * @param  string  $printer_type = null
+     * @return array
+     */
+    private function receiptContentForThermal(
+        $business_id,
+        $location_id,
+        $transaction_id,
+        $printer_type = null,
+        $is_package_slip = false,
+        $from_pos_screen = true,
+        $invoice_layout_id = null,
+        $is_delivery_note = false
+    ) {
+        $output = [
+            'is_enabled' => false,
+            'print_type' => 'browser',
+            'html_content' => null,
+            'printer_config' => [],
+            'data' => [],
+        ];
+
+        $business_details = $this->businessUtil->getDetails($business_id);
+        $location_details = BusinessLocation::find($location_id);
+
+        if ($from_pos_screen && $location_details->print_receipt_on_invoice != 1) {
+            return $output;
+        }
+        //Check if printing of invoice is enabled or not.
+        //If enabled, get print type.
+        $output['is_enabled'] = true;
+
+        $invoice_layout_id = ! empty($invoice_layout_id) ? $invoice_layout_id : $location_details->invoice_layout_id;
+        $invoice_layout = $this->businessUtil->invoiceLayout($business_id, $invoice_layout_id);
+
+        //Check if printer setting is provided.
+        $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
+
+        $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
+        $output['receipt_details'] = $receipt_details;
+        $currency_details = [
+            'symbol' => $business_details->currency_symbol,
+            'thousand_separator' => $business_details->thousand_separator,
+            'decimal_separator' => $business_details->decimal_separator,
+        ];
+        $receipt_details->currency = $currency_details;
+        $receipt_details->online_sale_payment = TransactionPayment::where('transaction_id', $transaction_id)->pluck('payment_collect_response')->first();
+        $receipt_details->register_number = CashRegister::select('register_number')->leftJoin('cash_register_transactions', 'cash_registers.id', '=', 'cash_register_transactions.cash_register_id')
+                                        ->where('transaction_id', $transaction_id)
+                                        ->pluck('register_number')
+                                        ->first();
+        
+        
+
+
+        $output['print_title'] = $receipt_details->invoice_no;
+        //If print type browser - return the content, printer - return printer config data, and invoice format config
+        $layout = 'sale_pos.receipts.thermal_print_for_sale_slip';
+        $output['html_content'] = view($layout, compact('receipt_details'))->render();
+
+        return $output;
+    }
+
 
     /**
      * Display the specified resource.
@@ -847,14 +1012,14 @@ class SellPosController extends Controller
     public function edit($id)
     {
         $business_id = request()->session()->get('user.business_id');
-
+        
         if (! (auth()->user()->can('superadmin') || auth()->user()->can('sell.update')
         || auth()->user()->can('edit_pos_payment')
          || ($this->moduleUtil->hasThePermissionInSubscription($business_id, 'repair_module') &&
          auth()->user()->can('repair.update')))) {
             abort(403, 'Unauthorized action.');
         }
-
+        
         //Check if the transaction can be edited or not.
         $edit_days = request()->session()->get('business.transaction_edit_days');
         if (! $this->transactionUtil->canBeEdited($id, $edit_days)) {
@@ -862,20 +1027,20 @@ class SellPosController extends Controller
                 ->with('status', ['success' => 0,
                     'msg' => __('messages.transaction_edit_not_allowed', ['days' => $edit_days]), ]);
         }
-
+        
         //Check if there is a open register, if no then redirect to Create Register screen.
         if ($this->cashRegisterUtil->countOpenedRegister() == 0) {
             return redirect()->action([\App\Http\Controllers\CashRegisterController::class, 'create']);
         }
-
+        
         //Check if return exist then not allowed
         if ($this->transactionUtil->isReturnExist($id)) {
-            return back()->with('status', ['success' => 0,
+            return redirect()->to(url('pos/create'))->with('status', ['success' => 0,
                 'msg' => __('lang_v1.return_exist'), ]);
         }
 
         $walk_in_customer = $this->contactUtil->getWalkInCustomer($business_id);
-
+        
         $business_details = $this->businessUtil->getDetails($business_id);
 
         $taxes = TaxRate::forBusinessDropdown($business_id, true, true);
@@ -884,7 +1049,7 @@ class SellPosController extends Controller
                             ->where('type', 'sell')
                             ->with(['price_group', 'types_of_service'])
                             ->findorfail($id);
-
+        
         $location_id = $transaction->location_id;
         $business_location = BusinessLocation::find($location_id);
         $payment_types = $this->productUtil->payment_types($business_location, true);
@@ -914,6 +1079,7 @@ class SellPosController extends Controller
                         ->leftjoin('units', 'units.id', '=', 'p.unit_id')
                         ->leftjoin('units as u', 'p.secondary_unit_id', '=', 'u.id')
                         ->where('transaction_sell_lines.transaction_id', $id)
+                        ->where('transaction_sell_lines.is_available', 1)
                         ->with(['warranties'])
                         ->select(
                             DB::raw("IF(pv.is_dummy = 0, CONCAT(p.name, ' (', pv.name, ':',variations.name, ')'), p.name) AS product_name"),
@@ -948,7 +1114,7 @@ class SellPosController extends Controller
                             'transaction_sell_lines.res_service_staff_id',
                             'units.id as unit_id',
                             'transaction_sell_lines.sub_unit_id',
-
+                            'transaction_sell_lines.res_line_order_status as res_line_order_status',
                             //qty_available not added when negative to avoid max quanity getting decreased in edit and showing error in max quantity validation
                             DB::raw('IF(vld.qty_available > 0, vld.qty_available + transaction_sell_lines.quantity, transaction_sell_lines.quantity) AS qty_available')
                         )
@@ -1065,8 +1231,7 @@ class SellPosController extends Controller
 
         //If brands, category are enabled then send else false.
         $categories = (request()->session()->get('business.enable_category') == 1) ? Category::catAndSubCategories($business_id) : false;
-        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)
-                    ->prepend(__('lang_v1.all_brands'), 'all') : false;
+        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)->prepend(__('lang_v1.all_brands'), 'all') : false;
 
         $change_return = $this->dummyPaymentLine;
 
@@ -1135,15 +1300,34 @@ class SellPosController extends Controller
         }else{
             $payment_device = null;
         }
+        $module_util = new ModuleUtil();
+        $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
+        $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
+        $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
+                                ->where('user_id', auth()->user()->id)
+                                ->whereNull('clock_out_time')
+                                ->first();
+
+        $register_details = $this->cashRegisterUtil->getCurrentCashRegister(auth()->user()->id);
+        //Register number get
+        $register_number = "";
+        if($register_details != null){
+            $register_number = $register_details->register_number;
+            /*
+            if($register_details->business_allowed_ip_id != ""){
+                $register_number = BusinessAllowedIP::where('id', $register_details->business_allowed_ip_id)->pluck('register_number')->first();
+            }
+            */
+        }
 
         return view('sale_pos.edit')
-            ->with(compact('business_details', 'taxes', 'payment_types', 'walk_in_customer',
+            ->with(compact('__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
             'commission_agent', 'categories', 'pos_settings', 'change_return', 'types', 'customer_groups',
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
             'shipping_statuses', 'warranties', 'sub_type', 'pos_module_data', 'invoice_schemes',
             'default_invoice_schemes', 'invoice_layouts', 'featured_products', 'customer_due',
-            'users', 'only_payment', 'payment_device'));
+            'users', 'only_payment', 'payment_device', 'register_number'));
     }
 
     /**
@@ -1193,6 +1377,16 @@ class SellPosController extends Controller
 
                 $sales_order_ids = $transaction_before->sales_order_ids ?? [];
 
+                if($input['send_to_kitchen'] == 1) {
+                    $t = Transaction::find($id);
+                    $t->res_order_status = null;
+                    $t->is_kitchen_again = 1;
+                    $t->update();
+                }
+
+                //Delete item if mark as not available
+                TransactionSellLine::where('transaction_id', $id)->where('is_available', 0)->delete();
+
                 //Add change return
                 $change_return = $this->dummyPaymentLine;
                 if (! empty($input['payment']['change_return'])) {
@@ -1230,6 +1424,32 @@ class SellPosController extends Controller
                     'discount_amount' => $input['discount_amount'],
                 ];
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+                
+                //Apply Gratuity
+                $business = Business::find($business_id);
+                $gratuity_charge_amount = 0;
+                if($business->business_type_id == 1){
+                    if($business->gratuity_settings != null){
+                        $gratuity_settings = json_decode($business->gratuity_settings, true);
+                        $gratuity_label = $gratuity_settings['label'];
+                        $gratuity_percentage = $gratuity_settings['percentage'];
+                        $gratuity_charge_amount = ($invoice_total['total_before_tax'] * $gratuity_percentage) / 100;
+                        $gratuity_charge_amount = sprintf('%0.2f', $gratuity_charge_amount);
+                        $input['gratuity_label'] = $gratuity_label;
+                        $input['gratuity_charge_percentage'] = $gratuity_percentage;
+                        $input['gratuity_charge_amount'] = $gratuity_charge_amount;
+                        $invoice_total['final_total'] = ($invoice_total['final_total'] + $gratuity_charge_amount);
+                    }
+                }
+
+                //Apply Tips
+                $tips_amount = 0;
+                if($request->has('tips_amount') && $request->filled('tips_amount')){
+                    $tips_amount = $request->tips_amount;
+                    $input['tips_amount'] = $tips_amount;
+                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $tips_amount);
+                }
+
 
                 if (! empty($request->input('transaction_date'))) {
                     $input['transaction_date'] = $this->productUtil->uf_date($request->input('transaction_date'), true);
@@ -1334,7 +1554,7 @@ class SellPosController extends Controller
 
                     return $output;
                 }
-
+                
                 //Begin transaction
                 DB::beginTransaction();
 
@@ -1386,7 +1606,7 @@ class SellPosController extends Controller
 
                 //Update Sell lines
                 $deleted_lines = $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id'], true, $status_before);
-
+                
                 //Update update lines
                 $is_credit_sale = isset($input['is_credit_sale']) && $input['is_credit_sale'] == 1 ? true : false;
 
@@ -1745,9 +1965,9 @@ class SellPosController extends Controller
                 $edit_discount = auth()->user()->can('edit_product_discount_from_pos_screen');
                 $edit_price = auth()->user()->can('edit_product_price_from_pos_screen');
             }
-
+            $dp_rules = $this->productUtil->getActiveDPRules($business_id);
             $output['html_content'] = view('sale_pos.product_row')
-                        ->with(compact('product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order', 'last_sell_line'))
+                        ->with(compact('dp_rules', 'product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order', 'last_sell_line'))
                         ->render();
         }
 
@@ -1783,7 +2003,7 @@ class SellPosController extends Controller
     {
         $output = [];
 
-        try {
+    //        try {
             $row_count = request()->get('product_row');
             $row_count = $row_count + 1;
             $quantity = request()->get('quantity', 1);
@@ -1821,12 +2041,12 @@ class SellPosController extends Controller
                     ->with(compact('product_ms', 'row_count'))->render();
                 }
             }
-        } catch (\Exception $e) {
-            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+        // } catch (\Exception $e) {
+        //     \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
-            $output['success'] = false;
-            $output['msg'] = __('lang_v1.item_out_of_stock');
-        }
+        //     $output['success'] = false;
+        //     $output['msg'] = __('lang_v1.item_out_of_stock');
+        // }
 
         return $output;
     }
@@ -2076,6 +2296,140 @@ class SellPosController extends Controller
 
             return view('sale_pos.partials.product_list')
                     ->with(compact('products', 'allowed_group_prices', 'show_prices'));
+        }
+    }
+
+
+
+    /**
+     * Get product by filter
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getProductByFilter(Request $request)
+    {
+        if ($request->ajax()) {
+            $category_id = $request->get('category_id');
+            $brand_id = $request->get('brand_id');
+            $location_id = $request->get('location_id');
+            $is_show_direct_product = $request->get('is_show_direct_product');
+
+            $check_qty = false;
+            $business_id = $request->session()->get('user.business_id');
+            $business = $request->session()->get('business');
+            $pos_settings = empty($business->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business->pos_settings, true);
+
+            $products = Variation::join('products as p', 'variations.product_id', '=', 'p.id')
+                ->join('product_locations as pl', 'pl.product_id', '=', 'p.id')
+                ->leftjoin(
+                    'variation_location_details AS VLD',
+                    function ($join) use ($location_id) {
+                        $join->on('variations.id', '=', 'VLD.variation_id');
+
+                        //Include Location
+                        if (! empty($location_id)) {
+                            $join->where(function ($query) use ($location_id) {
+                                $query->where('VLD.location_id', '=', $location_id);
+                                //Check null to show products even if no quantity is available in a location.
+                                //TODO: Maybe add a settings to show product not available at a location or not.
+                                $query->orWhereNull('VLD.location_id');
+                            });
+                        }
+                    }
+                )
+                ->where('p.business_id', $business_id)
+                ->where('p.type', '!=', 'modifier')
+                ->where('p.is_inactive', 0)
+                ->where('p.not_for_selling', 0)
+                //Hide products not available in the selected location
+                ->where(function ($q) use ($location_id) {
+                    $q->where('pl.location_id', $location_id);
+                });
+
+            //Include search
+            if (! empty($term)) {
+                $products->where(function ($query) use ($term) {
+                    $query->where('p.name', 'like', '%'.$term.'%');
+                    $query->orWhere('sku', 'like', '%'.$term.'%');
+                    $query->orWhere('sub_sku', 'like', '%'.$term.'%');
+                });
+            }
+
+            //Include check for quantity
+            if ($check_qty) {
+                $products->where('VLD.qty_available', '>', 0);
+            }
+
+            if (! empty($category_id) && ($category_id != 'all')) {
+                $products->where(function ($query) use ($category_id) {
+                    $query->where('p.category_id', $category_id);
+                    $query->orWhere('p.sub_category_id', $category_id);
+                });
+            }
+            if (! empty($brand_id) && ($brand_id != 'all')) {
+                $products->where('p.brand_id', $brand_id);
+            }
+
+            if (! empty($request->get('is_enabled_stock'))) {
+                $is_enabled_stock = 0;
+                if ($request->get('is_enabled_stock') == 'product') {
+                    $is_enabled_stock = 1;
+                }
+
+                $products->where('p.enable_stock', $is_enabled_stock);
+            }
+
+            if (! empty($request->get('repair_model_id'))) {
+                $products->where('p.repair_model_id', $request->get('repair_model_id'));
+            }
+
+            $products = $products->select(
+                'p.id as product_id',
+                'p.name',
+                'p.type',
+                'p.enable_stock',
+                'p.image as product_image',
+                'variations.id',
+                'variations.name as variation',
+                'VLD.qty_available',
+                'variations.default_sell_price as selling_price',
+                'variations.sub_sku',
+                'p.category_id',
+                'p.sub_category_id'
+            )
+            ->with(['media', 'group_prices'])
+            ->orderBy('p.name', 'asc')
+            ->get();
+
+            $price_groups = SellingPriceGroup::where('business_id', $business_id)->active()->pluck('name', 'id');
+
+            $allowed_group_prices = [];
+            foreach ($price_groups as $key => $value) {
+                if (auth()->user()->can('selling_price_group.'.$key)) {
+                    $allowed_group_prices[$key] = $value;
+                }
+            }
+
+            $show_prices = ! empty($pos_settings['show_pricing_on_product_sugesstion']);
+
+            /*
+            $subcategories = ($is_show_direct_product) ? [] : Category::where('parent_id', $category_id)->where('business_id', $business_id)->get()->toArray();
+            
+            if(!empty($subcategories)){
+                $category = Category::where('id', $category_id)->where('business_id', $business_id)->first();
+            }else{
+                $category = null;
+            }
+            
+            return view('sale_pos.partials.product_list')
+                    ->with(compact('products', 'allowed_group_prices', 'show_prices', 'subcategories', 'category'));
+            */
+
+            $subcategories = Category::where('parent_id', $category_id)->where('business_id', $business_id)->get()->toArray();
+            
+            return view('sale_pos.partials.product_list')
+                    ->with(compact('products', 'allowed_group_prices', 'show_prices', 'subcategories'));
         }
     }
 
@@ -3147,4 +3501,139 @@ class SellPosController extends Controller
 
         return ['success' => true];
     }
+
+    /**
+     * Function is use for verify 9 digits pin in pos screen.
+     */
+    public function saleReturnPinVerify(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('security_pin') && $request->filled('security_pin')){
+
+            if($request->security_pin == auth()->user()->security_pin){
+                return response()->json(['status' => true, 'message' => __('lang_v1.verified_success'), 'data' => '']);
+            }else{
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.security_pin_incorrect'), 'data' => '']);   
+            }
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_security_pin'), 'data' => '']);    
+        }
+    }
+
+    /**
+     * Function use for validate transaction invoice with check it is due or paid.
+     */
+    public function getSaleReturnInvoice(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('sale_return_invoice_number') && $request->filled('sale_return_invoice_number')){
+            
+            $business_id = request()->session()->get('user.business_id');
+
+            $invoice_number = $request->sale_return_invoice_number;
+            $is_exit_invoice = Transaction::select('id', 'payment_status', 'invoice_no')->where('invoice_no', $invoice_number)
+            ->where('payment_status', 'paid')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->first();
+
+            if($is_exit_invoice == null){
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.invoice_number_is_invalid'), 'data' => '']); 
+            }
+            
+            /*
+            if($is_exit_invoice->payment_status != "paid"){
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.invoice_payment_is_pending'), 'data' =>'']); 
+            }
+            */
+
+            $url = url('pos/'.$is_exit_invoice->id.'/edit?sale-return=1');
+            $array_res = array('redirect_url' => $url);
+            return response()->json(['status' => true, 'message' => "", 'data' => $array_res]); 
+
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_sale_return_invoice_number'), 'data' => '']);    
+        }
+    }
+
+
+    public function getPosPublic()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $business = Business::find($business_id);
+        return view('sale_pos.public')->with(compact('business'));
+    }
+
+    public function getDPRules() {
+        $business_id = request()->session()->get('user.business_id');
+        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+        return response()->json($dp_rules);
+    }
+
+    public function getProductVariation($business_id, $sku) {
+        $business_id = $business_id;
+        $product = \App\Product::where('sku', $sku)->where('business_id', $business_id)->first();
+		$variation = \App\Variation::where('product_id', $product->id)->first();
+        return response($variation, 200);
+    }
+    /**
+     * Function is use for verify 9 digits pin in pos screen.
+     */
+    public function securityPinVerify(Request $request){
+        if (! auth()->user()->can('sell.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if($request->has('security_pin') && $request->filled('security_pin')){
+
+            if($request->security_pin == auth()->user()->security_pin){
+                return response()->json(['status' => true, 'message' => __('lang_v1.verified_success'), 'data' => '']);
+            }else{
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.security_pin_incorrect'), 'data' => '']);   
+            }
+        }else{
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.validate_security_pin'), 'data' => '']);    
+        }
+    }
+
+    //That function is use for check the location is open on pos screen when location dropdown is change.
+    public function checkLocationIsOpen($location_id){
+        $user_id = auth()->user()->id;
+        $business_id = request()->session()->get('user.business_id');
+        $current_active_location_id = CashRegister::select('location_id')
+                                                ->where('user_id', $user_id)
+                                                ->where('business_id', $business_id)
+                                                ->where('closed_at', NULL)
+                                                ->where('status', 'open')
+                                                ->pluck('location_id')
+                                                ->first();
+        if($current_active_location_id == $location_id){
+            $data = array('is_popup_open' => 0, 'is_allowed_to_switch' => 0, 'active_location_id' => $current_active_location_id);
+            return response()->json(['status' => false, 'message' =>  __('lang_v1.success'), 'data' => $data]);   
+        }else{
+            $is_exit = CashRegister::select('id')
+                                    ->where('business_id', $business_id)
+                                    ->where('location_id', $location_id)
+                                    ->where('closed_at', NULL)
+                                    ->where('status', 'open')
+                                    ->pluck('id')
+                                    ->first();  
+            if($is_exit == null){
+                $data = array('is_popup_open' => 1, 'is_allowed_to_switch' => 1, 'active_location_id' => $current_active_location_id);
+                $active_location = BusinessLocation::select('id', 'name', 'location_id')->where('id', $current_active_location_id)->first();
+                $message = "Do you want to close Location: ".$active_location->name.' ('.$active_location->location_id.') and open new one ?';
+
+                return response()->json(['status' => true, 'message' =>  $message, 'data' => $data]);
+            }else{
+                $data = array('is_popup_open' => 1, 'is_allowed_to_switch' => 0, 'active_location_id' => $current_active_location_id);
+                return response()->json(['status' => false, 'message' =>  __('lang_v1.selected_location_is_open_to_another_machine'), 'data' => $data]);
+            }
+        }
+    }
+
+
 }

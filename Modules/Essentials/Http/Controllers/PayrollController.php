@@ -66,7 +66,7 @@ class PayrollController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $can_view_all_payroll = auth()->user()->can('essentials.view_all_payroll');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -180,7 +180,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module')) && ! auth()->user()->can('essentials.create_payroll')) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module')) && ! auth()->user()->can('essentials.create_payroll')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -313,7 +313,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module')) && ! auth()->user()->can('essentials.create_payroll')) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module')) && ! auth()->user()->can('essentials.create_payroll')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -441,7 +441,7 @@ class PayrollController extends Controller
     public function show($id)
     {
         $business_id = request()->session()->get('user.business_id');
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -518,7 +518,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || ! $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module')) && ! auth()->user()->can('essentials.update_payroll')) {
+        if (! (auth()->user()->can('superadmin') || ! $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module')) && ! auth()->user()->can('essentials.update_payroll')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -546,7 +546,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module')) && ! auth()->user()->can('essentials.update_payroll')) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module')) && ! auth()->user()->can('essentials.update_payroll')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -606,7 +606,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module')) && ! auth()->user()->can('essentials.delete_payroll')) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module')) && ! auth()->user()->can('essentials.delete_payroll')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -663,7 +663,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
-        if (! (auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -765,7 +765,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
-        if (! (auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -802,7 +802,7 @@ class PayrollController extends Controller
     public function getEditPayrollGroup($id)
     {
         $business_id = request()->session()->get('user.business_id');
-        if (! (auth()->user()->can('superadmin') || auth()->user()->can('essentials.update_payroll') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('essentials.update_payroll') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -875,7 +875,7 @@ class PayrollController extends Controller
     public function getUpdatePayrollGroup(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
-        if (! (auth()->user()->can('superadmin') || auth()->user()->can('essentials.update_payroll') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('essentials.update_payroll') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -940,7 +940,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
-        if (! (auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -983,7 +983,7 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
-        if (! (auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -1091,7 +1091,7 @@ class PayrollController extends Controller
     public function getMyPayrolls(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
-        if (! $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module')) {
+        if (! $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -1140,7 +1140,7 @@ class PayrollController extends Controller
     public function getEmployeesBasedOnLocation(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 

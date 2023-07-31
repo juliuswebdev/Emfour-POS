@@ -39,5 +39,8 @@ return [
     'leave_password_blank' => "Leave password field blank if you don't want to update password",
     'user_update_success' => 'User updated successfully',
     'user_delete_success' => 'User deleted successfully',
-    'leave_sale_return_pin_blank' => "Leave sale return pin field blank if you don't want to update pin"
+    'leave_security_pin_blank' => "Leave security pin field blank if you don't want to update pin",
+    'user_security_pin_exits' => "User security pin is exits. Please try another one.",
+    //'leave_sale_return_pin_blank' => "Leave security pin field blank if you don't want to update pin",
+    'leave_user_pin_blank' => "Leave user pin field blank if you don't want to update pin"
 ];

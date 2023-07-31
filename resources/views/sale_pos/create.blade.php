@@ -19,7 +19,7 @@
 	<div class="row mb-12">
 		<div class="col-md-12">
 			<div class="row">
-				<div class="@if(empty($pos_settings['hide_product_suggestion'])) col-md-7 @else col-md-10 col-md-offset-1 @endif no-padding pr-12">
+				<div class="@if(empty($pos_settings['hide_product_suggestion'])) col-md-7 @else col-md-10 col-md-offset-1 @endif no-padding pr-12 mo-padding-10">
 					<div class="box box-solid mb-12 @if(!isMobile()) mb-40 @endif">
 						<div class="box-body pb-0">
 							{!! Form::hidden('location_id', $default_location->id ?? null , ['id' => 'location_id', 'data-receipt_printer_type' => !empty($default_location->receipt_printer_type) ? $default_location->receipt_printer_type : 'browser', 'data-default_payment_accounts' => $default_location->default_payment_accounts ?? '']); !!}
@@ -115,6 +115,7 @@
 
 @include('restaurant.orders.checkout-modal')
 
+
 @if($business_details->business_type_id == 2)		
 	<div class="modal fade in" tabindex="-1" role="dialog" id="booking-checkout">
 		<div class="modal-dialog" role="document">
@@ -147,6 +148,92 @@
 	</div>
 @endif
 
+<div class="modal fade in" tabindex="-1" role="dialog" id="sale-return-modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+				<h4 class="modal-title">@lang('lang_v1.title_sale_return')</h4>
+			</div>
+			<div class="modal-body">
+				<!-- /.box-header -->
+				<div class="box-body">
+					<form action="{{ action('\App\Http\Controllers\SellPosController@saleReturnPinVerify') }}" class="form" method="post" id="frmSalePinVerify">
+						<label>@lang('lang_v1.enter_sale_return_9_digit_pin')*</label>
+						<div class="row">
+							<div class="col-md-10">
+								<input type="password" placeholder="@lang('lang_v1.enter_sale_return_9_digit_pin')" required="required" maxlength="9" minlength="4" name="security_pin" class="form-control">
+							</div>
+							<div class="col-md-2">
+								<button type="submit" class="btn btn-primary btn-verify-pin">@lang('lang_v1.verify')</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!-- /.box-body --> 
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade in" tabindex="-1" role="dialog" id="sale-return-invoice-modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+				<h4 class="modal-title">@lang('lang_v1.title_sale_return_invoice')</h4>
+			</div>
+			<div class="modal-body">
+				<!-- /.box-header -->
+				<div class="box-body">
+					<form action="{{ action('\App\Http\Controllers\SellPosController@getSaleReturnInvoice') }}" class="form" method="post" id="frmSaleReturnInvoiceVerify">
+						<label>@lang('lang_v1.enter_sale_return_invoice_number')*</label>
+						<div class="row">
+							<div class="col-md-10">
+								<input type="text" placeholder="@lang('lang_v1.enter_sale_return_invoice_number')" required="required" name="sale_return_invoice_number" class="form-control">
+							</div>
+							<div class="col-md-2">
+								<button type="submit" class="btn btn-primary btn-sale-return-invoice">@lang('lang_v1.submit')</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!-- /.box-body --> 
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<div class="modal fade in" tabindex="-1" role="dialog" id="security-pin-modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+				<h4 class="modal-title">@lang('lang_v1.title_security_pin')</h4>
+			</div>
+			<div class="modal-body">
+				<!-- /.box-header -->
+				<div class="box-body">
+					<form action="{{ action('\App\Http\Controllers\SellPosController@securityPinVerify') }}" class="form" method="post" id="frmSecurityPinVerify">
+						<label>@lang('lang_v1.enter_security_pin')*</label>
+						<div class="row">
+							<div class="col-md-10">
+								<input type="password" placeholder="@lang('lang_v1.enter_security_pin')" required="required" maxlength="9" minlength="4" name="security_pin" class="form-control">
+							</div>
+							<div class="col-md-2">
+								<button type="submit" class="btn btn-primary btn-verify-security-pin">@lang('lang_v1.verify')</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!-- /.box-body --> 
+			</div>
+		</div>
+	</div>
+</div>
 
 
 
@@ -194,10 +281,12 @@
 				showDeviceList($('#select_location_id').val());
 			})
 
+			/*
 			$('#select_location_id').change(function(){
 				showDeviceList($(this).val());
 			});
-
+			*/
+			
 			$(document).on('click', '.btn-select_device', function(){
 				var payment_device = $('input[name="payment_device"]:checked').val();
 				var device_name = $('label[for="d_'+payment_device+'"]').text();
@@ -232,6 +321,161 @@
 				$('.modal-backdrop').remove();
                 enable_pos_form_actions();
 			})
+
+			//Sale Return click event
+			$(document).on('click', '.sale-return', function(){
+				$('#sale-return-modal').modal('show');
+			})
+
+			//Verify Sale Return to Server Side
+			$("#frmSalePinVerify").validate({
+				errorElement: 'span',
+				errorPlacement: function (error, element) {
+					error.addClass('invalid-feedback');
+					element.closest('.form-group').append(error);
+					if (element.hasClass('select2')) {
+						error.insertAfter(element.parent().find('span.select2'));
+					} else if (element.parent('.input-group').length ||
+						element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
+						error.insertAfter(element.parent());
+					} else {
+						error.insertAfter(element);
+					}
+				},
+				highlight: function (element, errorClass, validClass) {
+					$(element).addClass('is-invalid').removeClass('is-valid');
+				},
+				unhighlight: function (element, errorClass, validClass) {
+					$(element).removeClass('is-invalid').addClass('is-valid');
+				},
+				focusInvalid: true,
+				submitHandler: function (form) {
+					$.ajax({
+						url: $('#frmSalePinVerify').attr('action'),
+						type: "POST",
+						headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+						data: new FormData(form),
+						contentType: false,
+						cache: false,
+						processData: false,
+						success: function (res) {
+							if(res.status == true){
+								$('#sale-return-modal').modal('hide');
+								$('#frmSalePinVerify')[0].reset();
+								$('#sale-return-invoice-modal').modal('show');
+								toastr.success(res.message);	
+							}else{
+								toastr.error(res.message);	
+							}
+						},
+					});
+				}
+			});
+
+			//Check Invoice Number is Exit or Not & Return the Redirect URL
+			$("#frmSaleReturnInvoiceVerify").validate({
+				errorElement: 'span',
+				errorPlacement: function (error, element) {
+					error.addClass('invalid-feedback');
+					element.closest('.form-group').append(error);
+					if (element.hasClass('select2')) {
+						error.insertAfter(element.parent().find('span.select2'));
+					} else if (element.parent('.input-group').length ||
+						element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
+						error.insertAfter(element.parent());
+					} else {
+						error.insertAfter(element);
+					}
+				},
+				highlight: function (element, errorClass, validClass) {
+					$(element).addClass('is-invalid').removeClass('is-valid');
+				},
+				unhighlight: function (element, errorClass, validClass) {
+					$(element).removeClass('is-invalid').addClass('is-valid');
+				},
+				focusInvalid: true,
+				submitHandler: function (form) {
+					$.ajax({
+						url: $('#frmSaleReturnInvoiceVerify').attr('action'),
+						type: "POST",
+						headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+						data: new FormData(form),
+						contentType: false,
+						cache: false,
+						processData: false,
+						success: function (res) {
+							if(res.status == true){
+								$('#sale-return-invoice-modal').modal('hide');
+								$('#frmSaleReturnInvoiceVerify')[0].reset();
+								//console.log(res.data.redirect_url);
+								window.location.href = res.data.redirect_url;
+							}else{
+								toastr.error(res.message);	
+							}
+						},
+					});
+				}
+			});
+
+
+			//Validate security pin for add expance
+			$("#frmSecurityPinVerify").validate({
+				errorElement: 'span',
+				errorPlacement: function (error, element) {
+					error.addClass('invalid-feedback');
+					element.closest('.form-group').append(error);
+					if (element.hasClass('select2')) {
+						error.insertAfter(element.parent().find('span.select2'));
+					} else if (element.parent('.input-group').length ||
+						element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
+						error.insertAfter(element.parent());
+					} else {
+						error.insertAfter(element);
+					}
+				},
+				highlight: function (element, errorClass, validClass) {
+					$(element).addClass('is-invalid').removeClass('is-valid');
+				},
+				unhighlight: function (element, errorClass, validClass) {
+					$(element).removeClass('is-invalid').addClass('is-valid');
+				},
+				focusInvalid: true,
+				submitHandler: function (form) {
+
+					$.ajax({
+						url: $('#frmSecurityPinVerify').attr('action'),
+						type: "POST",
+						headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+						data: new FormData(form),
+						contentType: false,
+						cache: false,
+						processData: false,
+						success: function (res) {
+							if(res.status == true){
+								$('#security-pin-modal').modal('hide');
+								$('#frmSecurityPinVerify')[0].reset();
+								toastr.success(res.message);	
+								//Call the ajax for open add expance popup.
+								$.ajax({
+									url: '/expenses/create',
+									data: { 
+										location_id: $('#select_location_id').val()
+									},
+									dataType: 'html',
+									success: function(result) {
+										$('#expense_modal').html(result);
+										$('#expense_modal').modal('show');
+									},
+								});
+							}else{
+								toastr.error(res.message);	
+							}
+						},
+					});
+				}
+			});
+
+			
 
 		})
 	</script>

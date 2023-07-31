@@ -108,9 +108,14 @@ return [
     'is_active' => 'Active',
     'created_by' => 'Created By',
     'your_device_is_offline' => 'Your device is offline, Please turn on the device.',
-    'sale_return_pin' => 'Sale Return 9 Digits Pin',
     'digits_pin' => 'Digits Pin',
     'sucess_pin' => 'Success',
-    'invalid_pin' => 'Inalid Pin',
-    'user_no_pin' => 'User doesn\'t have PIN'
+    'invalid_pin' => 'Please Enter Invalid Security Pin',
+    'user_no_pin' => 'User doesn\'t have PIN',
+    'security_pin' => 'Security Pin',
+    'sale_return_pin' => 'Sale Return Pin',
+    'user_pin' => 'User Pin',
+    'enable_ip_restriction' => 'Enable IP Restriction',
+    'not_allowed_to_access_cico' => 'Not allowed to access clock in clock out.',
+    'register_number' => 'Register Number'
 ];

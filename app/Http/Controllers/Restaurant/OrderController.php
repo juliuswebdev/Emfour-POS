@@ -57,19 +57,27 @@ class OrderController extends Controller
         $line_orders = [];
         if ($this->restUtil->is_service_staff($user_id)) {
             $is_service_staff = true;
-            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => $user_id]);
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => $user_id, 'orders_for' => 'waiter']);
 
-            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => $user_id]);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => $user_id, 'orders_for' => 'waiter']);
         } elseif (! empty(request()->service_staff)) {
-            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => request()->service_staff]);
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => request()->service_staff, 'orders_for' => 'waiter']);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => request()->service_staff, 'orders_for' => 'waiter']);
 
-            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => request()->service_staff]);
+        } else if ( empty(request()->service_staff) ) {
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => 'all', 'orders_for' => 'waiter']);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => 'all', 'orders_for' => 'waiter']);
+
+        }
+
+        if(request()->service_staff == 'all') {
+            $orders = $this->restUtil->getAllOrders($business_id, ['waiter_id' => 'all', 'orders_for' => 'waiter']);
+            $line_orders = $this->restUtil->getLineOrders($business_id, ['waiter_id' => 'all', 'orders_for' => 'waiter']);
         }
 
         if (! $is_service_staff) {
             $service_staff = $this->restUtil->service_staff_dropdown($business_id);
         }
-
         return view('restaurant.orders.index', compact('orders', 'is_service_staff', 'service_staff', 'line_orders', 'business_details'));
     }
 
@@ -96,6 +104,11 @@ class OrderController extends Controller
             }
 
             $query->update(['res_line_order_status' => 'served']);
+            
+            //Update the order status
+            Transaction::where('id', $id)->where('business_id', $business_id)->update([
+                'res_order_status' => 'served'
+            ]);
 
             $output = ['success' => 1,
                 'msg' => trans('restaurant.order_successfully_marked_served'),
@@ -119,17 +132,69 @@ class OrderController extends Controller
      */
     public function updateServed($stage, $id, $product_id){
         try {
-            $business_id = request()->session()->get('user.business_id');
-            $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
-                        ->where('t.business_id', $business_id)
-                        ->where('transaction_id', $id)
-                        ->where('product_id', $product_id)
-                        ->update([$stage => date('Y-m-d H:i:s')]);
 
-            $output = [
-                'success' => 1,
-                'msg' =>  __('lang_v1.order_item_served_message'),
-            ];
+            $undo_stage_label = $stage;
+            $update_table = true;
+
+            $res_line_order_status = null;
+            if($stage == 'cook_start') {
+                $res_line_order_status = 'cooking';
+            } else if($stage == 'cook_end') {
+                $res_line_order_status = 'cooked';
+            } else if($stage == 'served_at') {
+                $res_line_order_status = 'ready';
+            }
+
+            $date = date('Y-m-d H:i:s');
+            if(in_array($stage, ['served_at_undo'])) {
+                $date = null;
+            }
+            $stage = str_replace('_undo', '', $stage);
+
+            $business_id = request()->session()->get('user.business_id');
+
+            if(in_array($undo_stage_label, ['served_at_undo'])) {
+                $business_details = $this->businessUtil->getDetails($business_id);
+                $order_undo_timeframe_in_sec = $business_details->order_screen_button_undo_timeframe;
+                $current_time_in_sec = strtotime(\Carbon::now());
+
+                $cook_activity_time = TransactionSellLine::select($stage)->leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                            ->where('t.business_id', $business_id)
+                            ->where('transaction_id', $id)
+                            ->where('product_id', $product_id)
+                            ->pluck($stage)
+                            ->first();
+                $cook_activity_time = strtotime($cook_activity_time);
+                $time_of_different = ($current_time_in_sec - $cook_activity_time);
+                                    
+                if($time_of_different > $order_undo_timeframe_in_sec) {
+                    $update_table = false;
+                }else{
+                    $update_table = true;
+                }
+            }
+
+
+            if($update_table){
+                $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                            ->where('t.business_id', $business_id)
+                            ->where('transaction_id', $id)
+                            ->where('product_id', $product_id)
+                            ->update([
+                                $stage => $date,
+                                'res_line_order_status' => $res_line_order_status
+                            ]);
+
+                $output = [
+                    'success' => 1,
+                    'msg' =>  __('lang_v1.order_item_served_message'),
+                ];
+            }else{
+                $output = [
+                    'success' => 0,
+                    'msg' => __('lang_v1.you_can_not_undo_cooking_activity'),
+                ];
+            }
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
             $output = ['success' => 0,
@@ -250,8 +315,13 @@ class OrderController extends Controller
     public function userCheckHasPin(Request $request)
     {
         $user_id = $request->input('user_id');
-        $user = User::where('id', $user_id)->first();
-        if($user->sale_return_pin) {
+        if($user_id == null){
+            $user = User::where('id', auth()->user()->id)->first();
+        }else{
+            $user = User::where('id', $user_id)->first();
+        }
+       
+        if(isset($user->security_pin)) {
             $output = [
                 'success' => true
             ];
@@ -268,8 +338,11 @@ class OrderController extends Controller
     {
 
         $user_id = $request->input('user_id');
+        if($user_id == null){
+            $user_id = auth()->user()->id;
+        }
         $pin = $request->input('pin');
-        $user = User::where('id', $user_id)->where('sale_return_pin', $pin)->first();
+        $user = User::where('id', $user_id)->where('security_pin', $pin)->first();
 
         if($user) {
             $output = [

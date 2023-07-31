@@ -86,6 +86,12 @@
 		<!-- Invoice  number, Date  -->
 		<p style="width: 100% !important" class="word-wrap">
 			<span class="pull-left text-left word-wrap">
+				@isset($receipt_details->register_number)
+					<b>@lang('business.register_number')</b>
+					{{  $receipt_details->register_number }}
+					<br>
+				@endisset
+				
 				@if(!empty($receipt_details->invoice_no_prefix))
 					<b>{!! $receipt_details->invoice_no_prefix !!}</b>
 				@endif
@@ -402,6 +408,7 @@
 				@endforeach
 			@endif
 
+			
 			<!-- Total Paid-->
 			@if(!empty($receipt_details->total_paid))
 				<tr>
@@ -472,6 +479,32 @@
 							{{$receipt_details->subtotal}}
 						</td>
 					</tr>
+
+
+					<!-- Gratuity Amount-->
+					@if( ($receipt_details->gratuity_unformatted_charges > 0) && ($receipt_details->gratuity_label != "") )
+						<tr>
+							<th style="width:70%">
+								{!! $receipt_details->gratuity_label.' ('.$receipt_details->gratuity_percentage.'%)' !!}:
+							</th>
+							<td class="text-right">
+								{{$receipt_details->gratuity_charges}}
+							</td>
+						</tr>
+					@endif
+
+					<!-- Tips Amount-->
+					@if($receipt_details->tips_unformatted_amount > 0)
+						<tr>
+							<th style="width:70%">
+								@lang('lang_v1.tips'):
+							</th>
+							<td class="text-right">
+								{{$receipt_details->tips_amount}}
+							</td>
+						</tr>
+					@endif
+
 					@if(!empty($receipt_details->total_exempt_uf))
 					<tr>
 						<th style="width:70%">
@@ -530,6 +563,8 @@
 						</tr>
 					@endif
 
+
+
 					@if( !empty($receipt_details->additional_expenses) )
 						@foreach($receipt_details->additional_expenses as $key => $val)
 							<tr>
@@ -578,6 +613,24 @@
 							</td>
 						</tr>
 					@endif
+					
+					@if( !empty($receipt_details->dp_discount) )
+						@php
+							$dp_discount = json_decode($receipt_details->dp_discount);
+						@endphp
+						@if($dp_discount)
+							@foreach($dp_discount as $item)
+								<tr class="flex-box">
+									<th class="sub-headings">
+										{!! $item->label !!}
+									</th>
+									<td class="text-right">
+										{{$item->discount}}
+									</td>
+							</tr>
+							@endforeach
+						@endif
+					@endif
 
 					<!-- Total -->
 					<tr>
@@ -592,6 +645,9 @@
 							@endif
 						</td>
 					</tr>
+
+
+
 				</tbody>
         	</table>
         </div>

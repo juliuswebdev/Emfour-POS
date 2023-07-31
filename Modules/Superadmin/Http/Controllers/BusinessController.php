@@ -16,6 +16,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Modules\Superadmin\Entities\Package;
+use Modules\Superadmin\Entities\Subscription;
 use Modules\Superadmin\Notifications\PasswordUpdateNotification;
 use Spatie\Permission\Models\Permission;
 use Yajra\DataTables\Facades\DataTables;
@@ -322,6 +323,7 @@ class BusinessController extends BaseController
                 $subscription = $this->_add_subscription($business->id, $subscription_details['package_id'], $subscription_details['paid_via'], $subscription_details['payment_transaction_id'], $request->session()->get('user.id'), true);
             }
 
+
             DB::commit();
 
             //Module function to be called after after business is created
@@ -355,18 +357,33 @@ class BusinessController extends BaseController
      */
     public function show($business_id)
     {
+        
         if (! auth()->user()->can('superadmin')) {
             abort(403, 'Unauthorized action.');
         }
-
+        
         $business = Business::with(['currency', 'locations', 'subscriptions', 'owner', 'business_type'])->find($business_id);
         
         $created_id = $business->created_by;
 
         $created_by = ! empty($created_id) ? User::find($created_id) : null;
 
+        $modules = $this->moduleUtil->availableModules();
+        $permissions = $this->moduleUtil->getModuleData('superadmin_package', true);
+        
+        //Inject HRIS Module
+        $permissions['HRIS/Payroll'][0]['name'] = "hris_module";
+        $permissions['HRIS/Payroll'][0]['label'] = "HRIS/Payroll Module";
+        
+        //Inject Dynamic Price Permission
+        $permissions['DynamicPrice'][0]['name'] = "dynamic_price_module";
+        $permissions['DynamicPrice'][0]['label'] = "Dynamic Pricing Module";
+        
+        $subscription = Subscription::where('business_id', $business_id)->first();
+        
+        
         return view('superadmin::business.show')
-            ->with(compact('business', 'created_by'));
+            ->with(compact('business', 'modules', 'permissions', 'subscription', 'created_by'));
     }
 
     /**
@@ -558,4 +575,46 @@ class BusinessController extends BaseController
 
         return $output;
     }
+
+
+    public function updateModules(Request $request, $id)
+    {
+        $business = Business::find($id);
+        $business->enabled_modules = $request->input('enabled_modules');
+        $business->update();
+        
+        $subscription = Subscription::where('business_id', $business->id)->first();
+  
+        $package = Package::find($subscription->package_id);
+
+        $package_details_arr = [
+            'location_count' => $package->location_count,
+            'user_count' => $package->user_count,
+            'product_count' => $package->product_count,
+            'invoice_count' => $package->invoice_count,
+            'name' => $package->name,
+        ];
+
+        if($request->input('custom_permissions') == null){
+            $package_details = $package_details_arr;
+        }else{
+            $package_details = array_merge($package_details_arr, $request->input('custom_permissions'));
+        }
+        $subscription->package_details = $package_details;
+        $subscription->custom_permissions_super_admin = $request->input('custom_permissions');
+        $subscription->update();
+
+       return redirect()->back();
+
+    }
+
+    public function updateSettings(Request $request, $id)
+    {
+        $business = Business::find($id);
+        $business->card_charge = $request->input('card_charge');
+        $business->update();
+        return redirect()->back();
+    }
+
+
 }

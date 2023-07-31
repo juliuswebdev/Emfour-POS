@@ -1368,9 +1368,25 @@ table.table-text-center td, table.table-text-center th{
 
 .status-inline-block {
   display: inline-block;
+  vertical-align: top;
   margin-right: 5px;
+  margin-top: 0!important;
 }
 
 .status-inline-block .fs-12 {
   font-size: 80%;
+}
+
+.clock_in_btn {
+  margin-left: 25px;
+  background-color: #1e8659!important;
+}
+.clock_out_btn {
+  margin-right: 40px;
+}
+.clock_in_btn:disabled,
+.clock_out_btn:disabled {
+  background-color: #d2d6de !important;
+  border: 1px solid #7f7f7f;
+  color: #000!important;
 }

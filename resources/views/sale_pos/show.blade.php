@@ -20,7 +20,20 @@
         }
       @endphp
       <div class="@if(!empty($export_custom_fields)) col-sm-3 @else col-sm-4 @endif">
-        <b>@if($sell->type == 'sales_order') {{ __('restaurant.order_no') }} @else {{ __('sale.invoice_no') }} @endif:</b> #{{ $sell->invoice_no }}<br>
+        @isset($register_number)
+        <b>
+          {{ __('business.register_number') }}:
+          </b>{{ $register_number }}
+          <br>
+        <b>    
+        @endisset
+        
+        @if($sell->type == 'sales_order') 
+          {{ __('restaurant.order_no') }} 
+          @else 
+          <b>{{ __('sale.invoice_no') }}</b> 
+          @endif:</> #{{ $sell->invoice_no }}
+          <br>
         <b>{{ __('sale.status') }}:</b> 
           @if($sell->status == 'draft' && $sell->is_quotation == 1)
             {{ __('lang_v1.quotation') }}
@@ -268,6 +281,49 @@
               <td></td>
               <td><span class="display_currency pull-right" data-currency_symbol="true">{{ $sell->total_before_tax }}</span></td>
             </tr>
+
+            <!-- Gratuity Amount -->
+            @if( ($sell->gratuity_charge_amount > 0) && ($sell->gratuity_label != "") )
+            <tr>
+              <th>{!! $sell->gratuity_label.' ('.$sell->gratuity_charge_percentage.'%)' !!}: </th>
+              <td><b>(+)</b></td>
+              <td><span class="display_currency pull-right" data-currency_symbol="true">{{ $sell->gratuity_charge_amount }}</span></td>
+            </tr>
+            @endif
+
+            <!-- Tips Amount-->
+            @if($sell->tips_amount > 0)
+            <tr>
+              <th>@lang('lang_v1.tips'): </th>
+              <td><b>(+)</b></td>
+              <td>
+                <span class="display_currency pull-right" data-currency_symbol="true">
+                  {{$sell->tips_amount}}
+                </span>
+              </td>
+            </tr>
+            @endif
+
+
+            @if( !empty($sell->dp_discount) )
+              @php
+                $dp_discount = json_decode($sell->dp_discount);
+              @endphp
+              @if($dp_discount)
+                @foreach($dp_discount as $item)
+                  <tr class="flex-box">
+                    <th>
+                      {!! $item->label !!}:
+                    </th>
+                    <td></td>
+                    <td class="text-right">
+                      {{$item->discount}}
+                    </td>
+                  </tr>
+                @endforeach
+              @endif
+            @endif
+
             <tr>
               <th>{{ __('sale.discount') }}:</th>
               <td><b>(-)</b></td>

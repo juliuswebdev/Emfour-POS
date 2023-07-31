@@ -9222,20 +9222,24 @@ background-image: linear-gradient(to right, #3c3c4e, #245b80);
 
 .de-total-amount{
   display: flex !important;
-  margin: 10px 0px 20px 0px !important;
+  /* margin: 10px 0px 20px 0px !important;
   padding: 25px !important;
   width: 20%;
-  flex-direction: row;
+  flex-direction: row; */
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 .de-total-amount.pos-total span.text{
-  width: 100%;
-  font-size: 24px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #000;
+  width: 100% !important;
 }
 .de-total-amount.pos-total span.number{
-  font-size: 40px;
-  padding-left: 20px;
+  font-size: 16px;
+  padding-left: 15px;
+  color: #000;
+  font-weight: 900;
 }
 button#pos-cancel{
   padding: 9px 10px 5px 10px;
@@ -9247,6 +9251,182 @@ button#pos-cancel{
 
 .modal-backdrop #card-payment-close{
   margin-top: 10px;
+}
+
+.pos-form-actions .pos-total {
+  display: block;
+  padding: 0px !important;
+  vertical-align: unset;
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+
+.category_box{
+  background: #fff;
+  border-radius: 5px;
+  width: 100%;
+  cursor: pointer;
+  margin-bottom: 10px;
+  background: antiquewhite;
+}
+
+.category_box .image-container{
+  margin: auto;
+  width: 100%;
+  padding-top: 15px;
+}
+
+.category_box .image-container, img{
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.category_box .text_div{
+  text-align: center;
+  padding-bottom: 10px;
+  margin-top: 20px;
+  height: 47px;
+
+}
+
+.category_box .text_div .text{
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.back-btn-wrapper button:hover, .back-btn-wrapper button:focus{
+  color: #fff;
+}
+
+.back-btn-wrapper button{
+  margin-bottom: 10px;
+  padding: 5px 12px;
+  font-size: 12px;
+} 
+
+#product_list_body .product_box{
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#product_list_body .product_list{
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.subcategory-wrapper{
+  width:100%;
+}
+
+.product_box .image-container{
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-repeat: initial !important;
+}
+
+#category-list-wrapper, #subcategory-list-wrapper{
+  max-height: 75vh;
+  overflow-y: scroll;
+}
+
+#product_list_body {
+  max-height: 75vh !important;
+  overflow-y: scroll !important;
+}
+.subcategory-box .category_box{
+  background: aliceblue;
+}
+
+.clock-inout-btn-wrapper{
+  padding-left: 20px;
+  padding-bottom: 10px;
+}
+
+.font-weight-bold{
+  font-weight: bold;
+}
+
+#clock_in_clock_out_modal .modal-header{
+  border-bottom: none;
+}
+
+#clock_in_clock_out_modal .modal-footer{
+  border-top: none;
+}
+
+#clock_in_clock_out_modal .modal-content{
+  border-radius: 20px;
+  background: darkturquoise;
+  color: #000;
+}
+
+#clock_in_clock_out_modal .mf-title{
+  margin: 0px 0px 5px 0px;
+}
+
+#clock_in_clock_out_modal .mf-input-wrapper{
+  padding: 5% 15%;
+}
+
+#clock_in_clock_out_modal .mf-input-wrapper .input-pin{
+  height: 50px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#clock_in_clock_out_modal  .grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  margin-top: 10px;
+}
+#clock_in_clock_out_modal  .grid-item {
+  padding: 18px;
+  font-size: 30px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+#clock_in_clock_out_modal  .grid-item .circle{
+  width: 70px;
+  height: 70px;
+  background: #000;
+  color: #fff;
+  border-radius: 50%;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#clock_in_clock_out_modal .cl-co-action{
+padding: 13%;
+display: flex;
+justify-content: space-between;
+}
+
+.shift-text-wrapper{
+  text-align: left;
+}
+.shift-table .thead-light tr th{
+  text-align: center;
+}
+.hrm-essentials .pos-tab-content{
+  height:400px;
+}
+
+.custom-p-0{
+  padding:0px !important;
+}
+.c-font-size-18{
+  font-size: 18px;
+}
+.invoice-info{
+  margin-bottom: 15px;
 }
 /*!
  * FullCalendar v3.10.2

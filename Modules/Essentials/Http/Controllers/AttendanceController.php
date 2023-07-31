@@ -3,6 +3,9 @@
 namespace Modules\Essentials\Http\Controllers;
 
 use App\User;
+use App\Business;
+use App\BusinessLocation;
+use App\BusinessAllowedIP;
 use App\Utils\ModuleUtil;
 use DB;
 use Excel;
@@ -44,7 +47,7 @@ class AttendanceController extends Controller
     public function index()
     {
         $business_id = request()->session()->get('user.business_id');
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
         $can_crud_all_attendance = auth()->user()->can('essentials.crud_all_attendance');
@@ -178,7 +181,7 @@ class AttendanceController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module')) && ! $is_admin) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module')) && ! $is_admin) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -198,7 +201,7 @@ class AttendanceController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module') || $is_admin)) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module') || $is_admin)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -255,7 +258,7 @@ class AttendanceController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module') || $is_admin)) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module') || $is_admin)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -277,7 +280,7 @@ class AttendanceController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module') || $is_admin)) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module') || $is_admin)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -314,7 +317,7 @@ class AttendanceController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -346,7 +349,7 @@ class AttendanceController extends Controller
     {
         $business_id = $request->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -363,31 +366,78 @@ class AttendanceController extends Controller
             ];
         }
 
+        //Check IP address validate
+        /*
+        $is_exit_ip = BusinessAllowedIP::select('id')
+                        ->where('business_id', $business_id)
+                        ->where('ip_address',  $this->getClientIp())->first();
+        if($is_exit_ip == null)
+        {
+            return [
+                'success' => false,
+                'msg' => __('lang_v1.not_access_clockin_clockout'),
+            ];
+        }
+        */
+
+        //Check Input Pin exit In Our user table
+        $input_user_pin = $request->input('user_pin');
+        $user = User::with('business')->where('security_pin', $input_user_pin)->first();
+        if($user == null){
+            return [
+                'success' => false,
+                'msg' => __('business.invalid_pin'),
+            ];
+        }
+
         try {
-            $type = $request->input('type');
+            
+            $user->role = $user->getRoleNames()->first();
+            if($request->has('cico_action') && $request->filled('cico_action')){
+                $type = $request->input('cico_action');
 
-            if ($type == 'clock_in') {
-                $data = [
-                    'business_id' => $business_id,
-                    'user_id' => auth()->user()->id,
-                    'clock_in_time' => \Carbon::now(),
-                    'clock_in_note' => $request->input('clock_in_note'),
-                    'ip_address' => $this->moduleUtil->getUserIpAddr(),
-                    'clock_in_location' => $request->input('clock_in_out_location'),
+                if ($type == 'clock_in') {
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => $user->id,
+                        'clock_in_time' => \Carbon::now(),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        //'clock_in_note' => $request->input('clock_in_note'),
+                        //'clock_in_location' => $request->input('clock_in_out_location'),
+                    ];
+
+                    $output = $this->essentialsUtil->clockin($data, $settings);
+                    if(isset($output['current_shift'])){
+                        $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                    }else{
+                        $output['current_shift'] = "";
+                    }
+                }else{
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => $user->id,
+                        'clock_out_time' => \Carbon::now(),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        //'clock_out_note' => $request->input('clock_out_note'),
+                        //'clock_out_location' => $request->input('clock_in_out_location'),
+                    ];
+                    $output = $this->essentialsUtil->clockout($data, $settings);
+                    if(isset($output['current_shift'])){
+                        $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                    }else{
+                        $output['current_shift'] = "";
+                    }
+                }
+            }else{
+                $output = [
+                    'success' => true,
+                    'msg' => "",
+                    'data' => $user
                 ];
-
-                $output = $this->essentialsUtil->clockin($data, $settings);
-            } elseif ($type == 'clock_out') {
-                $data = [
-                    'business_id' => $business_id,
-                    'user_id' => auth()->user()->id,
-                    'clock_out_time' => \Carbon::now(),
-                    'clock_out_note' => $request->input('clock_out_note'),
-                    'clock_out_location' => $request->input('clock_in_out_location'),
-                ];
-
-                $output = $this->essentialsUtil->clockout($data, $settings);
             }
+
+            
+        
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
@@ -400,6 +450,33 @@ class AttendanceController extends Controller
         return $output;
     }
 
+
+    // Get real visitor IP behind CloudFlare network
+    public function getClientIp() {
+        if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
+                $_SERVER['REMOTE_ADDR'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+                $_SERVER['HTTP_CLIENT_IP'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+        }
+        $client  = @$_SERVER['HTTP_CLIENT_IP'];
+        $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+        $remote  = $_SERVER['REMOTE_ADDR'];
+
+        if(filter_var($client, FILTER_VALIDATE_IP))
+        {
+        $ip = $client;
+        }
+        elseif(filter_var($forward, FILTER_VALIDATE_IP))
+        {
+        $ip = $forward;
+        }
+        else
+        {
+        $ip = $remote;
+        }
+
+        return $ip;
+    }
+
     /**
      * Function to get attendance summary of a user
      *
@@ -409,7 +486,7 @@ class AttendanceController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -486,7 +563,7 @@ class AttendanceController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module') || $is_admin)) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module') || $is_admin)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -536,7 +613,7 @@ class AttendanceController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module') || $is_admin)) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module') || $is_admin)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -582,7 +659,7 @@ class AttendanceController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module') || $is_admin)) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module') || $is_admin)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -698,7 +775,7 @@ class AttendanceController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
 
-        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module') || $is_admin)) {
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hris_module') || $is_admin)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -719,4 +796,140 @@ class AttendanceController extends Controller
 
         return view('essentials::attendance.attendance_row')->with(compact('attendance', 'shifts', 'user'));
     }
+
+    public function getEmployeeClockInOut($slug, $location_id) {
+
+        $business = Business::where('slug', $slug)->first();
+        $allowed = false;
+        if($business) {
+            $location = BusinessLocation::where('business_id', $business->id)->where('location_id', $location_id)->first();
+            if($location) {
+                $business_allowed_ips = BusinessAllowedIP::where('business_id', $business->id)->where('location_id', $location->id)->get();
+                
+                $clientIP = \Request::getClientIp(true);
+                
+                $whitelist_ips = [];
+                foreach($business_allowed_ips as $item) {
+                    $ip = $item->ip_address;
+                    array_push($whitelist_ips, $ip);
+                }
+                
+                $client_ip = $clientIP;
+                $allowed = false;
+
+                if(in_array($client_ip, $whitelist_ips)) {
+                    $allowed = true;
+                }
+            }
+        }
+        if($allowed) {
+            return view('essentials::attendance.employee_clockinout')->with(compact('business', 'location_id'));
+        } else {
+            echo 'Invalid IP Address';
+        }
+    }
+
+    public function employeeClockInClockOut(Request $request, $slug, $location_id)
+    {
+    
+        $business = Business::where('slug', $slug)->first();
+        $business_id = $business->id;
+        
+        $settings = [];
+
+        //Check Input Pin exit In Our user table
+        $input_user_pin = $request->input('user_pin');
+        $user = User::with('business')->where('security_pin', $input_user_pin)->first();
+        if($user == null){
+            return [
+                'success' => false,
+                'msg' => __('business.invalid_pin'),
+            ];
+        }
+        
+
+        //Check for business validation
+        if($user->business->id != $business_id){
+            return [
+                'success' => false,
+                'msg' => __('business.not_allowed_to_access_cico'),
+            ];
+        }
+
+        //Check business location validation
+        $business_location_id = BusinessLocation::where('business_id', $business_id)->where('location_id', $location_id)->pluck('id')->first();
+        $access_all_locations = $user->hasPermissionTo('access_all_locations');
+        if($access_all_locations == false){
+            $check_specific_business_location = $user->hasPermissionTo('location.'.$business_location_id);
+            if($check_specific_business_location == false){
+                return [
+                    'success' => false,
+                    'msg' => __('business.not_allowed_to_access_cico'),
+                ];
+            }
+        }
+        
+        
+
+        try {
+            
+            $user->role = $user->getRoleNames()->first();
+            if($request->has('cico_action') && $request->filled('cico_action')){
+                $type = $request->input('cico_action');
+
+                if ($type == 'clock_in') {
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => $user->id,
+                        'clock_in_time' => \Carbon::now(),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        //'clock_in_note' => $request->input('clock_in_note'),
+                        //'clock_in_location' => $request->input('clock_in_out_location'),
+                    ];
+
+                    
+                    $output = $this->essentialsUtil->clockin($data, $settings);
+                    if(isset($output['current_shift'])){
+                        $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                    }else{
+                        $output['current_shift'] = "";
+                    }
+                }else{
+                    $data = [
+                        'business_id' => $business_id,
+                        'user_id' => $user->id,
+                        'clock_out_time' => \Carbon::now(),
+                        'ip_address' => $this->moduleUtil->getUserIpAddr(),
+                        //'clock_out_note' => $request->input('clock_out_note'),
+                        //'clock_out_location' => $request->input('clock_in_out_location'),
+                    ];
+                    $output = $this->essentialsUtil->clockout($data, $settings);
+                    if(isset($output['current_shift'])){
+                        $output['current_shift'] = str_replace(array("\n", "\r", "\t"), '', $output['current_shift']);
+                    }else{
+                        $output['current_shift'] = "";
+                    }
+                }
+            }else{
+                $output = [
+                    'success' => true,
+                    'msg' => "",
+                    'data' => $user
+                ];
+            }
+
+            
+        
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = ['success' => false,
+                'msg' => __('messages.something_went_wrong'),
+                'type' => $type,
+            ];
+        }
+
+        return $output;
+    }
+
 }

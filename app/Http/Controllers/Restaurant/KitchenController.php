@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Restaurant;
 
 use App\TransactionSellLine;
+use App\Transaction;
 use App\Utils\RestaurantUtil;
 use App\Utils\BusinessUtil;
 
@@ -48,9 +49,9 @@ class KitchenController extends Controller
         // }
 
         $business_id = request()->session()->get('user.business_id');
-        $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received']);
-        //dd($orders);
-
+        $orders = $this->restUtil->getAllOrders($business_id, ['line_order_status' => 'received', 'orders_for' => 'kitchen']);
+            
+        
         $business_details = $this->businessUtil->getDetails($business_id);
         return view('restaurant.kitchen.index', compact('orders', 'business_details'));
     }
@@ -63,17 +64,56 @@ class KitchenController extends Controller
      */
     public function updateCookProgress($stage, $id, $product_id){
         try {
-            $business_id = request()->session()->get('user.business_id');
-            $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
-                        ->where('t.business_id', $business_id)
-                        ->where('transaction_id', $id)
-                        ->where('product_id', $product_id)
-                        ->update([$stage => date('Y-m-d H:i:s')]);
 
-            $output = [
-                'success' => 1,
-                'msg' => __('lang_v1.cooking_state_update_message'),
-            ];
+            $undo_stage_label = $stage;
+            $update_table = true;
+            $date = date('Y-m-d H:i:s');
+            if(in_array($stage, ['cook_start_undo', 'cook_end_undo'])) {
+                $date = null;
+            }
+            $stage = str_replace('_undo', '', $stage);
+            
+            $business_id = request()->session()->get('user.business_id');
+
+            if(in_array($undo_stage_label, ['cook_start_undo', 'cook_end_undo'])) {
+                //Check timeframe in serverside.
+                $business_details = $this->businessUtil->getDetails($business_id);
+                $kitchen_undo_timeframe_in_sec = $business_details->kitchen_screen_button_undo_timeframe;
+                $current_time_in_sec = strtotime(\Carbon::now());
+                                    
+                $cook_activity_time = TransactionSellLine::select($stage)->leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                            ->where('t.business_id', $business_id)
+                            ->where('transaction_id', $id)
+                            ->where('product_id', $product_id)
+                            ->pluck($stage)
+                            ->first();
+                $cook_activity_time = strtotime($cook_activity_time);
+                $time_of_different = ($current_time_in_sec - $cook_activity_time);
+                                    
+                if($time_of_different > $kitchen_undo_timeframe_in_sec) {
+                    $update_table = false;
+                }else{
+                    $update_table = true;
+                }
+            }
+
+            if($update_table){
+                $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                            ->where('t.business_id', $business_id)
+                            ->where('transaction_id', $id)
+                            ->where('product_id', $product_id)
+                            ->update([$stage => $date]);
+
+                $output = [
+                    'success' => 1,
+                    'msg' => __('lang_v1.cooking_state_update_message'),
+                ];
+            }else{
+                $output = [
+                    'success' => 0,
+                    'msg' => __('lang_v1.you_can_not_undo_cooking_activity'),
+                ];
+            }
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
             $output = ['success' => 0,
@@ -84,6 +124,34 @@ class KitchenController extends Controller
         return $output;
     }
 
+
+
+    /**c
+     * function use for update the flag of item available or not in kitchen.
+     *
+     * @return json $output
+     */
+    public function removeFromKitchen($id, $product_id){
+        try {
+            $business_id = request()->session()->get('user.business_id');
+            $sl = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
+                        ->where('t.business_id', $business_id)
+                        ->where('transaction_id', $id)
+                        ->where('product_id', $product_id)
+                        ->update(['is_available' => 0]);
+            $output = [
+                'success' => 1,
+                'msg' => __('lang_v1.item_has_been_removed'),
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $output = ['success' => 0,
+                'msg' => trans('messages.something_went_wrong'),
+            ];
+        }
+
+        return $output;
+    }
 
     /**
      * Marks an order as cooked
@@ -102,9 +170,15 @@ class KitchenController extends Controller
                         ->where('transaction_id', $id)
                         ->where(function ($q) {
                             $q->whereNull('res_line_order_status')
-                                ->orWhere('res_line_order_status', 'received');
+                                ->orWhere('res_line_order_status', 'received')
+                                ->orWhere('res_line_order_status', 'served');
                         })
                         ->update(['res_line_order_status' => 'cooked']);
+
+            $t = Transaction::find($id);
+            $t->res_order_status = 'cooked';
+            $t->update();
+
 
             $output = ['success' => 1,
                 'msg' => trans('restaurant.order_successfully_marked_cooked'),
@@ -143,9 +217,14 @@ class KitchenController extends Controller
         if ($orders_for == 'kitchen') {
             $filter['line_order_status'] = 'received';
         } elseif ($orders_for == 'waiter') {
-            $filter['waiter_id'] = $service_staff_id;
+            if(!empty($request->input('service_staff_id'))) {
+                $filter['waiter_id'] = $request->input('service_staff_id');
+            } else {
+                $filter['waiter_id'] = $service_staff_id;
+            }
         }
-
+        $filter['orders_for'] = $orders_for;
+        
         $orders = $this->restUtil->getAllOrders($business_id, $filter);
         $business_details = $this->businessUtil->getDetails($business_id);
         return view('restaurant.partials.show_orders', compact('orders', 'orders_for', 'business_details'));
@@ -176,6 +255,8 @@ class KitchenController extends Controller
         } elseif ($orders_for == 'waiter') {
             $filter['waiter_id'] = $service_staff_id;
         }
+
+        $filter['orders_for'] = $orders_for;
 
         $line_orders = $this->restUtil->getLineOrders($business_id, $filter);
 
