@@ -1,0 +1,31 @@
+header.main-header, footer, .order-page-title, .clock-inout-btn-wrapper, 
+i.fa-keyboard.hover-q, .mo-btn-hide{
+    display: none;
+}
+.content-wrapper{
+    min-height: 250px !important;
+}
+.row-no-padding{
+    padding: 0px !important;
+}
+.box .box-header, .box .box-body, .box .box-footer {
+    padding: 10px 10px !important;
+}
+.mobile-mb-0{
+    margin-bottom: 0px;
+}
+.pos-time-location-register-number{
+    font-size: 12px;
+}
+#add_expense{
+    display: none;
+}
+#open_device_change_modal{
+    margin: 0px 5px;
+}
+#close_register{
+    margin: 0px;
+}
+.mo-padding-10{
+    padding: 10px !important;
+}

@@ -18,10 +18,11 @@ class SetSessionData
      */
     public function handle($request, Closure $next)
     {
+        
         if (! $request->session()->has('user')) {
             $business_util = new BusinessUtil;
-
             $user = Auth::user();
+        
             $session_data = ['id' => $user->id,
                 'surname' => $user->surname,
                 'first_name' => $user->first_name,

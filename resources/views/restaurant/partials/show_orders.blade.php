@@ -15,7 +15,7 @@
 	}
 @endphp
 @forelse($orders as $order)
-	<div class="col-md-4 col-xs-6 order_div" data-service-staff="{{ $order->res_waiter_id }}">
+	<div class="col-md-4 col-xs-12 order_div" data-service-staff="{{ $order->res_waiter_id }}">
 		<div class="small-box bg-gray">
             <div class="inner">
 				<div class="d-flex">
