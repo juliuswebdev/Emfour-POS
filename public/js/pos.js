@@ -2307,7 +2307,8 @@ function dp_rules(shown_total, sub_total, dp, type="all", cart_total_amount = tr
     } else {
         type_arr = type;
     }
-    var dp_rules = localStorage.getItem('dp_rules') ? JSON.parse(localStorage.getItem('dp_rules')) : JSON.parse($('#dp_rules').val());
+    var dp_rules = JSON.parse($('#dp_rules').val());
+    //var dp_rules = localStorage.getItem('dp_rules') ? JSON.parse(localStorage.getItem('dp_rules')) : JSON.parse($('#dp_rules').val());
     // $.ajax({
     //     type: 'GET',
     //     url: '/sells/pos/get-dp-rules',
@@ -2323,30 +2324,49 @@ function dp_rules(shown_total, sub_total, dp, type="all", cart_total_amount = tr
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
-    today = mm + '-' + dd + '-' + yyyy;
+    today = dd + '-' + mm + '-' + yyyy;
     var total_rules = 0;
+    var location_select = $('#select_location_id option:selected').text();
+    
     if(dp_rules && dp_rules.length > 0 && dp) {
-        var location_select = $('#select_location_id option:selected').text();
         dp_rules.forEach(function(rule, index){
 
             var condition_bool = true;
             var start_date = rule['start-date'];
             var end_date = rule['end-date'];
 
-            var d1 = start_date.split("-");
-            var d2 = end_date.split("-");
-            var c = today.split("-");
+            const dateStr = today;
+            const [day1, month1, year1] = dateStr.split('-');
+            const today_d = new Date(+year1, month1 - 1, +day1);
 
-            var start_d = new Date(d1[2], parseInt(d1[0])-1, d1[1]);  // -1 because months are from 0 to 11
-            var end_d   = new Date(d2[2], parseInt(d2[0])-1, d2[1]);
-            var today_d = new Date(c[2], parseInt(c[1])-1, c[0]);
+            const startStr = start_date;
+            const [day2, month2, year2] = startStr.split('-');
+            const start_d = new Date(+year2, month2 - 1, +day2);
 
+            const endStr = end_date;
+            const [day3, month3, year3] = endStr.split('-');
+            const end_d = new Date(+year3, month3 - 1, +day3);
+
+            // var d1 = start_date.split("-");
+            // var d2 = end_date.split("-");
+            // var c = today.split("-");
+
+            // var start_d = new Date(d1);  // -1 because months are from 0 to 11
+            // var end_d   = new Date(d2);
+            // var today_d = new Date(c);
+
+            console.log('today', today);
+            console.log('start_date', start_date);
+            console.log('end_date', end_date);
+            console.log('(today_d > start_d && today_d < end_d)',(today_d > start_d && today_d < end_d));
+            console.log('(rule[active])', (rule['active']));
+            console.log('(rule[business-location] === location_select.match(/\(([^)]+)\)/)[1])', (rule['business-location'] === location_select.match(/\(([^)]+)\)/)[1]));
             if(
                 (today_d > start_d && today_d < end_d) &&
                 (rule['active']) &&
                 (rule['business-location'] === location_select.match(/\(([^)]+)\)/)[1])
             ) {
-                
+                console.log(rule['business-location']);
                 if(rule['conditions']) {
                     condition_bool = false;
                     rule['conditions'].forEach(function(condition, id) {

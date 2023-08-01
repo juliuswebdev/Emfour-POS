@@ -1321,9 +1321,10 @@ class SellPosController extends Controller
             }
             */
         }
-
+        $dp_rules = [];
+        //$dp_rules = $this->productUtil->getActiveDPRules($business_id);
         return view('sale_pos.edit')
-            ->with(compact('__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
+            ->with(compact('dp_rules', '__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
             'commission_agent', 'categories', 'pos_settings', 'change_return', 'types', 'customer_groups',
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
