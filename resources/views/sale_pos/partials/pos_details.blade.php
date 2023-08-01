@@ -115,7 +115,7 @@
 									id="final_total_input" value=0>
 								<span id="total_payable" class="text-success lead text-bold">0</span>
 								@if(empty($edit))
-									<button type="button" class="btn btn-danger btn-flat btn-xs pull-right" id="pos-cancel">@lang('sale.cancel')</button>
+									<button type="button" class="btn btn-danger btn-flat btn-xs pull-right mo-btn-hide" id="pos-cancel">@lang('sale.cancel')</button>
 								@else
 									<button type="button" class="btn btn-danger btn-flat hide btn-xs pull-right" id="pos-delete">@lang('messages.delete')</button>
 								@endif
@@ -128,11 +128,11 @@
 							<div class="col-sm-2 col-xs-6 col-2px-padding">
 
 								<button type="button" 
-									class="btn btn-warning btn-block btn-flat @if($pos_settings['disable_draft'] != 0) hide @endif" 
+									class="mo-btn-hide btn btn-warning btn-block btn-flat @if($pos_settings['disable_draft'] != 0) hide @endif" 
 									id="pos-draft">@lang('sale.draft')</button>
 
 								<button type="button" 
-									class="btn btn-info btn-block btn-flat" 
+									class="btn btn-info btn-block btn-flat mo-btn-hide" 
 									id="pos-quotation">@lang('lang_v1.quotation')</button>
 							</div>
 							<div class="col-sm-3 col-xs-6 col-2px-padding">
@@ -171,7 +171,7 @@
 								@endif
 							</div>
 							<div class="col-sm-4 col-xs-12 col-2px-padding">
-								<button type="button" class="btn bg-navy  btn-block btn-flat btn-lg no-print @if($pos_settings['disable_pay_checkout'] != 0) hide @endif pos-express-btn" id="pos-finalize" title="@lang('lang_v1.tooltip_checkout_multi_pay')">
+								<button type="button" class="btn bg-navy  btn-block btn-flat btn-lg no-print @if($pos_settings['disable_pay_checkout'] != 0) hide @endif pos-express-btn mo-btn-hide" id="pos-finalize" title="@lang('lang_v1.tooltip_checkout_multi_pay')">
 								<div class="text-center">
 									<i class="fa fa-check" aria-hidden="true"></i>
     								<b>@lang('lang_v1.checkout_multi_pay')</b>
