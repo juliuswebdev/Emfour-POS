@@ -1939,6 +1939,7 @@ function pos_product_row(variation_id = null, purchase_line_id = null, weighing_
                             $(product_class+' .pos_line_total_text').text(__currency_trans_from_en(final_item_price * parseFloat(qty), true));
                             $(product_class+' .pos_unit_price_inc_tax').attr('value', final_item_price);
                             $(product_class+' .pos_unit_price').val(final_item_price);
+                            $(product_class+' .is_promo').val(1);
                             $(product_class+' .hidden_base_unit_sell_price').val(final_item_price);
                             $(product_class+' .pos_line_total').val(final_item_price * parseFloat(qty));
                             $(product_class+' .original_price').val(final_item_price * parseFloat(qty));
@@ -2679,8 +2680,8 @@ function dp_rule_prices(prices, shown_total, index, sub_total, type_arr, conditi
 
                 }
                 if(price['target'] == 'promo_products' && type_arr.includes('promo_products')) {
-                    var lastPart = window.location.href.split("/").pop();
-                    if(lastPart != 'edit') {
+                    // var lastPart = window.location.href.split("/").pop();
+                    // if(lastPart != 'edit') {
                         price['promo_product_sku'].forEach(function(product, id) {
                             console.log('test');
                             var product_class = '.product_row[data-promo="1"][data-promo-index="'+index+'"]';
@@ -2694,7 +2695,7 @@ function dp_rule_prices(prices, shown_total, index, sub_total, type_arr, conditi
                             pos_product_row(product.product_variation_id, null, null, qty, product);
                             }
                         });
-                    }
+                    //}
                 }
                 if(price['target'] == 'matched_products' && type_arr.includes('matched_products')) {
 

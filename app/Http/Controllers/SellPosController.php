@@ -438,7 +438,7 @@ class SellPosController extends Controller
                     $invoice_total['final_total'] = ($invoice_total['final_total'] + $tips_amount);
                 }
 
-                $input['table_chair_selected'] = json_encode($request->input('table_chair_selected'));
+                $input['table_chair_selected'] = $request->input('table_chair_selected');
             
                 // Card Charge J
                 /*
@@ -1107,6 +1107,7 @@ class SellPosController extends Controller
                             'transaction_sell_lines.item_tax as item_tax',
                             'transaction_sell_lines.unit_price as default_sell_price',
                             'transaction_sell_lines.original_price as original_price',
+                            'transaction_sell_lines.is_promo as is_promo',
                             'transaction_sell_lines.unit_price_before_discount as unit_price_before_discount',
                             'transaction_sell_lines.unit_price_inc_tax as sell_price_inc_tax',
                             'transaction_sell_lines.id as transaction_sell_lines_id',

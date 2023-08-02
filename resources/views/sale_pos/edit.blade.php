@@ -286,7 +286,7 @@
 				//$(this).toggleClass('active');
 			
 				if(!$(this).hasClass('chair')) {
-					$('.table_circle.active:not(.locked)').removeClass('active');
+					$('.table.active:not(.locked)').removeClass('active');
 					if($(this).attr('data-table-chair-id') == this_click && !counter) {
 						counter = 1;
 						$(this).removeClass('active');
@@ -298,7 +298,7 @@
 					$(this).toggleClass('active');
 				}
 
-				if($(this).attr('data-type') == 'table_circle') {
+				if($(this).attr('data-type') == 'table') {
 					this_click = $(this).attr('data-table-chair-id');
 				}
 
@@ -326,7 +326,7 @@
 					$('select[name="res_table_id"]').val(res_table_id);
 				} else {
 					$('select[name="res_table_id"]').val('');
-					$('.table_circle.active:not(.locked)').removeClass('active');
+					$('.table.active:not(.locked)').removeClass('active');
 				}
 			
 			});

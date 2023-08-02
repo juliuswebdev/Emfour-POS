@@ -16,7 +16,7 @@
 	@endphp
 	{!! Form::open(['url' => action([\App\Http\Controllers\SellPosController::class, 'store']), 'method' => 'post', 'id' => 'add_pos_sell_form' ]) !!}
 	<input type="hidden" id="card_charge_percent_hidden" value="{{ $business_details->card_charge }}">
-	<input type="hidden" name="table_chair_selected" id="table_chair_selected">
+	<input type="hidden" name="table_chair_selected" id="table_chair_selected" value="">
 	<div class="row mb-12">
 		<div class="col-md-12">
 			<div class="row">
@@ -536,7 +536,7 @@
 				//$(this).toggleClass('active');
 			
 				if(!$(this).hasClass('chair')) {
-					$('.table_circle.active:not(.locked)').removeClass('active');
+					$('.table.active:not(.locked)').removeClass('active');
 					if($(this).attr('data-table-chair-id') == this_click && !counter) {
 						counter = 1;
 						$(this).removeClass('active');
@@ -548,7 +548,7 @@
 					$(this).toggleClass('active');
 				}
 
-				if($(this).attr('data-type') == 'table_circle') {
+				if($(this).attr('data-type') == 'table') {
 					this_click = $(this).attr('data-table-chair-id');
 				}
 
@@ -576,7 +576,7 @@
 					$('select[name="res_table_id"]').val(res_table_id);
 				} else {
 					$('select[name="res_table_id"]').val('');
-					$('.table_circle.active:not(.locked)').removeClass('active');
+					$('.table.active:not(.locked)').removeClass('active');
 				}
 			
 			});

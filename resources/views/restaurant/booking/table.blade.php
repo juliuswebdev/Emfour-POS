@@ -27,9 +27,11 @@
                                 $off = 20;
                             }
                             $table_name = $item['name'] .''. $item['number'];
+                            $type = explode("_", $item['type'])[0];
+                        
                             @endphp
-                            <div class="table-chair-btn {{$item['type']}}" id="{{$item['id']}}" data-table-chair-id="{{ str_replace('T', 'Table ', $table_name) }}"
-                             data-type="{{$item['type']}}"
+                            <div class="table-chair-btn {{ $item['type'] }} {{ $type }}" id="{{$item['id']}}" data-table-chair-id="{{ str_replace('T', 'Table ', $table_name) }}"
+                             data-type="{{ $type }}"
                              style="
                                 position: absolute;
                                 top: {{$item['positions']['top'] - $off}}px;
