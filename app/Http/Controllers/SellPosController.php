@@ -587,6 +587,7 @@ class SellPosController extends Controller
                 if($input['dp_flag']) {
                     $input['final_total'] = $request->input('final_total');
                 }
+              
 
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
@@ -1105,6 +1106,7 @@ class SellPosController extends Controller
                             'transaction_sell_lines.tax_id as tax_id',
                             'transaction_sell_lines.item_tax as item_tax',
                             'transaction_sell_lines.unit_price as default_sell_price',
+                            'transaction_sell_lines.original_price as original_price',
                             'transaction_sell_lines.unit_price_before_discount as unit_price_before_discount',
                             'transaction_sell_lines.unit_price_inc_tax as sell_price_inc_tax',
                             'transaction_sell_lines.id as transaction_sell_lines_id',
@@ -1972,11 +1974,11 @@ class SellPosController extends Controller
                 $edit_price = auth()->user()->can('edit_product_price_from_pos_screen');
             }
             $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+           
             $output['html_content'] = view('sale_pos.product_row')
                         ->with(compact('dp_rules', 'product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order', 'last_sell_line'))
                         ->render();
         }
-
         return $output;
     }
 

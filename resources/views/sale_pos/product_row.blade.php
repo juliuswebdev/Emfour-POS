@@ -1,3 +1,4 @@
+
 @php
 	$common_settings = session()->get('business.common_settings');
 	$multiplier = 1;
@@ -307,7 +308,13 @@
 
 		<input type="hidden" class="hidden_base_unit_sell_price" value="{{$product->default_sell_price / $multiplier}}">
 
-		<input type="hidden" class="original_price" value="{{@num_format($unit_price_inc_tax)}}">
+		@php
+		$pos_original_price = $product->default_sell_price / $multiplier;
+		if($action == 'edit') {
+			$pos_original_price = $product->original_price / $multiplier;
+		}
+		@endphp
+		<input type="hidden" class="original_price" name="products[{{$row_count}}][original_price]" value="{{$pos_original_price}}">
 		
 		{{-- Hidden fields for combo products --}}
 		@if($product->product_type == 'combo'&& !empty($product->combo_products))

@@ -514,7 +514,7 @@
 				method: 'GET',
 				url: '/bookings/get-table-chair-selected?location_id=' + $('#select_location_id').val(),
 					success: function(result){
-						console.log(result);
+						$('.table-chair-btn').removeClass('active locked');
 						$('.table-chair-btn').each(function(){
 							var id = $(this).attr('id');
 							if(result.includes(id)) {

@@ -2894,8 +2894,8 @@ function dp_rule_prices_reset(prices, index, condition = [], matched_products = 
 }
 
 function dp_rule_compute_row(index, sku, product_class, data_dp_type = 0, data_dp_percent = 0, data_dp_amount = 0) {
-    var lastPart = window.location.href.split("/").pop();
-    if(lastPart != 'edit') {
+    // var lastPart = window.location.href.split("/").pop();
+    // if(lastPart != 'edit') {
         const action = {
             'type': data_dp_type,
             'percent' : data_dp_percent,
@@ -2946,7 +2946,7 @@ function dp_rule_compute_row(index, sku, product_class, data_dp_type = 0, data_d
         $(product_class+' .pos_unit_price').val(final_item_price);
         $(product_class+' .hidden_base_unit_sell_price').val(final_item_price);
         $(product_class+' .pos_line_total').val(final_item_price * parseFloat(qty));
-    }
+    // }
 }
 
 function dp_rule_reset_row(index, product_class) {
