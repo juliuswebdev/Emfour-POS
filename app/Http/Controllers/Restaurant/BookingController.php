@@ -760,7 +760,7 @@ class BookingController extends Controller
         foreach($transactions as $item1) {
             if($item1->table_chair_selected && $item1->table_chair_selected != 'null') {
                 $i = $item1->table_chair_selected;
-                $arr_temp = json_decode(json_decode(json_decode($i, true), true), true);
+                $arr_temp = json_decode(json_decode($i, true), true);
                 foreach($arr_temp as $item2) {
                     if(!in_array($item2, $arr)) {
                         array_push($arr, $item2);

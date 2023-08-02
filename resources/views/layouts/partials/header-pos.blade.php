@@ -41,6 +41,7 @@
             </div>
             @else
               {{$default_location->name}}
+              <input type="hidden" id="select_location_id" value="{{ $default_location->id }}">
             @endif
           @endif
 
