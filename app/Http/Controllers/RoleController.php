@@ -100,7 +100,7 @@ class RoleController extends Controller
         //Remove Module in module permission array
         unset($module_permissions['HRIS/Payroll']);
         unset($module_permissions['DynamicPrice']);
-        
+        unset($module_permissions['TableMapping']);
 
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 
@@ -220,7 +220,7 @@ class RoleController extends Controller
         //Remove Module in module permission array
         unset($module_permissions['HRIS/Payroll']);
         unset($module_permissions['DynamicPrice']);
-        
+        unset($module_permissions['TableMapping']);
 
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 

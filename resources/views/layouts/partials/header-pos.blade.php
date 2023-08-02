@@ -44,7 +44,7 @@
             @endif
           @endif
 
-          @if(!empty($transaction->location_id)) {{$transaction->location->name}} @endif &nbsp; <span class="curr_datetime">{{ @format_datetime('now') }}</span> <i class="fa fa-keyboard hover-q text-muted" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="@include('sale_pos.partials.keyboard_shortcuts_details')" data-html="true" data-trigger="hover" data-original-title="" title=""></i>
+          @if(!empty($transaction->location_id)) <span id="location_id_code">{{$transaction->location->name}} ({{ $transaction->location->location_id }})</span> <input type="hidden" id="select_location_id" value="{{ $transaction->location->id }}"> @endif &nbsp; <span class="curr_datetime">{{ @format_datetime('now') }}</span> <i class="fa fa-keyboard hover-q text-muted" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="@include('sale_pos.partials.keyboard_shortcuts_details')" data-html="true" data-trigger="hover" data-original-title="" title=""></i>
         </p>
         @if($__is_essentials_enabled && $is_employee_allowed)
 

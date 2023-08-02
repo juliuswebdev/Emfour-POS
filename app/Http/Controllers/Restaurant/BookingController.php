@@ -767,7 +767,7 @@ class BookingController extends Controller
         $transactions = Transaction::where('business_id', $business_id)->where('location_id', $location_id)->where('payment_status', 'due')->select('table_chair_selected')->get();
         $arr = [];
         foreach($transactions as $item1) {
-            if($item1->table_chair_selected) {
+            if($item1->table_chair_selected && $item1->table_chair_selected != 'null') {
                 $i = $item1->table_chair_selected;
                 $arr_temp = json_decode(json_decode(json_decode($i, true), true), true);
                 foreach($arr_temp as $item2) {

@@ -19,7 +19,8 @@
 
 	{!! Form::open(['url' => action([\App\Http\Controllers\SellPosController::class, 'update'], [$transaction->id]), 'method' => 'post', 'id' => 'edit_pos_sell_form' ]) !!}
 	{{ method_field('PUT') }}
-
+	<input type="hidden" id="card_charge_percent_hidden" value="{{ $business_details->card_charge }}">
+	<input type="hidden" name="table_chair_selected" id="table_chair_selected">
 
 	<div class="row mb-12">
 		<div class="col-md-12">
@@ -226,6 +227,111 @@
 
 		});
 	</script>
+	@endif
+
+	@if($business_details->wpc_reservation_site_link && $__is_table_mapping_enabled)
+		<div class="modal fade" id="restaurant_booking_table_modal" tabindex="-1" role="dialog"></div>
+		<style>
+			select[name="res_table_id"] option {
+				display: none;
+			}
+			.table-chair-btn {
+				cursor: pointer;
+			}
+			.table-chair-btn.active {
+				background-color: green!important;
+			}
+			#restaurant_booking_table_modal .close {
+				position: relative;
+				z-index: 99;
+				top: -60px;
+				color: #000;
+				opacity: 1;
+				font-size: 50px;
+			}
+		</style>
+		<script>
+			$.ajax({
+				method: 'GET',
+				url: '/bookings/get-table-mapping',
+				success: function(result){
+					$('#restaurant_booking_table_modal').html(result);
+				}
+			});
+			$(document).on('click', 'select[name="res_table_id"]', function(e) {
+				e.preventDefault();
+				$.ajax({
+				method: 'GET',
+				url: '/bookings/get-table-chair-selected?location_id=' + $('#select_location_id').val(),
+					success: function(result){
+						console.log(result);
+						$('.table-chair-btn').each(function(){
+							var id = $(this).attr('id');
+							if(result.includes(id)) {
+								$(this).addClass('active locked');
+							}
+						});
+					}
+				});
+
+				$('#restaurant_booking_table_modal').modal('show');
+			});
+			
+			var this_click = '';
+			var counter = 0;
+			$(document).on('click', '.table-chair-btn:not(.locked)', function(e) {
+				e.preventDefault();
+				
+		
+				//$(this).toggleClass('active');
+			
+				if(!$(this).hasClass('chair')) {
+					$('.table_circle.active:not(.locked)').removeClass('active');
+					if($(this).attr('data-table-chair-id') == this_click && !counter) {
+						counter = 1;
+						$(this).removeClass('active');
+					} else {
+						counter = 0;
+						$(this).addClass('active');
+					}
+				} else {
+					$(this).toggleClass('active');
+				}
+
+				if($(this).attr('data-type') == 'table_circle') {
+					this_click = $(this).attr('data-table-chair-id');
+				}
+
+
+				var table_chair_selected = [];
+				var table_id = 0;
+
+				$('.table-chair-btn.active:not(.locked)').each(function(){
+					var id = $(this).attr('id');
+					table_id = $(this).attr('data-table-chair-id');
+					table_chair_selected.push(id);
+				});
+
+				$('#table_chair_selected').val(JSON.stringify(table_chair_selected));
+
+				var res_table_id = 0;
+				$('select[name="res_table_id"] option').each(function(){
+					var text = $(this).text();
+					if(text == table_id) {
+						res_table_id = $(this).attr('value');
+					}
+				
+				});
+				if(res_table_id) {
+					$('select[name="res_table_id"]').val(res_table_id);
+				} else {
+					$('select[name="res_table_id"]').val('');
+					$('.table_circle.active:not(.locked)').removeClass('active');
+				}
+			
+			});
+
+		</script>
 	@endif
 
 

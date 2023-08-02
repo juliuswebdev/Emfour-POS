@@ -10,7 +10,10 @@
             <div class="modal-body">
                 <div id="table-layout-container">
                     <h4>@lang('restaurant.table_mapping')</h4>
-                    <input type="hidden" name="table_chair_selected" id="table_chair_selected">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: relative; z-index: 99">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                    
                     <div id="table-layout-map" style="
                             position: relative;
                             width: {{ $map['canvasWidth'] }}px;
@@ -25,7 +28,9 @@
                             }
                             $table_name = $item['name'] .''. $item['number'];
                             @endphp
-                            <div class="table-chair-btn {{$item['type']}}" id="{{$item['id']}}" data-table-chair-id="{{ str_replace('T', 'Table ', $table_name) }}" style="
+                            <div class="table-chair-btn {{$item['type']}}" id="{{$item['id']}}" data-table-chair-id="{{ str_replace('T', 'Table ', $table_name) }}"
+                             data-type="{{$item['type']}}"
+                             style="
                                 position: absolute;
                                 top: {{$item['positions']['top'] - $off}}px;
                                 left: {{$item['positions']['left'] - $off}}px;

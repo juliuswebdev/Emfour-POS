@@ -674,7 +674,7 @@
 
 	@if(!empty($receipt_details->additional_notes))
 	    <div class="col-xs-12">
-	    	<p>{!! nl2br($receipt_details->additional_notes) !!}</p>
+	    	<p><strong>Note:</strong> {!! nl2br($receipt_details->additional_notes) !!}</p>
 	    </div>
     @endif
     

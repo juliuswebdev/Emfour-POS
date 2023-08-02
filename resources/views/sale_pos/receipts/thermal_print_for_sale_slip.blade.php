@@ -836,7 +836,7 @@
 
             @if(!empty($receipt_details->additional_notes))
 	            <p class="centered">
-	            	{!! nl2br($receipt_details->additional_notes) !!}
+	            	<strong>Note:</strong> {!! nl2br($receipt_details->additional_notes) !!}
 	            </p>
             @endif
 

@@ -284,6 +284,7 @@ class SellPosController extends Controller
         }
         $module_util = new ModuleUtil();
         $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
+        $__is_table_mapping_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'table_mapping_module');
         $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
         $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
                                 ->where('user_id', auth()->user()->id)
@@ -294,6 +295,7 @@ class SellPosController extends Controller
             ->with(compact(
                 'dp_rules',
                 'clock_in',
+                '__is_table_mapping_enabled',
                 '__is_essentials_enabled',
                 'is_employee_allowed',
                 'edit_discount',
@@ -1304,6 +1306,7 @@ class SellPosController extends Controller
         }
         $module_util = new ModuleUtil();
         $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
+        $__is_table_mapping_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'table_mapping_module');
         $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
         $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
                                 ->where('user_id', auth()->user()->id)
@@ -1321,10 +1324,10 @@ class SellPosController extends Controller
             }
             */
         }
-        $dp_rules = [];
+        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
         //$dp_rules = $this->productUtil->getActiveDPRules($business_id);
         return view('sale_pos.edit')
-            ->with(compact('dp_rules', '__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
+            ->with(compact('dp_rules', '__is_table_mapping_enabled', '__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
             'commission_agent', 'categories', 'pos_settings', 'change_return', 'types', 'customer_groups',
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
