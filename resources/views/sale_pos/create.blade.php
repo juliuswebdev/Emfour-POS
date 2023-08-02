@@ -479,7 +479,7 @@
 	</script>
 	@endif
 
-	@if($__is_table_mapping_enabled)
+	@if( ($__is_table_mapping_enabled) && (strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != true) )
 		<div class="modal fade" id="restaurant_booking_table_modal" tabindex="-1" role="dialog"></div>
 		<style>
 			select[name="res_table_id"] option {
@@ -508,6 +508,7 @@
 					$('#restaurant_booking_table_modal').html(result);
 				}
 			});
+			
 			$(document).on('click', 'select[name="res_table_id"]', function(e) {
 				e.preventDefault();
 				$.ajax({
@@ -581,6 +582,25 @@
 			
 			});
 
+		</script>
+	@endif
+
+	@if(strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != false)
+	<script>
+		$(document).ready(function() {
+		$.ajax({
+			method: 'GET',
+			url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
+				success: function(result){
+					$('select[name="res_table_id"] option').each(function(){
+						var id = $(this).attr('value');
+						if(result.includes(id)) {
+							$(this).attr('disabled', 'disabled');
+						}
+					});
+				}
+			});
+		});
 		</script>
 	@endif
 @endsection
