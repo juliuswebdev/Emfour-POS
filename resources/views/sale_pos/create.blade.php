@@ -479,7 +479,7 @@
 	</script>
 	@endif
 
-	@if($business_details->wpc_reservation_site_link && $__is_table_mapping_enabled)
+	@if($__is_table_mapping_enabled)
 		<div class="modal fade" id="restaurant_booking_table_modal" tabindex="-1" role="dialog"></div>
 		<style>
 			select[name="res_table_id"] option {
@@ -503,7 +503,7 @@
 		<script>
 			$.ajax({
 				method: 'GET',
-				url: '/bookings/get-table-mapping',
+				url: '/bookings/get-table-mapping?location_id=' + $('#select_location_id').val(),
 				success: function(result){
 					$('#restaurant_booking_table_modal').html(result);
 				}

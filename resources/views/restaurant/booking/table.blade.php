@@ -1,5 +1,5 @@
 @php
-    $url = file_get_contents($business_details->wpc_reservation_site_link.'wp-json/wpc/table_mapping');
+    $url = file_get_contents($business_location->wpc_reservation_site_link.'wp-json/wpc/table_mapping');
     //$url = file_get_contents('https://restaurant.emfoursolutions.com/wp-json/wpc/table_mapping');
     $data = json_decode($url, true);
     $map = $data['content']['common_mapping'];

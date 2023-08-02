@@ -744,21 +744,12 @@ class BookingController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
     */
-    public function updateTablePerLocation()
-    {
-        $business_id = request()->session()->get('user.business_id');
-        $business_details = Business::find($business_id);
-        $url = file_get_contents($business_details->wpc_reservation_site_link.'wp-json/wpc/table_mapping');
-        $data = json_decode($url, true);
-        $map = $data['content']['common_mapping'];
-        return response($map, 200);
-    }
 
-    public function loadTableMapping()
+    public function loadTableMapping(Request $request)
     {
-        $business_id = request()->session()->get('user.business_id');
-        $business_details = Business::find($business_id);
-        return view('restaurant.booking.table', compact('business_details'));
+        $location_id = $request->input('location_id');
+        $business_location = BusinessLocation::find($location_id);
+        return view('restaurant.booking.table', compact('business_location'));
     }
 
     public function loadTableChairSelected(Request $request) {

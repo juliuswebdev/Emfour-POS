@@ -517,7 +517,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::get('bookings/get-table-mapping', [Restaurant\BookingController::class, 'loadTableMapping']);
     Route::get('bookings/get-table-chair-selected', [Restaurant\BookingController::class, 'loadTableChairSelected']);
-    Route::get('bookings/update-table-per-location', [Restaurant\BookingController::class, 'updateTablePerLocation']);
+    
     Route::get('bookings/get-todays-bookings', [Restaurant\BookingController::class, 'getTodaysBookings']);
     Route::resource('bookings', Restaurant\BookingController::class);
     
