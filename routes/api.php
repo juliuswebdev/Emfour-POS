@@ -44,6 +44,10 @@ Route::prefix('v1')->group(function() {
     
 
     Route::middleware('auth:api')->group(function() {
+
+        //Get Home Dashboard Data
+        Route::get('/get-dashboard-information', [OrderingAppController::class, 'getDashboardInformation']);
+
         Route::get('/products', [OrderingAppController::class, 'getProducts']);
         Route::get('/product/{product_id}', [OrderingAppController::class, 'getProduct']);
         Route::get('/orders', [OrderingAppController::class, 'getOrders']);

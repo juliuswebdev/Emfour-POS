@@ -113,7 +113,7 @@
 							
 							@if( ($product->product_custom_field1 == 1 && ($row->res_line_order_status != 'served' && $row->res_line_order_status != 'ready' || $order->is_kitchen_again != 1)) || ($orders_for == 'waiter' ))
 								<tr>
-									<td>
+									<td class="mob-tr-text-left">
 										
 										{!! $product->name !!}
 										@if(!empty($row->children))
@@ -125,7 +125,7 @@
 											@endforeach
 										@endif
 									</td>
-									<td>
+									<td class="mob-tr-text-left">
 										<span class="display_currency" data-currency_symbol="false" data-is_quantity="true">{{ $row->quantity }}</span>
 								
 										@if($row->sub_unit_id)
@@ -142,7 +142,7 @@
 									</td>
 
 									<td>
-										<div>
+										<div class="wrapper-crs">
 											
 											@if($product->product_custom_field1 == 1)
 
