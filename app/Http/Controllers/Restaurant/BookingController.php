@@ -8,6 +8,7 @@ use App\Contact;
 use App\CustomerGroup;
 use App\Product;
 use App\Variation;
+use App\Transaction;
 use App\Restaurant\Booking;
 use App\Restaurant\BookingDetail;
 use App\User;
@@ -207,7 +208,7 @@ class BookingController extends Controller
 
                 $services = Variation::whereIn('id', explode(',', $booking->booking_details->product_id))->with(['product'])->get();
                 $services_text = '';
-                foreach($services as $service) {$
+                foreach($services as $service) {
                     $variation_name = '';
                     if($service->name != 'DUMMY') {
                         $variation_name = '['.$service->name.']';
@@ -224,7 +225,11 @@ class BookingController extends Controller
                     'cancelled' => __('restaurant.cancelled'),
                 ];
 
-                return view('restaurant.booking.show', compact('services', 'booking', 'booking_start', 'booking_end', 'booking_statuses'));
+                $business_locations = BusinessLocation::forDropdown($business_id);
+                $customers = CustomerGroup::forDropdown($business_id);
+                $correspondents = User::forDropdown($business_id, false);
+
+                return view('restaurant.booking.show', compact('business_locations', 'correspondents', 'customers', 'services', 'booking', 'booking_start', 'booking_end', 'booking_statuses'));
             }
         }
     }
@@ -257,15 +262,26 @@ class BookingController extends Controller
             $booking = Booking::where('business_id', $business_id)
                                 ->with(['booking_details', 'customer'])
                                 ->find($id);
-            if (! empty($booking)) {
-                $booking->booking_status = $request->booking_status;
-               $booking->save();
+
+            if($request->booking_status == 'cancelled' && $booking->booking_status == 'completed') {
+
+                $output = ['success' => 0,
+                            'msg' => __('lang_v1.unable_cancel'),
+                ];
+
+            } else {
+
+                if (! empty($booking)) {
+                    $booking->booking_status = $request->booking_status;
+                    $booking->save();
+                }
+                $output = ['success' => 1,
+                    'msg' => trans('lang_v1.updated_success'),
+                    'booking' => $booking
+                ];
+
             }
 
-            $output = ['success' => 1,
-                'msg' => trans('lang_v1.updated_success'),
-                'booking' => $booking
-            ];
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
             $output = ['success' => 0,
@@ -388,7 +404,7 @@ class BookingController extends Controller
                         $text = __('restaurant.checkout');
                     }  else if ($row->booking_status  == 'completed') {
                         $type = 'bg-green';
-                        $text = __('restaurant.cancelled');
+                        $text = __('restaurant.completed');
                     } else if ($row->booking_status  == 'cancelled') {
                         $type = 'bg-black';
                         $text = __('restaurant.cancelled');
@@ -484,7 +500,7 @@ class BookingController extends Controller
 
         $correspondents = User::forDropdown($business->id, false);
 
-        $services = Product::where('business_id', $business->id)->where('enable_stock', 0)->with(['variations'])->get();
+        $services = Product::where('business_id', $business->id)->where('enable_stock', 0)->where('type', '<>', 'modifier')->with(['variations'])->get();
 
         return view('restaurant.booking.public', compact('business', 'business_info', 'business_locations', 'correspondents', 'services'));
     }
@@ -496,8 +512,7 @@ class BookingController extends Controller
      */
     public function postPublicBooking(Request $request)
     {
-        
-        try {
+        // try {
             $input = $request->input();
             $business_location = BusinessLocation::find($input['location_id']);
             $business_id = $business_location->business_id ?? 0;
@@ -508,7 +523,14 @@ class BookingController extends Controller
             $user = User::where('business_id', $business_id)->first();
             $user_id = $user->id ?? 0;
 
-            $booking_time = $input['booking_time'];
+            $booking_start = $input['booking_time'];
+            $booking_end = $input['booking_time'];
+
+            $date_temp = strtotime($booking_start);
+            $time = date('H:i:s', $date_temp);
+            
+            $time_details = 'Start: '. $booking_start. ' , End: ' .$booking_end. ', @ '.$time;
+            $full_name = $input['first_name']. ' ' .$input['last_name'];
 
             //$booking_start = $this->commonUtil->uf_date($input['booking_start'], true);
             //$booking_end = $this->commonUtil->uf_date($input['booking_end'], true);
@@ -526,7 +548,8 @@ class BookingController extends Controller
                 $contact_input['email'] = $input['email'];
                 $contact_input['mobile'] = $input['phone'];
                 $contact_input['created_by'] = $user_id;   
-                $contact = $this->contactUtil->createNewContact($contact_input);             
+                $contact = $this->contactUtil->createNewContact($contact_input);    
+                $contact = $contact['data'];         
             }
 
             $input['contact_id'] = $contact->id;
@@ -599,16 +622,16 @@ class BookingController extends Controller
                     'services' => substr($services_text, 0, -1)
                 ]
             );
-        } catch (\Exception $e) {
-            //dd($e->getMessage());
-            return redirect()->back()->with(
-                [
-                    'status' => false
-                ]
-            );
-        }
+        // } catch (\Exception $e) {
+        //     return redirect()->back()->with(
+        //         [
+        //             'status' => false
+        //         ]
+        //     );
+        // }
 
     }
+
 
 
     public function getPublicBookingCheckin(Request $request, $slug)
@@ -639,5 +662,113 @@ class BookingController extends Controller
         );
     }
 
+    public function getLocations($id) {
+        $locations = BusinessLocation::where('business_id', $id)->get();
+        return response($locations, 200);
+    }
+
+        /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function postPublicBookingAPI(Request $request)
+    {
+        try {
+            $input = $request->input();
+            $business_location = BusinessLocation::find($input['location_id']);
+            $business_id = $business_location->business_id ?? 0;
+
+            $business_location_id = $business_location->location_id ?? 'NA';
+
+            $user = User::where('business_id', $business_id)->first();
+            $user_id = $user->id ?? 0;
+
+            $booking_start = date('Y-m-d', strtotime($input['date'])) .' '. date('H:i:s', strtotime($input['when']));
+            $booking_end = date('Y-m-d', strtotime($input['date'])) .' '. date('H:i:s', strtotime($input['until']));
+
+   
+            $contact = Contact::where('mobile', $input['phone'])->first();
+            if(!$contact) {
+                $contact_input['business_id'] = $business_id;
+                $contact_input['type'] = 'customer';
+                $contact_input['name'] = $input['full_name'];
+                $contact_input['mobile'] = $input['phone'];
+                $contact_input['created_by'] = $user_id;   
+                $contact = $this->contactUtil->createNewContact($contact_input);   
+                $contact = $contact['data'];
+            }
+          
+            $input['contact_id'] = $contact->id;
+            $input['business_id'] = $business_id;
+            $input['location_id'] = $input['location_id'];
+            $input['created_by'] = $user_id;
+            $input['booking_start'] = $booking_start;
+            $input['booking_end'] = $booking_end;
+            $input['booking_note'] = $input['note'];
+            $input['booking_status'] = 'waiting';
+            $booking = Booking::createBooking($input);
+
+
+            $product_id = array(
+                'wpc_booked_ids' => $input['wpc_booked_ids'],
+                'wpc_booked_table_ids' => $input['wpc_booked_table_ids']
+            );
+
+            $booking_detail_input['booking_id'] = $booking->id;
+            $booking_detail_input['product_id'] = json_encode($product_id);
+            $booking_detail_input['ref_no'] = $input['invoice_id'].'-'.$input['location_id'];
+            $booking_detail_input['full_name'] = $input['full_name'];
+            $booking_detail_input['phone'] = $input['phone'];
+            $booking_details = BookingDetail::create($booking_detail_input);
+            
+            $return = [
+                    'status' => true,
+                    'booking' => $booking,
+                    'booking_details' => $booking_details,     
+            ];
+            return response($return, 200);
+        } catch (\Exception $e) {
+            $return = [
+                    'status' => false
+            ];
+            return response($return, 401);
+        } 
+    }
+
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+    */
+
+    public function loadTableMapping(Request $request)
+    {
+        $location_id = $request->input('location_id');
+        $business_location = BusinessLocation::find($location_id);
+        return view('restaurant.booking.table', compact('business_location'));
+    }
+
+    public function loadTableChairSelected(Request $request) {
+        $business_id = request()->session()->get('user.business_id');
+        $location_id = $request->input('location_id');
+        $transactions = Transaction::where('business_id', $business_id)->where('location_id', $location_id)->where('payment_status', 'due')->select('table_chair_selected')->get();
+        $arr = [];
+        foreach($transactions as $item1) {
+            if($item1->table_chair_selected && $item1->table_chair_selected != 'null') {
+                $i = $item1->table_chair_selected;
+                $arr_temp = json_decode(json_decode(json_decode($i, true), true), true);
+                foreach($arr_temp as $item2) {
+                    if(!in_array($item2, $arr)) {
+                        array_push($arr, $item2);
+                    }
+                }
+            }
+        }
+        return response($arr, 200);
+    }
 
 }

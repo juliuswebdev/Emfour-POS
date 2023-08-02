@@ -22,6 +22,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('/authorize-net', [App\Http\Controllers\AuthorizeNetController::class, 'store'])->name('api.authorize-net');
 
+Route::get('/get-locations/{id}', [App\Http\Controllers\Restaurant\BookingController::class, 'getLocations']);
+Route::post('/booking/store', [App\Http\Controllers\Restaurant\BookingController::class, 'postPublicBookingAPI']);
 Route::get('/get-locations/{id}', function($id) {
     $locations = App\BusinessLocation::where('business_id', $id)->get();
     return response($locations, 200);
@@ -56,4 +58,5 @@ Route::prefix('v1')->group(function() {
     });
 
 });
+
 

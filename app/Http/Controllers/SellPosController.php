@@ -284,6 +284,7 @@ class SellPosController extends Controller
         }
         $module_util = new ModuleUtil();
         $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
+        $__is_table_mapping_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'table_mapping_module');
         $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
         $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
                                 ->where('user_id', auth()->user()->id)
@@ -294,6 +295,7 @@ class SellPosController extends Controller
             ->with(compact(
                 'dp_rules',
                 'clock_in',
+                '__is_table_mapping_enabled',
                 '__is_essentials_enabled',
                 'is_employee_allowed',
                 'edit_discount',
@@ -436,6 +438,8 @@ class SellPosController extends Controller
                     $invoice_total['final_total'] = ($invoice_total['final_total'] + $tips_amount);
                 }
 
+                $input['table_chair_selected'] = $request->input('table_chair_selected');
+            
                 // Card Charge J
                 /*
                 $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
@@ -583,6 +587,7 @@ class SellPosController extends Controller
                 if($input['dp_flag']) {
                     $input['final_total'] = $request->input('final_total');
                 }
+              
 
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
@@ -1101,6 +1106,8 @@ class SellPosController extends Controller
                             'transaction_sell_lines.tax_id as tax_id',
                             'transaction_sell_lines.item_tax as item_tax',
                             'transaction_sell_lines.unit_price as default_sell_price',
+                            'transaction_sell_lines.original_price as original_price',
+                            'transaction_sell_lines.is_promo as is_promo',
                             'transaction_sell_lines.unit_price_before_discount as unit_price_before_discount',
                             'transaction_sell_lines.unit_price_inc_tax as sell_price_inc_tax',
                             'transaction_sell_lines.id as transaction_sell_lines_id',
@@ -1302,6 +1309,7 @@ class SellPosController extends Controller
         }
         $module_util = new ModuleUtil();
         $__is_essentials_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'hris_module');
+        $__is_table_mapping_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'table_mapping_module');
         $is_employee_allowed = auth()->user()->can('essentials.allow_users_for_attendance_from_web');
         $clock_in = \Modules\Essentials\Entities\EssentialsAttendance::where('business_id', $business_id)
                                 ->where('user_id', auth()->user()->id)
@@ -1319,9 +1327,10 @@ class SellPosController extends Controller
             }
             */
         }
-
+        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+        //$dp_rules = $this->productUtil->getActiveDPRules($business_id);
         return view('sale_pos.edit')
-            ->with(compact('__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
+            ->with(compact('dp_rules', '__is_table_mapping_enabled', '__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
             'commission_agent', 'categories', 'pos_settings', 'change_return', 'types', 'customer_groups',
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
@@ -1966,11 +1975,11 @@ class SellPosController extends Controller
                 $edit_price = auth()->user()->can('edit_product_price_from_pos_screen');
             }
             $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+           
             $output['html_content'] = view('sale_pos.product_row')
                         ->with(compact('dp_rules', 'product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order', 'last_sell_line'))
                         ->render();
         }
-
         return $output;
     }
 

@@ -147,8 +147,11 @@
                 @else
                 {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control', 'readonly' => 'true']); !!}
                 @endif
+
+
             </div>
         </div>
+        
     </div>
      {{-- code --}}
     <div class="row hide">

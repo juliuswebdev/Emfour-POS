@@ -376,7 +376,7 @@ class BusinessController extends Controller
                 'redeem_amount_per_unit_rp', 'min_order_total_for_redeem',
                 'min_redeem_point', 'max_redeem_point', 'rp_expiry_period',
                 'rp_expiry_type', 'custom_labels', 'weighing_scale_setting',
-                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge', 'custom_permissions', 'enable_ip_restriction']);
+                'code_label_1', 'code_1', 'code_label_2', 'code_2', 'currency_precision', 'quantity_precision', 'card_charge', 'custom_permissions', 'enable_ip_restriction', 'wpc_reservation_site_link']);
 
             if(!auth()->user()->can('superadmin')) {
                 unset($business_details['card_charge']);

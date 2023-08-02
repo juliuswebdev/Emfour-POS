@@ -145,6 +145,7 @@ class TransactionUtil extends Util
             'gratuity_label' => isset($input['gratuity_label']) ? $input['gratuity_label'] : null, 
             'gratuity_charge_percentage' => isset($input['gratuity_charge_percentage']) ? $input['gratuity_charge_percentage'] : 0, 
             'gratuity_charge_amount' => isset($input['gratuity_charge_amount']) ? $input['gratuity_charge_amount'] : 0,
+            'table_chair_selected' => ($input['table_chair_selected']) ? json_encode($input['table_chair_selected']) : null
         ]);
 
 
@@ -333,6 +334,8 @@ class TransactionUtil extends Util
                                         'variation_id' => $value,
                                         'quantity' => $modifier_quantity,
                                         'unit_price_before_discount' => $this_price,
+                                        'original_price' => $product['original_price'],
+                                        'is_promo' => $product['is_promo'],
                                         'unit_price' => $this_price,
                                         'unit_price_inc_tax' => $this_price,
                                         'parent_sell_line_id' => $product['transaction_sell_lines_id'],
@@ -382,6 +385,8 @@ class TransactionUtil extends Util
                     'variation_id' => $product['variation_id'],
                     'quantity' => $uf_quantity * $multiplier,
                     'unit_price_before_discount' => $unit_price_before_discount,
+                    'original_price' => $product['original_price'],
+                    'is_promo' => $product['is_promo'],
                     'unit_price' => $unit_price,
                     'line_discount_type' => ! empty($product['line_discount_type']) ? $product['line_discount_type'] : null,
                     'line_discount_amount' => $line_discount_amount,
@@ -425,6 +430,8 @@ class TransactionUtil extends Util
                                     'variation_id' => $value,
                                     'quantity' => $modifier_quantity,
                                     'unit_price_before_discount' => $this_price,
+                                    'original_price' => $product['original_price'],
+                                    'is_promo' => $product['is_promo'],
                                     'unit_price' => $this_price,
                                     'unit_price_inc_tax' => $this_price,
                                     'children_type' => 'modifier',

@@ -214,9 +214,10 @@ class OrderingAppController extends Controller
         } else {
 
             $query = Product::leftJoin('product_locations', 'product_locations.product_id', '=', 'products.id')
+            ->where('product_locations.location_id', '=', $get['location_id'])
             ->where('products.category_id', '=', $get['category_id'])
             ->orWhere('products.sub_category_id', '=', $get['category_id']);
-            //->where('product_locations.location_id', '=', $get['location_id']);
+            
                                 
             if(isset($get['q'])) {
                 $query->where('products.name', 'LIKE', "%{$get['q']}%");
@@ -254,7 +255,7 @@ class OrderingAppController extends Controller
 
             $product = Product::leftJoin('product_locations', 'product_locations.product_id', '=', 'products.id')
             ->where('products.id', $product_id)
-            // ->orWhere('product_locations.location_id', $get['location_id'])
+            //->orWhere('product_locations.location_id', $get['location_id'])
             ->with(['variations'])->first();
 
             $modifier_sets = [];

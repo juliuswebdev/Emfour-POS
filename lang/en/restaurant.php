@@ -82,6 +82,8 @@ return [
     'select_correspondent' => 'Select correspondent',
     'send_notification_to_customer' => 'Send Email/SMS notification to customer',
     'booking_details' => 'Booking Details',
+    'select_cat_bra' => 'Please select Category or Brand',
+    'table_mapping' => 'Table Mapping',
     'ref_no' => 'Reference No',
     'time' => 'Time',
     'phone' => 'Phone',

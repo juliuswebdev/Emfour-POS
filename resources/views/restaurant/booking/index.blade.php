@@ -279,6 +279,7 @@
                                     if(result.send_notification){
                                         $( "div.view_modal" ).load( result.notification_url,function(){
                                             $(this).modal('show');
+
                                         });
                                     }
 
@@ -313,6 +314,9 @@
             });
 
             $('.view_modal').on('shown.bs.modal', function (e) {
+                $('.input-icheck').iCheck({
+                    checkboxClass: 'icheckbox_square-blue',
+                });
                 $('form#edit_booking_form').validate({
                     submitHandler: function(form) {
                         var data = $(form).serialize();

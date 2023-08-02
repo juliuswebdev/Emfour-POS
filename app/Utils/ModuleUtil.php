@@ -23,7 +23,7 @@ class ModuleUtil extends Util
     public function isModuleInstalled($module_name)
     {
         
-        $is_available = ($module_name == "HRIS/Payroll" || $module_name == "DynamicPrice") ? true : Module::has($module_name);
+        $is_available = ($module_name == "HRIS/Payroll" || $module_name == "DynamicPrice" || $module_name == "TableMapping") ? true : Module::has($module_name);
         
         if ($is_available) {
             //Check if installed by checking the system table {module_name}_version
@@ -71,7 +71,13 @@ class ModuleUtil extends Util
         $dp_module['alias'] = "dynamic_price_module";
         $modules['DynamicPrice'] = $dp_module;
         
-        
+        //Inject HRIS Module
+        $table_mapping_modules = [];
+        $table_mapping_modules['name'] = "TableMapping";
+        $table_mapping_modules['alias'] = "table_mapping_module";
+        $modules['TableMapping'] = $table_mapping_modules;
+
+
         
         $installed_modules = [];
         foreach ($modules as $module => $details) {
@@ -116,6 +122,11 @@ class ModuleUtil extends Util
                         //Inject Dynamic Price Module
                         $data[$module['name']][0]['name'] = "dynamic_price_module";
                         $data[$module['name']][0]['label'] = "Dynamic Pricing Module";
+                        $data[$module['name']][0]['default'] = false;
+                    }else if($module['name'] == "TableMapping"){ 
+                        //Inject Table Mapping Module
+                        $data[$module['name']][0]['name'] = "table_mapping_module";
+                        $data[$module['name']][0]['label'] = "Table Mapping Module";
                         $data[$module['name']][0]['default'] = false;
                     }else{
                         $module_name = $module['name'];

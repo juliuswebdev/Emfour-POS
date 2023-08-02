@@ -1,3 +1,4 @@
+
 @php
 	$common_settings = session()->get('business.common_settings');
 	$multiplier = 1;
@@ -22,6 +23,7 @@
 	$product_cat2_slug = $product_cat2->slug ?? '';
 @endphp
 
+@if($product->is_promo == 0)
 <tr class="product_row product_row_{{$product->product_id}} product_row_{{ $product->sub_sku }} has_dp"  
 	data-cat-slug="{{ $product_cat1_slug }}"
 	data-sub-cat-slug="{{ $product_cat2_slug }}"
@@ -307,8 +309,16 @@
 
 		<input type="hidden" class="hidden_base_unit_sell_price" value="{{$product->default_sell_price / $multiplier}}">
 
-		<input type="hidden" class="original_price" value="{{@num_format($unit_price_inc_tax)}}">
-		
+		@php
+		$pos_is_promo = 0;
+		$pos_original_price = $product->default_sell_price / $multiplier;
+		if($action == 'edit') {
+			$pos_is_promo = $product->is_promo;
+			$pos_original_price = $product->original_price / $multiplier;
+		}
+		@endphp
+		<input type="hidden" class="original_price" name="products[{{$row_count}}][original_price]" value="{{$pos_original_price}}">
+		<input type="hidden" class="is_promo" name="products[{{$row_count}}][is_promo]" value="{{ $pos_is_promo }}">
 		{{-- Hidden fields for combo products --}}
 		@if($product->product_type == 'combo'&& !empty($product->combo_products))
 
@@ -440,3 +450,4 @@
 	</td>
 
 </tr>
+@endif

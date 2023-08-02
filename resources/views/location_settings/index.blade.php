@@ -103,6 +103,16 @@
                             </div>
                         </div>
 
+                        <div class="clearfix"></div>
+                        <br/>
+                        
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                {!! Form::label('wpc_reservation_site_link',__('lang_v1.wpc_reservation_site_link') . ':*') !!}
+                                {!! Form::text('wpc_reservation_site_link', $location->wpc_reservation_site_link, ['class' => 'form-control',
+                                'placeholder' => __('lang_v1.wpc_reservation_site_link')]); !!}
+                            </div>
+                        </div>
 
                         
 
