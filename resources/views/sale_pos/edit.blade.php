@@ -295,7 +295,7 @@
 						$(this).addClass('active');
 					}
 				} else {
-					$(this).toggleClass('active');
+					//$(this).toggleClass('active');
 				}
 
 				if($(this).attr('data-type') == 'table') {
