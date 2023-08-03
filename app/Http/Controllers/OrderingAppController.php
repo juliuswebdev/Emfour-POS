@@ -31,6 +31,7 @@ class OrderingAppController extends Controller
     public function __construct(RestaurantUtil $restUtil, ProductUtil $productUtil, TransactionUtil $transactionUtil)
     {
         $this->restUtil = $restUtil;
+        $this->transactionUtil = $transactionUtil;
     }
 
     public function login(Request $request)
@@ -131,6 +132,66 @@ class OrderingAppController extends Controller
         }
 
     }
+
+    public function getDashboardInformation(Request $request)
+    {
+        $user  = auth()->user();
+
+        $start = date('Y-m-d');
+        $end = date('Y-m-d');
+        $location_id = "";
+        $business_id = $user->business_id;
+
+        $purchase_details = $this->transactionUtil->getPurchaseTotals($business_id, $start, $end, $location_id);
+
+        $sell_details = $this->transactionUtil->getSellTotals($business_id, $start, $end, $location_id);
+
+        $total_ledger_discount = $this->transactionUtil->getTotalLedgerDiscount($business_id, $start, $end);
+
+        $purchase_due = $purchase_details['purchase_due'] - $total_ledger_discount['total_purchase_discount'];
+        $purchase_details['purchase_due'] = sprintf("%.2f", $purchase_due);
+
+        $transaction_types = [
+            'purchase_return', 'sell_return', 'expense',
+        ];
+
+        $transaction_totals = $this->transactionUtil->getTransactionTotals(
+            $business_id,
+            $transaction_types,
+            $start,
+            $end,
+            $location_id
+        );
+
+        $total_purchase_inc_tax = ! empty($purchase_details['total_purchase_inc_tax']) ? $purchase_details['total_purchase_inc_tax'] : 0;
+        $total_purchase_return_inc_tax = $transaction_totals['total_purchase_return_inc_tax'];
+
+        $output = $purchase_details;
+        $output['total_purchase'] = sprintf("%.2f", $total_purchase_inc_tax);;
+        $output['total_purchase_return'] = sprintf("%.2f", ($total_purchase_return_inc_tax));
+        $output['total_purchase_return_paid'] = $this->transactionUtil->getTotalPurchaseReturnPaid($business_id, $start, $end, $location_id);
+
+        $total_sell_inc_tax = ! empty($sell_details['total_sell_inc_tax']) ? $sell_details['total_sell_inc_tax'] : 0;
+        $total_sell_return_inc_tax = ! empty($transaction_totals['total_sell_return_inc_tax']) ? $transaction_totals['total_sell_return_inc_tax'] : 0;
+        $output['total_sell_return_paid'] = $this->transactionUtil->getTotalSellReturnPaid($business_id, $start, $end, $location_id);
+
+        $output['total_sell'] = sprintf("%.2f", $total_sell_inc_tax);
+        $output['total_sell_return'] = sprintf("%.2f",  $total_sell_return_inc_tax);
+
+        $output['invoice_due'] = sprintf("%.2f", $sell_details['invoice_due'] - $total_ledger_discount['total_sell_discount']);
+        $output['total_expense'] = sprintf("%.2f", $transaction_totals['total_expense']);
+
+        //NET = TOTAL SALES - INVOICE DUE - EXPENSE
+        $output['net'] = sprintf("%.2f",  $output['total_sell'] - $output['invoice_due'] - $output['total_expense']);
+
+        return response([
+            'message' => 'Success',
+            'data' => $output,
+            'status' => 1
+        ], 200);
+       
+    }
+
 
     public function getProducts(Request $request)
     {

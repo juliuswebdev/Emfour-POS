@@ -128,7 +128,7 @@
 	@endif
 
 	@if(in_array('types_of_service', $enabled_modules) && !empty($types_of_service))
-		<div class="col-md-4 col-sm-6">
+		<div class="col-md-4 col-sm-6 mo-div-hide">
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon">

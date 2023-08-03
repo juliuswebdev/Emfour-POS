@@ -3185,6 +3185,11 @@ function reset_pos_form(){
     $('.table-chair-btn').each(function(){
         $(this).removeClass('active');
     });
+
+    //Disabled table in pos
+    if($('select[name="res_table_id"]').length != 0){
+        check_table_is_occupied();
+    }
 }
 
 function set_default_customer() {
@@ -4679,3 +4684,19 @@ function check_location_is_open(){
     }
 }
 
+
+//Check table occupied
+function check_table_is_occupied(){
+    $.ajax({
+    method: 'GET',
+    url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
+        success: function(result){
+            $('select[name="res_table_id"] option').each(function(){
+                var id = $(this).attr('value');
+                if(result.includes(id)) {
+                    $(this).attr('disabled', 'disabled');
+                }
+            });
+        }
+    });
+}

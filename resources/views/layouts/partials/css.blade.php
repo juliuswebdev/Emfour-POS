@@ -78,3 +78,4 @@
 @if(strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != false)
 <link rel="stylesheet" href="{{ asset('css/mobile.app.css?v='.$asset_v) }}">
 @endif
+

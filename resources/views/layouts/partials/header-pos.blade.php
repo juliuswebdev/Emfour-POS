@@ -40,6 +40,7 @@
                 'required', 'autofocus'], $bl_attributes); !!}
             </div>
             @else
+              <input type="hidden" id="select_location_id" value="{{ $default_location->id }}">
               {{$default_location->name}}
               <input type="hidden" id="select_location_id" value="{{ $default_location->id }}">
             @endif

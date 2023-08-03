@@ -1,5 +1,5 @@
 header.main-header, footer, .order-page-title, .clock-inout-btn-wrapper, 
-i.fa-keyboard.hover-q, .mo-btn-hide{
+i.fa-keyboard.hover-q, .mo-btn-hide, .mo-dropdown-hide, .mo-div-hide{
     display: none;
 }
 .content-wrapper{
@@ -28,4 +28,31 @@ i.fa-keyboard.hover-q, .mo-btn-hide{
 }
 .mo-padding-10{
     padding: 10px !important;
+}
+.padding-top-0{
+    padding-top: 0px !important;
+}
+.pos_form_totals table
+{ 
+    margin-bottom: 50px !important;
+}
+button#pos-cancel{
+    margin-left: 0px !important;
+}
+
+button[data-target="#restaurant-checkout"] {
+    width: 50%;
+  } 
+.pos-form-actions .pos-total {
+    margin-bottom: 15px;
+}
+.kitchen-order-table-wrapper table tr{
+    font-size: 12px;
+}
+
+.kitchen-order-table-wrapper table tr .wrapper-crs{
+    display: flex;
+}
+.kitchen-order-table-wrapper table tr .mob-tr-text-left{
+    text-align: left;
 }
