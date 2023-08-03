@@ -534,7 +534,7 @@
 					success: function(result){
 						$('.table-chair-btn').removeClass('active locked');
 						$('.table-chair-btn').each(function(){
-							var id = $(this).attr('id');
+							var id = $(this).attr('data-table-chair-id');
 							if(result.includes(id)) {
 								$(this).addClass('active locked');
 							}

@@ -284,7 +284,7 @@
 					success: function(result){
 						console.log(result);
 						$('.table-chair-btn').each(function(){
-							var id = $(this).attr('id');
+							var id = $(this).attr('data-table-chair-id');
 							if(result.includes(id)) {
 								$(this).addClass('active locked');
 							}

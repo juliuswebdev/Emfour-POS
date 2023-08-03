@@ -755,22 +755,26 @@ class BookingController extends Controller
     public function loadTableChairSelected(Request $request) {
         $business_id = request()->session()->get('user.business_id');
         $location_id = $request->input('location_id');
-        $transactions = Transaction::where('business_id', $business_id)
-                    ->where('res_table_id','!=', null)
-                    ->where('location_id', $location_id)
-                    ->where('payment_status', 'due')
-                    ->select('table_chair_selected')->get();
+        $transactions = Transaction::where('transactions.business_id', $business_id)
+                    ->leftJoin('res_tables', 'res_tables.id', '=', 'transactions.res_table_id')
+                    ->where('transactions.res_table_id','!=', null)
+                    ->where('transactions.location_id', $location_id)
+                    ->where('transactions.payment_status', 'due')
+                    ->select('res_tables.name')->get();
         $arr = [];
         foreach($transactions as $item1) {
-            if($item1->table_chair_selected && $item1->table_chair_selected != 'null') {
-                $i = $item1->table_chair_selected;
-                $arr_temp = json_decode(json_decode($i, true), true);
-                foreach($arr_temp as $item2) {
-                    if(!in_array($item2, $arr)) {
-                        array_push($arr, $item2);
-                    }
-                }
+            if(!in_array($item1->name, $arr)) {
+                array_push($arr, $item1->name);
             }
+            // if($item1->table_chair_selected && $item1->table_chair_selected != 'null') {
+            //     $i = $item1->table_chair_selected;
+            //     $arr_temp = json_decode(json_decode($i, true), true);
+            //     foreach($arr_temp as $item2) {
+            //         if(!in_array($item2, $arr)) {
+            //             array_push($arr, $item2);
+            //         }
+            //     }
+            // }
         }
         return response($arr, 200);
     }

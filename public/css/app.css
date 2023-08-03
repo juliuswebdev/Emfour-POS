@@ -1399,7 +1399,7 @@ table.table-text-center td, table.table-text-center th{
   background-color: green!important;
 }
 select[name="res_table_id"] option[disabled="disabled"]{
-  background-color: #7f7f7f;
+  background-color: #e2e2e2;
 }
 #restaurant_booking_table_modal .close {
   position: relative;
