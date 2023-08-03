@@ -40,8 +40,8 @@
                 'required', 'autofocus'], $bl_attributes); !!}
             </div>
             @else
-              <input type="hidden" id="select_location_id" value="{{ $default_location->id }}">
-              {{$default_location->name}}
+         
+            <span id="location_id_code">{{$default_location->name}} ({{ $default_location->location_id }})</span>
               <input type="hidden" id="select_location_id" value="{{ $default_location->id }}">
             @endif
           @endif
