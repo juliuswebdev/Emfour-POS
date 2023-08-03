@@ -39,12 +39,7 @@ Route::middleware(['cors'])->group(function () {
 
 // API Ordering APP
 Route::prefix('v1')->group(function() {
-
-    
     Route::post('/login', [OrderingAppController::class, 'login']);
-
-    
-
     Route::middleware('auth:api')->group(function() {
 
         //Get Home Dashboard Data
