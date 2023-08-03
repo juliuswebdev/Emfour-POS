@@ -1392,3 +1392,26 @@ table.table-text-center td, table.table-text-center th{
   border: 1px solid #7f7f7f;
   color: #000!important;
 }
+.table-chair-btn {
+  cursor: pointer;
+}
+.table-chair-btn.active {
+  background-color: green!important;
+}
+select[name="res_table_id"] option[disabled="disabled"]{
+  background-color: #7f7f7f;
+}
+#restaurant_booking_table_modal .close {
+  position: relative;
+  z-index: 99;
+  top: -60px;
+  color: #000;
+  opacity: 1;
+  font-size: 50px;
+}
+.table-mapping-btn {
+  cursor: pointer;
+}
+.table-mapping-btn:hover {
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.2);
+}

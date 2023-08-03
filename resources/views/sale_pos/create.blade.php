@@ -481,25 +481,7 @@
 
 	@if( ($__is_table_mapping_enabled) && (strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != true) )
 		<div class="modal fade" id="restaurant_booking_table_modal" tabindex="-1" role="dialog"></div>
-		<style>
-			select[name="res_table_id"] option {
-				display: none;
-			}
-			.table-chair-btn {
-				cursor: pointer;
-			}
-			.table-chair-btn.active {
-				background-color: green!important;
-			}
-			#restaurant_booking_table_modal .close {
-				position: relative;
-				z-index: 99;
-				top: -60px;
-				color: #000;
-				opacity: 1;
-				font-size: 50px;
-			}
-		</style>
+		<div class="modal fade" id="tables_modal" tabindex="-1" role="dialog"></div>
 		<script>
 			$.ajax({
 				method: 'GET',
@@ -508,8 +490,43 @@
 					$('#restaurant_booking_table_modal').html(result);
 				}
 			});
+
+			$.ajax({
+				method: 'GET',
+				url: '/modules/tables/create',
+				success: function(result){
+					$('#tables_modal').html(result);
+				}
+			});
+
+			$(document).on('click', '.add_new_table', function(e) {
+				$('#tables_modal').modal('show');
+			});
+
+			$(document).on('submit', 'form#table_add_form', function(e){
+                e.preventDefault();
+                var data = $(this).serialize();
+
+                $.ajax({
+                    method: "POST",
+                    url: $(this).attr("action"),
+                    dataType: "json",
+                    data: data,
+                    success: function(result){
+                        if(result.success == true){
+                            $('#tables_modal').modal('hide');
+							$('#tables_modal').removeAttr('disabled');
+							$('#tables_modal #location_id, #tables_modal #name, #tables_modal #description').val('');
+                            toastr.success(result.msg);
+							getLocationTables($('#select_location_id').val());
+                        } else {
+                            toastr.error(result.msg);
+                        }
+                    }
+                });
+            });
 			
-			$(document).on('click', 'select[name="res_table_id"]', function(e) {
+			$(document).on('click', '.table-mapping-btn', function(e) {
 				e.preventDefault();
 				$.ajax({
 				method: 'GET',
@@ -524,7 +541,6 @@
 						});
 					}
 				});
-
 				$('#restaurant_booking_table_modal').modal('show');
 			});
 			
@@ -585,7 +601,7 @@
 		</script>
 	@endif
 
-	@if(strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != false)
+	
 	<script>
 		$(document).ready(function() {
 		$.ajax({
@@ -602,5 +618,5 @@
 			});
 		});
 		</script>
-	@endif
+	
 @endsection

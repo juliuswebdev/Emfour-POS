@@ -2,10 +2,13 @@
 <div class="col-sm-4">
 	<div class="form-group">
 		<div class="input-group">
-			<span class="input-group-addon">
+			<span class="input-group-addon table-mapping-btn">
 				<i class="fa fa-table"></i>
 			</span>
 			{!! Form::select('res_table_id', $tables, $view_data['res_table_id'], ['class' => 'form-control', 'placeholder' => __('restaurant.select_table')]); !!}
+			<span class="input-group-btn">
+					<button type="button" class="btn btn-default bg-white btn-flat add_new_table" data-name=""><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+			</span>
 		</div>
 	</div>
 </div>
