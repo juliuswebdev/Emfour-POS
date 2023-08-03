@@ -56,3 +56,11 @@ button[data-target="#restaurant-checkout"] {
 .kitchen-order-table-wrapper table tr .mob-tr-text-left{
     text-align: left;
 }
+.card-payment-popup{
+    max-width: 75%;
+    padding: 20px;
+    font-size: 19px;
+}
+.modal-backdrop.in {
+    opacity: .9;
+}
