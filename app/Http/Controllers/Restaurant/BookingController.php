@@ -780,7 +780,7 @@ class BookingController extends Controller
     public function getOccupiedTableChairs(Request $request) {
         $business_id = request()->session()->get('user.business_id');
         $location_id = $request->input('location_id');
-        $res_table_ids = Transaction::where('res_table_id','!=', null)->where('business_id', $business_id)->where('location_id', $location_id)->where('payment_status', 'due')->whereNotNull('table_chair_selected')->pluck('res_table_id')->toArray();
+        $res_table_ids = Transaction::where('res_table_id','!=', null)->where('business_id', $business_id)->where('location_id', $location_id)->where('payment_status', 'due')->pluck('res_table_id')->toArray();
         $res_table_ids = (empty($res_table_ids)) ? [] : array_map('strval', $res_table_ids);
         return response($res_table_ids, 200);
     }
