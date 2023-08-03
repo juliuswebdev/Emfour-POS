@@ -1017,6 +1017,7 @@ $(document).ready(function() {
             }
 
             if (cnf) {
+                
                 disable_pos_form_actions();
 
                 var data = $(form).serialize();
@@ -1067,8 +1068,12 @@ $(document).ready(function() {
                         } else {
                             toastr.error(result.msg);
                         }
-
-                        $('.modal-backdrop').remove();
+                        
+                        var modal_backdrop_length = $('.modal-backdrop').length;
+                        if(modal_backdrop_length > 1){
+                            console.log(modal_backdrop_length);
+                            $('.modal-backdrop').remove();
+                        }   
                         enable_pos_form_actions();
                     },
                 });
@@ -3190,6 +3195,7 @@ function reset_pos_form(){
     if($('select[name="res_table_id"]').length != 0){
         check_table_is_occupied();
     }
+    
 }
 
 function set_default_customer() {

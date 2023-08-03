@@ -200,7 +200,7 @@
             @endif
         @endisset
         <button type="button" title="{{ __('expense.add_expense') }}"   
-          data-placement="bottom" class="btn bg-purple btn-flat m-6 btn-xs m-5 btn-modal pull-right" id="{{ ($is_open_security_pin_on_expance_btn_click) ? 'open_security_pin_modal': 'add_expense' }}">
+          data-placement="bottom" class="btn bg-purple btn-flat m-6 btn-xs m-5 btn-modal pull-right mo-btn-hide" id="{{ ($is_open_security_pin_on_expance_btn_click) ? 'open_security_pin_modal': 'add_expense' }}">
             <strong><i class="fa fas fa-minus-circle"></i> @lang('expense.add_expense')</strong>
         </button>
         @endcan

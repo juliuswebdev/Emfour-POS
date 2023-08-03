@@ -139,13 +139,12 @@ class OrderingAppController extends Controller
 
         $start = date('Y-m-d');
         $end = date('Y-m-d');
-        $location_id = "";
+        $location_id = null;
         $business_id = $user->business_id;
-
+        
         $purchase_details = $this->transactionUtil->getPurchaseTotals($business_id, $start, $end, $location_id);
 
         $sell_details = $this->transactionUtil->getSellTotals($business_id, $start, $end, $location_id);
-
         $total_ledger_discount = $this->transactionUtil->getTotalLedgerDiscount($business_id, $start, $end);
 
         $purchase_due = $purchase_details['purchase_due'] - $total_ledger_discount['total_purchase_discount'];
