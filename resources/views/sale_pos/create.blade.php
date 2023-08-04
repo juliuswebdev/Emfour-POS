@@ -480,6 +480,14 @@
 	@endif
 
 	@if( ($__is_table_mapping_enabled) && (strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != true) )
+		<style>
+			.table-mapping-dropdown {
+				display: none;
+			}
+			.table-mapping-dropdown.active {
+				display: block;
+			}
+		</style>
 		<div class="modal fade" id="restaurant_booking_table_modal" tabindex="-1" role="dialog"></div>
 		<div class="modal fade" id="tables_modal" tabindex="-1" role="dialog"></div>
 		<script>
@@ -488,8 +496,24 @@
 				url: '/bookings/get-table-mapping?location_id=' + $('#select_location_id').val(),
 				success: function(result){
 					$('#restaurant_booking_table_modal').html(result);
+					$('.table-mapping-dropdown').addClass('active');
+					$.ajax({
+						method: 'GET',
+						url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
+							success: function(result){
+					
+								$('select[name="res_table_id"] option').each(function(){
+									var id = $(this).attr('value');
+									if(result.includes(id)) {
+										$(this).attr('disabled', 'disabled');
+									}
+								});
+							}
+					});
+
 				}
 			});
+
 
 			$.ajax({
 				method: 'GET',
@@ -519,6 +543,7 @@
 							$('#tables_modal #location_id, #tables_modal #name, #tables_modal #description').val('');
                             toastr.success(result.msg);
 							getLocationTables($('#select_location_id').val());
+							$('.table-mapping-dropdown').addClass('active');
                         } else {
                             toastr.error(result.msg);
                         }
@@ -603,20 +628,23 @@
 
 	
 	<script>
-		$(document).ready(function() {
+		
 		$.ajax({
 			method: 'GET',
 			url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
 				success: function(result){
+		
 					$('select[name="res_table_id"] option').each(function(){
 						var id = $(this).attr('value');
+						console.log('result.includes(id)',result.includes(id));
 						if(result.includes(id)) {
+							console.log(id);
 							$(this).attr('disabled', 'disabled');
 						}
 					});
 				}
-			});
 		});
-		</script>
+
+	</script>
 	
 @endsection

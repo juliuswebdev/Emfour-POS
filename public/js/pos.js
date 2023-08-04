@@ -976,7 +976,7 @@ $(document).ready(function() {
 
             //Ignore if the difference is less than 0.5
             if ($('input#in_balance_due').val() >= 0.5) {
-                cnf = confirm(LANG.paid_amount_is_less_than_payable);
+                // cnf = confirm(LANG.paid_amount_is_less_than_payable);
                 // if( total_payble > total_paying ){
                 // 	cnf = confirm( LANG.paid_amount_is_less_than_payable );
                 // } else if(total_payble < total_paying) {
@@ -2324,7 +2324,7 @@ function dp_rules(shown_total, sub_total, dp, type="all", cart_total_amount = tr
     //         dp_rules = result;
     //     }
     // });
-    console.log(dp_rules);
+
 
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
@@ -2361,12 +2361,7 @@ function dp_rules(shown_total, sub_total, dp, type="all", cart_total_amount = tr
             // var end_d   = new Date(d2);
             // var today_d = new Date(c);
 
-            console.log('today', today);
-            console.log('start_date', start_date);
-            console.log('end_date', end_date);
-            console.log('(today_d > start_d && today_d < end_d)',(today_d > start_d && today_d < end_d));
-            console.log('(rule[active])', (rule['active']));
-            console.log('(rule[business-location] === location_select.match(/\(([^)]+)\)/)[1])', (rule['business-location'] === location_select.match(/\(([^)]+)\)/)[1]));
+          
             if(
                 (today_d > start_d && today_d < end_d) &&
                 (rule['active']) &&

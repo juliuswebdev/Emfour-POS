@@ -1,5 +1,5 @@
 @if($tables_enabled)
-<div class="col-sm-4">
+<div class="col-sm-4 table-mapping-dropdown">
 	<div class="form-group">
 		<div class="input-group">
 			<span class="input-group-addon table-mapping-btn">
