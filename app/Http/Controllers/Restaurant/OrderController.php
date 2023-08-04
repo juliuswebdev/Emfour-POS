@@ -288,7 +288,7 @@ class OrderController extends Controller
             }
 
             $transactions = $query->where('transaction_sell_lines.res_line_order_status', '=', $res_line_order_status)
-            ->where('transactions.final_total', '=', 0.0000)
+          
             ->select(
                 'transactions.id as id',
                 'transactions.invoice_no as invoice_no',

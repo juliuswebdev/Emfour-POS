@@ -182,7 +182,7 @@
 
   </div>
     @include('user.edit_profile_form_part')
-    @if(!empty($form_partials))
+    @if(!$form_partials)
       @foreach($form_partials as $partial)
         {!! $partial !!}
       @endforeach

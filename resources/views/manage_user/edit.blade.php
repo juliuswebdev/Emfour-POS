@@ -188,7 +188,7 @@
     </div>
     @include('user.edit_profile_form_part', ['bank_details' => !empty($user->bank_details) ? json_decode($user->bank_details, true) : null])
 
-    @if(!empty($form_partials))
+    @if(!$form_partials)
       @foreach($form_partials as $partial)
         {!! $partial !!}
       @endforeach
