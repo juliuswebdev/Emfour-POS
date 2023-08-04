@@ -192,18 +192,12 @@
 				});
 			});
 
-			//Close the card payment on return
-			$(document).on('click', '#card-payment-close', function(){
-				$('.modal-backdrop').remove();
-			});
-
+		
 			$(document).on('click', '.overlay2 a', function(){
 				window.onbeforeunload = null;
 				$(window).off('beforeunload');
 			});
 			
-			
-
 			//Input qty validation in sale return screen
 			$('.input_quantity').on('input', function(){
 				var max_qty = $(this).attr('data-max');
@@ -228,6 +222,13 @@
 		});
 	</script>
 	@endif
+
+	<script>
+		//Close the card payment on return
+		$(document).on('click', '#card-payment-close', function(){
+			$('.modal-backdrop').remove();
+		});
+	</script>
 
 	@if( ($__is_table_mapping_enabled) && (strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != true) )
 		<style>

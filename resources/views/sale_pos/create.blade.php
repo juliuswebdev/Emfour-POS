@@ -314,12 +314,6 @@
 				});
 			}
 
-			//Handel Transaction Cancel event Through click button
-			$(document).on('click', '#card-payment-close', function(){
-				$('.modal-backdrop').remove();
-                enable_pos_form_actions();
-			})
-
 			//Sale Return click event
 			$(document).on('click', '.sale-return', function(){
 				$('#sale-return-modal').modal('show');
@@ -478,6 +472,14 @@
 		})
 	</script>
 	@endif
+
+	<script>
+		//Handel Transaction Cancel event Through click button
+		$(document).on('click', '#card-payment-close', function(){
+			$('.modal-backdrop').remove();
+			enable_pos_form_actions();
+		})
+	</script>
 
 	@if( ($__is_table_mapping_enabled) && (strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != true) )
 		<style>
