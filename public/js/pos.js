@@ -305,7 +305,8 @@ $(document).ready(function() {
                         response
                     );
                 },
-                minLength: 2,
+                //minLength: 2,
+                minLength: 1,
                 response: function(event, ui) {
                     if (ui.content.length == 1) {
                         ui.item = ui.content[0];
