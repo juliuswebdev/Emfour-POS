@@ -37,7 +37,7 @@ $(document).ready(function() {
     }
 });
 
-function getLocationTables(location_id) {
+function getLocationTables(location_id, $type=null) {
     var transaction_id = $('span#restaurant_module_span').data('transaction_id');
 
     if (location_id != '') {
@@ -57,6 +57,24 @@ function getLocationTables(location_id) {
                 var length_of_sale_return_btn = $('.wrapper-of-sale-return').length;
                 if(length_of_sale_return_btn != 0){
                     $('span#restaurant_module_span').find('select').attr("disabled", "disabled")
+                }
+
+                if($type == 'table_mapping') {
+                    $('.table-mapping-dropdown').addClass('active');
+                    $.ajax({
+						method: 'GET',
+						url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
+							success: function(result){
+					
+								$('select[name="res_table_id"] option').each(function(){
+                                    var id = $(this).attr('value');
+                                    var selected = $(this).attr('selected');
+                                    if(result.includes(id) && !selected) {
+                                        $(this).attr('disabled', 'disabled');
+                                    }
+								});
+							}
+					});
                 }
 
             },

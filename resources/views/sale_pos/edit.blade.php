@@ -292,8 +292,7 @@
 							$('#tables_modal').removeAttr('disabled');
 							$('#tables_modal #location_id, #tables_modal #name, #tables_modal #description').val('');
                             toastr.success(result.msg);
-							getLocationTables($('#select_location_id').val());
-							$('.table-mapping-dropdown').addClass('active');
+							getLocationTables($('#select_location_id').val(), 'table_mapping');
                         } else {
                             toastr.error(result.msg);
                         }
