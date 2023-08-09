@@ -291,8 +291,13 @@ class SellPosController extends Controller
                                 ->whereNull('clock_out_time')
                                 ->first();
         $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+
+        $types_of_service_active = TypesOfService::where('business_id', $business_id)->where('is_default', 1)->first();
+        $types_of_service_active = ($types_of_service_active) ? $types_of_service_active->id : null;
+
         return view('sale_pos.create')
             ->with(compact(
+                'types_of_service_active',
                 'dp_rules',
                 'clock_in',
                 '__is_table_mapping_enabled',
@@ -1329,8 +1334,10 @@ class SellPosController extends Controller
         }
         $dp_rules = $this->productUtil->getActiveDPRules($business_id);
         //$dp_rules = $this->productUtil->getActiveDPRules($business_id);
+        $types_of_service_active = TypesOfService::where('business_id', $business_id)->where('is_default', 1)->first();
+        $types_of_service_active = ($types_of_service_active) ? $types_of_service_active->id : null;
         return view('sale_pos.edit')
-            ->with(compact('dp_rules', '__is_table_mapping_enabled', '__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
+            ->with(compact('types_of_service_active', 'dp_rules', '__is_table_mapping_enabled', '__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
             'commission_agent', 'categories', 'pos_settings', 'change_return', 'types', 'customer_groups',
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',

@@ -527,6 +527,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     
 
     Route::resource('types-of-service', TypesOfServiceController::class);
+    Route::post('types-of-service-make-default/{id}', [TypesOfServiceController::class, 'makeDefault']);
     Route::get('sells/edit-shipping/{id}', [SellController::class, 'editShipping']);
     Route::put('sells/update-shipping/{id}', [SellController::class, 'updateShipping']);
     Route::get('shipments', [SellController::class, 'shipments']);

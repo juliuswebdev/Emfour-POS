@@ -45,12 +45,17 @@ class TypesOfServiceController extends Controller
                         ->select('*');
 
             return Datatables::of($tax_rates)
-                ->addColumn(
-                    'action',
-                    '<button data-href="{{action(\'App\Http\Controllers\TypesOfServiceController@edit\', [$id])}}" class="btn btn-xs btn-primary btn-modal" data-container=".type_of_service_modal"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
+                ->addColumn('action', function ($row) {
+                    $class = ($row->is_default) ? 'success' : 'default';
+                    $html =
+                    '<button data-href="'.action([\App\Http\Controllers\TypesOfServiceController::class, 'edit'], [$row->id]).'" class="btn btn-xs btn-primary btn-modal" data-container=".type_of_service_modal"><i class="glyphicon glyphicon-edit"></i> '.__("messages.edit").'</button>
                         &nbsp;
-                    <button data-href="{{action(\'App\Http\Controllers\TypesOfServiceController@destroy\', [$id])}}" class="btn btn-xs btn-danger delete_type_of_service"><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>'
-                )
+                    <button data-href="'.action([\App\Http\Controllers\TypesOfServiceController::class, 'destroy'], [$row->id]).'" class="btn btn-xs btn-danger delete_type_of_service"><i class="glyphicon glyphicon-trash"></i> '.__("messages.delete").'</button>
+                        &nbsp;
+                    <button data-href="'.action([\App\Http\Controllers\TypesOfServiceController::class, 'makeDefault'], [$row->id]).'" class="btn btn-xs btn-'.$class.' make_default_type_of_service"><i class="glyphicon glyphicon-clipboard"></i> '.__("Make Default").'</button>
+                    ';
+                    return $html;
+                })
                 ->editColumn('packing_charge', function ($row) {
                     $html = '<span class="display_currency" data-currency_symbol="false">'.$row->packing_charge.'</span>';
 
@@ -220,6 +225,38 @@ class TypesOfServiceController extends Controller
 
                 $output = ['success' => true,
                     'msg' => __('lang_v1.deleted_success'),
+                ];
+            } catch (\Exception $e) {
+                \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+                $output = ['success' => false,
+                    'msg' => __('messages.something_went_wrong'),
+                ];
+            }
+
+            return $output;
+        }
+    }
+
+    public function makeDefault($id)
+    {
+        if (! auth()->user()->can('access_types_of_service')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (request()->ajax()) {
+            try {
+                $business_id = request()->session()->get('user.business_id');
+                
+                TypesOfService::where('business_id', $business_id)
+                        ->update(['is_default' => 0]);
+
+                TypesOfService::where('business_id', $business_id)
+                        ->where('id', $id)
+                        ->update(['is_default' => 1]);
+
+                $output = ['success' => true,
+                    'msg' => __('lang_v1.updated_success'),
                 ];
             } catch (\Exception $e) {
                 \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());

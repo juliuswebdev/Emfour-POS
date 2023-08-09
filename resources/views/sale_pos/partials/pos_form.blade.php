@@ -134,7 +134,7 @@
 					<span class="input-group-addon">
 						<i class="fa fa-external-link-square-alt text-primary service_modal_btn"></i>
 					</span>
-					{!! Form::select('types_of_service_id', $types_of_service, null, ['class' => 'form-control', 'id' => 'types_of_service_id', 'style' => 'width: 100%;', 'placeholder' => __('lang_v1.select_types_of_service')]); !!}
+					{!! Form::select('types_of_service_id', $types_of_service, $types_of_service_active, ['class' => 'form-control', 'id' => 'types_of_service_id', 'style' => 'width: 100%;', 'placeholder' => __('lang_v1.select_types_of_service')]); !!}
 
 					{!! Form::hidden('types_of_service_price_group', null, ['id' => 'types_of_service_price_group']) !!}
 

@@ -2469,6 +2469,36 @@ $(document).on('click', 'button.delete_type_of_service', function(e) {
     });
 });
 
+$(document).on('click', 'button.make_default_type_of_service', function(e) {
+    e.preventDefault();
+    swal({
+        title: LANG.sure,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then(willDefault => {
+        if (willDefault) {
+            var href = $(this).data('href');
+            var data = $(this).serialize();
+
+            $.ajax({
+                method: 'POST',
+                url: href,
+                dataType: 'json',
+                data: data,
+                success: function(result) {
+                    if (result.success == true) {
+                        toastr.success(result.msg);
+                        types_of_service_table.ajax.reload();
+                    } else {
+                        toastr.error(result.msg);
+                    }
+                },
+            });
+        }
+    });
+});
+
 $(document).on('shown.bs.modal', '.view_modal', function(e){
     if ($('#shipping_documents_dropzone').length) {
        $(this).find("div#shipping_documents_dropzone").dropzone({
