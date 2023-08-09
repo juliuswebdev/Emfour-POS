@@ -30,7 +30,10 @@
     <div class="col-md-7">
       <div class="m-6 mt-5 pos-time-location-register-number" style="display: flex;">
         
-        <p ><strong>@lang('business.register_number'): {{  $register_number }} &nbsp;&nbsp;</strong> 
+        <p >
+          <strong>@lang('business.register_number'): {{  $register_number }} &nbsp;&nbsp;<br>
+          <strong>Cashier: {{ Auth::User()->first_name }} {{ Auth::User()->last_name }}</strong>
+        </strong> 
         <p ><strong>@lang('sale.location'): &nbsp;</strong> 
           @if(empty($transaction->location_id))
             @if(count($business_locations) > 1)
@@ -51,7 +54,7 @@
         @if($__is_essentials_enabled && $is_employee_allowed)
 
         <div class="clock-inout-btn-wrapper">
-          <button class="btn bg-info btn-flat clockinout">@lang( 'lang_v1.btn_label_clockin_clockout' )</button>
+          <button class="btn bg-info btn-flat clockinout" style="background-color: yellow!important">@lang( 'lang_v1.btn_label_clockin_clockout' )</button>
         </div>
 
         {{--

@@ -3,8 +3,16 @@
     //$url = file_get_contents('https://restaurant.emfoursolutions.com/wp-json/wpc/table_mapping');
     $data = json_decode($url, true);
     $map = $data['content']['common_mapping'];
-@endphp
 
+@endphp
+    <style>
+        .table-chair-btn.locked {
+            background-color:  @php echo $map['colorStyle']['bookedColor'] @endphp!important;
+        }
+        .table-chair-btn.active {
+            background-color:  @php echo $map['colorStyle']['selectionColor'] @endphp!important;
+        }
+    </style>
     <div class="modal-dialog modal-lg" role="document" style="width: {{ $map['canvasWidth'] + 30 }}px;">
         <div class="modal-content">
             <div class="modal-body">
@@ -22,9 +30,15 @@
                         ">
                         @foreach($map['mapping'] as $item)
                             @php 
-                            $off = 0;
+                            $off_top = 0;
+                            $off_left = 0;
                             if($item['type'] == 'table_circle') {
-                                $off = 20;
+                                $off_top = 20;
+                                $off_left = 20;
+                            }
+                            if($item['type'] == 'table') {
+                                $off_top = 20;
+                                $off_left = 60;
                             }
                             $table_name = $item['name'] .''. $item['number'];
                             $type = explode("_", $item['type'])[0];
@@ -34,8 +48,8 @@
                              data-type="{{ $type }}"
                              style="
                                 position: absolute;
-                                top: {{$item['positions']['top'] - $off}}px;
-                                left: {{$item['positions']['left'] - $off}}px;
+                                top: {{$item['positions']['top'] - $off_top}}px;
+                                left: {{$item['positions']['left'] - $off_left}}px;
                                 width: {{$item['positions']['width']}}px;
                                 height: {{$item['positions']['height']}}px;
                                 background-color: {{$item['color']}};

@@ -52,6 +52,7 @@
                             <th>@lang('messages.action')</th>
                             <th>@lang('lang_v1.by')</th>
                             <th>@lang('brand.note')</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                 </table>
@@ -59,6 +60,8 @@
             @endcomponent
         </div>
     </div>
+    <div class="modal fade view_modal" tabindex="-1" role="dialog" 
+        aria-labelledby="gridSystemModalLabel"></div>
 </section>
 <!-- /.content -->
 
@@ -105,7 +108,8 @@
                 { data: 'subject_type', "orderable": false, "searchable": false},
                 { data: 'description', name: 'description'},
                 { data: 'created_by', name: 'created_by'},
-                { data: 'note', name: 'note'}
+                { data: 'note', name: 'note'},
+                { data: 'actions', name: 'actions'}
             ]
         });  
 

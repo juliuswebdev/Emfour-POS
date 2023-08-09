@@ -3592,7 +3592,6 @@ class ReportController extends Controller
                                 } elseif (($row->subject_type == \App\TransactionPayment::class)) {
                                     $subject_type = __('lang_v1.payment');
                                 }
-
                                 return $subject_type;
                             })
                             ->addColumn('note', function ($row) use ($statuses, $shipping_statuses) {
@@ -3634,13 +3633,22 @@ class ReportController extends Controller
 
                                 return $html;
                             })
+                            ->addColumn('actions', function($row) {
+                                $html = '';
+                                if($row->description == 'sell_deleted') {
+                                    $html   .= '<a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->getExtraProperty('id')]).'" class="btn-modal btn btn-xs btn-info" data-container=".view_modal">
+                                                <i class="fas fa-eye" aria-hidden="true"></i>'.__('messages.view').'
+                                            </a>';
+                                }
+                                return $html;
+                            })
                             ->filterColumn('created_by', function ($query, $keyword) {
                                 $query->whereRaw("CONCAT(COALESCE(surname, ''), ' ', COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) like ?", ["%{$keyword}%"]);
                             })
                             ->editColumn('description', function ($row) {
                                 return __('lang_v1.'.$row->description);
                             })
-                            ->rawColumns(['note'])
+                            ->rawColumns(['note', 'actions'])
                             ->make(true);
         }
 

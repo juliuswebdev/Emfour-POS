@@ -594,10 +594,11 @@ class ModuleUtil extends Util
                 //check if category type is duplicate
                 if (! in_array($key, $category_types)) {
                     $category_types[] = $key;
-                } else {
-                    echo __('lang_v1.duplicate_taxonomy_type_found');
-                    exit;
-                }
+                } 
+                //else {
+                //    echo __('lang_v1.duplicate_taxonomy_type_found');
+                //    exit;
+                //}
 
                 if ($category_type == $key) {
                     $module_data = $value;

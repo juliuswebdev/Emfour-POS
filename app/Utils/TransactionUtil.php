@@ -4872,17 +4872,19 @@ class TransactionUtil extends Util
                 if (! empty($sales_order_ids)) {
                     $this->updateSalesOrderStatus($sales_order_ids);
                 }
-
-                $transaction->delete();
+                $transaction->update(['is_deleted'=> 1]);
+                // --> $transaction->delete();
             } else {
                 $business = Business::findOrFail($business_id);
                 $transaction_payments = $transaction->payment_lines;
                 $deleted_sell_lines = $transaction->sell_lines;
                 $deleted_sell_lines_ids = $deleted_sell_lines->pluck('id')->toArray();
-                $this->deleteSellLines(
-                    $deleted_sell_lines_ids,
-                    $transaction->location_id
-                );
+
+                // -->
+                // $this->deleteSellLines(
+                //     $deleted_sell_lines_ids,
+                //     $transaction->location_id
+                // );
 
                 $this->updateCustomerRewardPoints($transaction->contact_id, 0, $transaction->rp_earned, 0, $transaction->rp_redeemed);
 
@@ -4903,7 +4905,8 @@ class TransactionUtil extends Util
                 //Delete Cash register transactions
                 $transaction->cash_register_payments()->delete();
 
-                $transaction->delete();
+                // --> $transaction->delete();
+                $transaction->update(['is_deleted'=> 1]);
 
                 foreach ($transaction_payments as $payment) {
                     event(new TransactionPaymentDeleted($payment));

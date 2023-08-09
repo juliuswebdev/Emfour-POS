@@ -1827,7 +1827,23 @@ class SellPosController extends Controller
                 //Begin transaction
                 DB::beginTransaction();
 
-                $output = $this->transactionUtil->deleteSale($business_id, $id);
+                //
+                $is_card = false;
+                $transaction_payments = TransactionPayment::where('transaction_id', $id)->get();
+                foreach($transaction_payments as $item) {
+                    if($item->method == 'card') {
+                        $is_card = true;
+                    }
+                }
+
+                if($is_card) {
+                    $output['success'] = false;
+                    $output['msg'] = 'Unable to delete Card Payment Method.';
+                } else {
+                    $output = $this->transactionUtil->deleteSale($business_id, $id);
+                }
+
+                
 
                 DB::commit();
             } catch (\Exception $e) {
