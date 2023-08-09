@@ -905,3 +905,64 @@ justify-content: space-between;
 .invoice-info{
   margin-bottom: 15px;
 }
+
+.cu-text-white{
+  color:#ffffff;
+}
+
+.login-brand-box{
+  background: #000000b8;
+  padding: 25px 0px;
+}
+
+.brand-logo{
+  width: 27% !important;
+  height: 100%;
+  border-radius: 0px;
+}
+.cu-float-right{
+  float: right;
+}
+.login-header{
+  font-size: 24px;
+    font-weight: 900;
+    padding-bottom: 5px;
+}
+
+.ff-feature{
+    display: flex;
+    justify-content: space-evenly;
+    margin:0px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+.features-class .demo-login{
+    padding: 10px !important;
+    height: 80px;
+    border-radius: 10px;
+    margin: 3px !important;
+    font-size: 12.5px;
+    line-height: 15px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 124px;
+    max-width: 124px;
+}
+.features-class .demo-login i{
+padding-bottom: 10px;
+}
+.cu-mb-0{
+  margin-bottom:0px;
+}
+.ff-login-hr{
+  height: 0px;
+    padding: 0px;
+    border-top: 1px solid #eee;
+}
+#footer-navigation{
+  background: #0e263a;
+    padding: 25px;
+    width: 100%;
+}
