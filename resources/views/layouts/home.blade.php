@@ -51,6 +51,22 @@
                 @yield('content')
             </div>
         </div>
+        
+
+        <section id="footer-navigation">
+            <div class="container">
+               <div class="footer-text">
+                  <div class="row">
+                     <div class="col-md-12 text-center">
+                        <span class="text-white">Copyright © {{ date('Y') }} Emfour Technology Solutions. All rights reserved.</span>
+                     </div>
+                  </div>
+                  
+               </div>
+            </div>
+         </section>
+        
+        
         @include('layouts.partials.javascripts')
 
     <!-- Scripts -->

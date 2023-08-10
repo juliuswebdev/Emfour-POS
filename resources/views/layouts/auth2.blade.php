@@ -30,18 +30,20 @@
             <div class="col-md-5 col-sm-5 hidden-xs left-col eq-height-col" >
                 <div class="left-col-content login-header"> 
                     <!-- <img src="/img/hero-img.png" alt="main"> -->
-                    <div>
+                    <div class="login-brand-box">
                     <a href="/">
                     @if(file_exists(public_path('uploads/logo.png')))
                         <img src="/uploads/logo.png" class="img-rounded" alt="Logo" width="150">
                     @else
-                       {{ config('app.name', 'ultimatePOS') }}
+                       {{-- {{ config('app.name', 'ultimatePOS') }} --}}
+                       Welcome to MAXXIMU Software
                     @endif 
                     </a>
                     <br/>
-                    @if(!empty(config('constants.app_title')))
+                    <span class="cu-text-white">"POS and Beyond"</span>
+                    {{-- @if(!empty(config('constants.app_title')))
                         <small>{{config('constants.app_title')}}</small>
-                    @endif
+                    @endif --}}
                     </div>
                 </div>
             </div>
@@ -61,11 +63,11 @@
                     @endforeach
                     </select>
                 </div>
-                <div class="col-md-3 col-xs-4 locale" style="margin-left: 10px;">
+                <div class="col-md-9 col-xs-4 locale">
                     @if(\Request::route()->getName() == 'business.getRegister')
                     <a href="{{ route('login') }}">Login</a>
                     @else
-                    <a href="{{ route('business.getRegister') }}">Register</a>
+                    <a href="{{ route('business.getRegister') }}" class="cu-float-right">Register</a>
                     @endif                
 		        </div>
                 <!-- <div class="col-md-9 col-xs-8" style="text-align: right;padding-top: 10px;"> -->

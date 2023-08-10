@@ -3,8 +3,8 @@
 
 @section('content')
     <div class="login-form col-md-12 col-xs-12 right-col-content">
-        <p class="text-center"><img src="/img/hero-img.png" alt="main" class="main-logo"></p>
-        <p class="form-header text-white">@lang('lang_v1.login')</p>
+        <p class="text-center cu-mb-0"><img src="/img/maxximu.png" alt="main" class="main-logo brand-logo"></p>
+        <p class="form-header text-white login-header">@lang('lang_v1.login')</p>
         <form method="POST" action="{{ route('login') }}" id="login-form">
             {{ csrf_field() }}
             <div class="form-group has-feedback {{ $errors->has('username') ? ' has-error' : '' }}">
@@ -82,20 +82,20 @@
     <div class="col-md-12 col-xs-12 rm">
         @component('components.widget', ['class' => 'box-primary text-center', 'header' => ''])
         <h4 class="text-left"><i class="fas fa-clipboard-list"></i> Key Features</h4>
-        <ul class="features-class">
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-store"></i>Convenience Store <br> Supermarket</a>
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-utensils"></i>Restaurant</a>
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-cut"></i>Salon/Barber Shop</a>
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-tools"></i>Repair Shops</a>
+        <ul class="features-class ff-feature">
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-store"></i></span><span>Convenience Store <br> Supermarket</span></a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-utensils"></i></span><span>Restaurant</span></a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-cut"></i></span><span>Salon/Barber Shop</span></a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-tools"></i></span><span>Repair Shops</span></a>
         </ul>
-        <hr>
+        <hr class="ff-login-hr">
         <h4 class="text-left"><i class="fas fa-cogs"></i> Key Modules</h4>
-        <ul class="features-class">
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-store-alt"></i>Merchandising</a>
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-desktop"></i>Retail / POS</a>
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-warehouse"></i>Inventory</a>
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-calendar-check"></i>Online Booking</a>
-            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <i class="fas fa-shopping-bag"></i>CheckIn / Checkout</a>
+        <ul class="features-class ff-feature">
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-store-alt"></i></span><span>Merchandising</span></a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-desktop"></i></span><span>Retail / POS</span></a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-warehouse"></i></span><span>Inventory</span></a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-calendar-check"></i></span><span>Online Booking</span></a>
+            <li class="btn btn-app bg-blue demo-login" data-toggle="tooltip" title="Showcases all feature available in the application." > <span><i class="fas fa-shopping-bag"></i></span><span>CheckIn / Checkout</span></a>
         </ul>
         @endcomponent  
     </div>
