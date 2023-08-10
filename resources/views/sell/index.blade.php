@@ -118,8 +118,15 @@ $(document).ready( function(){
     });
 
     sell_table = $('#sell_table').DataTable({
-        processing: true,
-        serverSide: true,
+        // processing: true,
+        // serverSide: true,
+        responsive: false,
+            bStateSave: false,
+            processing: true,
+            serverSide: true,
+            deferRender: true,
+            searching: true,
+            paging: true,
         aaSorting: [[1, 'desc']],
         "ajax": {
             "url": "/sells",
@@ -165,7 +172,7 @@ $(document).ready( function(){
             { data: 'mobile', name: 'contacts.mobile'},
             { data: 'business_location', name: 'bl.name'},
             { data: 'payment_status', name: 'payment_status'},
-            { data: 'payment_methods', name: "payment_methods"},
+            { data: 'payment_methods', name: 'payment_methods', "searchable": false},
             { data: 'final_total', name: 'final_total'},
             { data: 'total_paid', name: 'total_paid', "searchable": false},
             { data: 'total_remaining', name: 'total_remaining'},

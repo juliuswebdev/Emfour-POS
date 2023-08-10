@@ -5062,6 +5062,8 @@ class TransactionUtil extends Util
                     DB::raw('COUNT(SR.id) as return_exists'),
                     DB::raw('(SELECT SUM(TP2.amount) FROM transaction_payments AS TP2 WHERE
                         TP2.transaction_id=SR.id ) as return_paid'),
+                    DB::raw('(SELECT GROUP_CONCAT(TP3.method) FROM transaction_payments AS TP3 WHERE
+                        TP3.transaction_id=transactions.id ) as payment_methods'),
                     DB::raw('COALESCE(SR.final_total, 0) as amount_return'),
                     'SR.id as return_transaction_id',
                     'tos.name as types_of_service_name',

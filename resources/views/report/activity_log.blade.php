@@ -60,7 +60,7 @@
             @endcomponent
         </div>
     </div>
-    <div class="modal fade view_modal" tabindex="-1" role="dialog" 
+    <div class="modal fade view_modal_show_deleted_sale" tabindex="-1" role="dialog" 
         aria-labelledby="gridSystemModalLabel"></div>
 </section>
 <!-- /.content -->

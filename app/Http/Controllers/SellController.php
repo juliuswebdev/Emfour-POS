@@ -337,6 +337,7 @@ class SellController extends Controller
 
             //Tips Column added in List
             $sells->addSelect('transactions.tips_amount');
+            // ->orderBy('transactions.created_at', 'DESC');
             
 
             $sales_order_statuses = Transaction::sales_order_statuses();
@@ -351,10 +352,12 @@ class SellController extends Controller
                                         '<span class="caret"></span><span class="sr-only">Toggle Dropdown
                                         </span>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+                                    <ul class="dropdown-menu dropdown-menu-left sale-dropdown-menu" role="menu">';
 
                         if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
-                            $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->id]).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a></li>';
+                            $html .= '<li>
+                            <a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->id]).'" class="btn-modal view-sale" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a>
+                            </li>';
                         }
                         if (! $only_shipments) {
                             if ($row->is_direct_sale == 0) {
@@ -371,7 +374,7 @@ class SellController extends Controller
                                 }
                             }
 
-                            $delete_link = '<li><a href="'.action([\App\Http\Controllers\SellPosController::class, 'destroy'], [$row->id]).'" class="delete-sale"><i class="fas fa-trash"></i> '.__('messages.delete').'</a></li>';
+                            $delete_link = '<li><a data-store-deleted-sale="'.action([\App\Http\Controllers\SellPosController::class, 'storeDeletedSale'], [$row->id]).'" href="'.action([\App\Http\Controllers\SellPosController::class, 'destroy'], [$row->id]).'" class="delete-sale"><i class="fas fa-trash"></i> '.__('messages.delete').'</a></li>';
                             if ($row->is_direct_sale == 0) {
                                 if (auth()->user()->can('sell.delete')) {
                                     $html .= $delete_link;
@@ -551,7 +554,7 @@ class SellController extends Controller
                         ->orWhere('contacts.supplier_business_name', 'like', "%{$keyword}%");
                     });
                 })
-                ->addColumn('payment_methods', function ($row) use ($payment_types) {
+                ->editColumn('payment_methods', function ($row) use ($payment_types) {
                     $methods = array_unique($row->payment_lines->pluck('method')->toArray());
                     $count = count($methods);
                     $payment_method = '';
@@ -560,10 +563,21 @@ class SellController extends Controller
                     } elseif ($count > 1) {
                         $payment_method = __('lang_v1.checkout_multi_pay');
                     }
+                    $value = 0;
+                    if($payment_method === 'Cheque') {
+                        $value = 1;
+                    } else if($payment_method === 'Card') {
+                        $value = 2;
+                    } else if($payment_method === 'Cash') {
+                        $value = 3;
+                    } else if($payment_method === 'Split Payment') { 
+                        $value = 4;
+                    }
 
-                    $html = ! empty($payment_method) ? '<span class="payment-method" data-orig-value="'.$payment_method.'" data-status-name="'.$payment_method.'">'.$payment_method.'</span>' : '';
+                    $html = ! empty($payment_method) ? '<span class="payment-method" data-orig-value="'.$value.'">'.$payment_method.'</span>' : '';
 
                     return $html;
+                  
                 })
                 ->editColumn('status', function ($row) use ($sales_order_statuses, $is_admin) {
                     $status = '';
@@ -592,7 +606,7 @@ class SellController extends Controller
                         }
                     }, ]);
 
-            $rawColumns = ['final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name', 'payment_methods', 'return_due', 'conatct_name', 'status', 'tips_amount'];
+            $rawColumns = ['payment_methods', 'final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name',  'return_due', 'conatct_name', 'status', 'tips_amount'];
 
             return $datatable->rawColumns($rawColumns)
                       ->make(true);
@@ -1255,6 +1269,12 @@ class SellController extends Controller
                     'transactions.location_id',
                     '=',
                     'bl.id'
+                )
+                ->join(
+                    'transaction_payments AS tp',
+                    'transactions.id',
+                    '=',
+                    'tp.transaction_id'
                 )
                 ->leftJoin('transaction_sell_lines as tsl', function ($join) {
                     $join->on('transactions.id', '=', 'tsl.transaction_id')

@@ -1822,7 +1822,7 @@ class SellPosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         if (! auth()->user()->can('sell.delete') && ! auth()->user()->can('direct_sell.delete') && ! auth()->user()->can('so.delete')) {
             abort(403, 'Unauthorized action.');
@@ -1835,24 +1835,29 @@ class SellPosController extends Controller
                 DB::beginTransaction();
 
                 //
-                $is_card = false;
+                $is_disable = false;
                 $transaction_payments = TransactionPayment::where('transaction_id', $id)->get();
+                $transaction = Transaction::where('id', $id)->first();
+              
                 foreach($transaction_payments as $item) {
                     if($item->method == 'card') {
-                        $is_card = true;
+                        $is_disable = true;
                     }
                 }
 
-                if($is_card) {
+                if($transaction->payment_status == 'due') {
+                    $is_disable = true;
+                }
+
+                if($is_disable) {
                     $output['success'] = false;
-                    $output['msg'] = 'Unable to delete Card Payment Method.';
+                    $output['msg'] = 'Unable to delete Card Payment Method or Due Payment Status.';
                 } else {
                     $output = $this->transactionUtil->deleteSale($business_id, $id);
                 }
 
-                
-
                 DB::commit();
+
             } catch (\Exception $e) {
                 DB::rollBack();
                 \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
@@ -1863,6 +1868,16 @@ class SellPosController extends Controller
 
             return $output;
         }
+    }
+
+    public function storeDeletedSale(Request $request, $id) {
+        DB::table('transaction_temp')->insert(
+            ['log' => $request->input('result'), 'transaction_id' => $id]
+        );
+    }
+
+    public function showDeletedSale(Request $request, $id) {
+        return DB::table('transaction_temp')->where('transaction_id', $id)->first();
     }
 
     public function getSalesOrderLines()

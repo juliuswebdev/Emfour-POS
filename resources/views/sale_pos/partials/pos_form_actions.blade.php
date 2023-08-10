@@ -211,3 +211,5 @@
 @include('sale_pos.partials.edit_shipping_modal')
 
 @include('sale_pos.partials.tips_modal')
+
+

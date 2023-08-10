@@ -3636,7 +3636,7 @@ class ReportController extends Controller
                             ->addColumn('actions', function($row) {
                                 $html = '';
                                 if($row->description == 'sell_deleted') {
-                                    $html   .= '<a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->getExtraProperty('id')]).'" class="btn-modal btn btn-xs btn-info" data-container=".view_modal">
+                                    $html   .= '<a href="#" data-href="'.action([\App\Http\Controllers\SellPosController::class, 'showDeletedSale'], [$row->getExtraProperty('id')]).'" class="btn-modal-show-deleted-sale btn btn-xs btn-info" data-container=".view_modal_show_deleted_sale">
                                                 <i class="fas fa-eye" aria-hidden="true"></i>'.__('messages.view').'
                                             </a>';
                                 }

@@ -233,7 +233,7 @@
 	</div>
 </div>
 
-
+@include('sale_pos.partials.user_pin_modal')
 
 @stop
 @section('css')

@@ -49,6 +49,24 @@ $(document).ready(function() {
         });
     });
 
+    $(document).on('click', '.btn-modal-show-deleted-sale', function(e) {
+        e.preventDefault();
+        var container = $(this).data('container');
+
+        $.ajax({
+            url: $(this).data('href'),
+            dataType: 'json',
+            success: function(result) {
+           
+                $(container)
+                    .html(result.log)
+                    .modal('show');
+            },
+        });
+    });
+
+    
+
     $(document).on('submit', 'form#brand_add_form', function(e) {
         e.preventDefault();
         var form = $(this);
@@ -1849,43 +1867,69 @@ $(document).ready(function() {
     //Delete Sale
     $(document).on('click', '.delete-sale', function(e) {
         e.preventDefault();
-        swal({
-            title: LANG.sure,
-            icon: 'warning',
-            buttons: true,
-            dangerMode: true,
-        }).then(willDelete => {
-            if (willDelete) {
-                var href = $(this).attr('href');
-                var is_suspended = $(this).hasClass('is_suspended');
-                $.ajax({
-                    method: 'DELETE',
-                    url: href,
-                    dataType: 'json',
-                    success: function(result) {
-                        if (result.success == true) {
-                            toastr.success(result.msg);
-                            if (typeof sell_table !== 'undefined') {
-                                sell_table.ajax.reload();
-                            }
-                            if (typeof pending_repair_table !== 'undefined') {
-                                pending_repair_table.ajax.reload();
-                            }
-                            //Displays list of recent transactions
-                            if (typeof get_recent_transactions !== 'undefined') {
-                                get_recent_transactions('final', $('div#tab_final'));
-                                get_recent_transactions('draft', $('div#tab_draft'));
-                            }
-                            if (is_suspended) {
-                                $('.view_modal').modal('hide');
-                            }
-                        } else {
-                            toastr.error(result.msg);
-                        }
-                    },
+    
+        $.ajax({
+            url: $(this).parents('.sale-dropdown-menu').find('.view-sale').data('href'),
+            dataType: 'html',
+            context : this,
+            success: function(result) {
+                $(this).attr('data-result', result);
+                swal({
+                    title: LANG.sure,
+                    icon: 'warning',
+                    buttons: true,
+                    dangerMode: true,
+                }).then(willDelete => {
+
+                    if (willDelete) {
+
+                        var href = $(this).attr('href');
+                        var is_suspended = $(this).hasClass('is_suspended');
+
+                        $.ajax({
+                            method: 'DELETE',
+                            url: href,
+                            dataType: 'json',
+                            context : this,
+                            success: function(result) {
+                                if (result.success == true) {
+
+                                    $.ajax({
+                                        url: $(this).attr('data-store-deleted-sale'),
+                                        method: 'POST',
+                                        context : this,
+                                        data: {result: $(this).attr('data-result').replace(/(\r\n|\n|\r)/gm,"") },
+                                        success: function(result) {
+                                        }
+                                    });
+
+                                    toastr.success(result.msg);
+                                    if (typeof sell_table !== 'undefined') {
+                                        sell_table.ajax.reload();
+                                    }
+                                    if (typeof pending_repair_table !== 'undefined') {
+                                        pending_repair_table.ajax.reload();
+                                    }
+                                    //Displays list of recent transactions
+                                    if (typeof get_recent_transactions !== 'undefined') {
+                                        get_recent_transactions('final', $('div#tab_final'));
+                                        get_recent_transactions('draft', $('div#tab_draft'));
+                                    }
+                                    if (is_suspended) {
+                                        $('.view_modal').modal('hide');
+                                    }
+                                } else {
+                                    toastr.error(result.msg);
+                                }
+                            },
+                        });
+                    }
                 });
-            }
+
+            },
         });
+
+
     });
 
     if ($('form#add_invoice_layout_form').length > 0) {

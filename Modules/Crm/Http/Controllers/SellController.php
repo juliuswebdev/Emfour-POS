@@ -196,7 +196,7 @@ class SellController extends Controller
                         $payment_method = __('lang_v1.checkout_multi_pay');
                     }
 
-                    $html = ! empty($payment_method) ? '<span class="payment-method" data-orig-value="'.$payment_method.'" data-status-name="'.$payment_method.'">'.$payment_method.'</span>' : '';
+                    $html = ! empty($payment_method) ? $payment_method : '';
 
                     return $html;
                 })

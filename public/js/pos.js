@@ -1153,6 +1153,49 @@ $(document).ready(function() {
             .select();
     });
 
+    var price_override_id = '';
+    $(document).on('click', '.row_edit_product_price_modal_btn', function() {
+        $.ajax({
+            context: this,
+            method: "POST",
+            url: '/user/check-has-pin',
+            data: { user_id : $('#user_id_pin').val() },
+            dataType: "json",
+            success: function(result) {
+                if(result.success == true) {
+
+                    $('#pin_server_modal').modal('show');
+                    price_override_id = $(this).attr('data-target');
+                } else {
+                    toastr.error(result.msg);
+                }
+            }
+        });
+    });
+
+    $('#check_user_pin').submit(function(e) {
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            context: this,
+            method: "POST",
+            url: $(this).attr("action"),
+            data: data,
+            dataType: "json",
+            success: function(result) {
+                if(result.success == true) {
+                    toastr.success(result.msg);
+                    $('#pin_server_modal').modal('hide');
+                    $(price_override_id).modal('show');
+                } else {
+                    toastr.error(result.msg);
+                }
+                $('#check_user_pin #pin').val('');
+                $('#check_user_pin button').removeAttr('disabled');
+            }
+        });
+    });
+
     //Update Order tax
     $('button#posEditOrderTaxModalUpdate').click(function() {
         //Close modal

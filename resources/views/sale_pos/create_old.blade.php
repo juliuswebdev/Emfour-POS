@@ -263,6 +263,9 @@
 
 @include('sale_pos.partials.configure_search_modal')
 
+
+
+
 @stop
 
 @section('javascript')
