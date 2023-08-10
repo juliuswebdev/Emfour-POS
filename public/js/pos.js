@@ -441,6 +441,8 @@ $(document).ready(function() {
        
     });
 
+    var tr_temp = '';
+    var entered_qty_temp = 0;
     //Update line total and check for quantity not greater than max quantity
     $('table#pos_table tbody').on('change', 'input.pos_quantity', function() {
         if (sell_form_validator) {
@@ -451,9 +453,61 @@ $(document).ready(function() {
         }
         // var max_qty = parseFloat($(this).data('rule-max'));
         var entered_qty = __read_number($(this));
-
         var tr = $(this).parents('tr');
+        tr_temp = tr;
+        entered_qty_temp = entered_qty;
 
+        if(entered_qty > -1) {
+
+            update_all_change_quantity(tr, entered_qty);
+
+
+        } else {
+            $.ajax({
+                context: this,
+                method: "POST",
+                url: '/user/check-has-pin',
+                data: { user_id : $('#user_id_pin').val() },
+                dataType: "json",
+                success: function(result) {
+                    if(result.success == true) {
+                        $('#check_user_pin').addClass('entered_qty');
+                        $('#pin_server_modal').modal('show');
+                        price_override_id = $(this).attr('data-target');
+                    } else {
+                        toastr.error(result.msg);
+                    }
+                }
+            });
+        }
+
+    });
+
+    $(document).on('submit', '#check_user_pin.entered_qty', function(e) {
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            context: this,
+            method: "POST",
+            url: $(this).attr("action"),
+            data: data,
+            dataType: "json",
+            success: function(result) {
+                if(result.success == true) {
+                    update_all_change_quantity(tr_temp, entered_qty_temp);
+                    toastr.success(result.msg);
+                    $('#pin_server_modal').modal('hide');
+                } else {
+                    toastr.error(result.msg);
+                }
+                $('#check_user_pin #pin').val('');
+                $('#check_user_pin button').removeAttr('disabled');
+            }
+        });
+    });
+
+    function update_all_change_quantity(tr, entered_qty) {
+        
         var unit_price_inc_tax = tr.find('input.pos_unit_price_inc_tax').attr('value');
         //alert(unit_price_inc_tax);
         var line_total = entered_qty * unit_price_inc_tax;
@@ -472,7 +526,7 @@ $(document).ready(function() {
         pos_total_row();
 
         adjustComboQty(tr);
-    });
+    }
 
     //If change in unit price update price including tax and line total
     $('table#pos_table tbody').on('change', 'input.pos_unit_price', function() {
@@ -1163,9 +1217,12 @@ $(document).ready(function() {
             dataType: "json",
             success: function(result) {
                 if(result.success == true) {
-
+                    $('#check_user_pin').addClass('price_override');
                     $('#pin_server_modal').modal('show');
+                    // $(this).parents('.product_row').find('.is_price_override').val(1);
+                    // $(this).parents('.product_row').find('.user_id_pinned').val($('#user_id_pin').val());
                     price_override_id = $(this).attr('data-target');
+                    populate_textarea_override_price($(this));
                 } else {
                     toastr.error(result.msg);
                 }
@@ -1173,7 +1230,43 @@ $(document).ready(function() {
         });
     });
 
-    $('#check_user_pin').submit(function(e) {
+    function populate_textarea_override_price(tr) {
+        const date = $('.curr_datetime').text();
+        const original_price = $('#__symbol').val() +''+ tr.parents('.product_row').find('.original_price').val();
+        const override_price = $('#__symbol').val() +''+ tr.parents('.product_row').find('.row_edit_product_price_model .pos_unit_price').val();
+        const name = $('#user_name_pin').val();
+        const price_override_description = `Date: ${ date }
+Price Change: ${ original_price } -> ${ override_price }
+Name: ${ name }`;
+        tr.parents('.product_row').find('.row_edit_product_price_model textarea').val(price_override_description)
+    }
+
+    $(document).on('change', '.row_edit_product_price_model', function() {
+        populate_textarea_override_price($(this));
+    });
+
+
+    // $(document).on('keyup', '.input_quantity', function() {
+    //     $.ajax({
+    //         context: this,
+    //         method: "POST",
+    //         url: '/user/check-has-pin',
+    //         data: { user_id : $('#user_id_pin').val() },
+    //         dataType: "json",
+    //         success: function(result) {
+    //             if(result.success == true) {
+
+    //                 $('#pin_server_modal').modal('show');
+    //                 price_override_id = tr.attr('data-target');
+    //             } else {
+    //                 toastr.error(result.msg);
+    //             }
+    //         }
+    //     });
+    // });
+    
+
+    $(document).on('submit', '#check_user_pin.price_override', function(e) {
         e.preventDefault();
         var data = $(this).serialize();
         $.ajax({
@@ -2096,6 +2189,7 @@ function pos_each_row(row_obj) {
     //var unit_price_inc_tax = __read_number(row_obj.find('input.pos_unit_price_inc_tax'));
 
     __write_number(row_obj.find('input.item_tax'), unit_price_inc_tax - discounted_unit_price);
+
 }
 
 function pos_total_row() {
@@ -4745,3 +4839,4 @@ function check_table_is_occupied(){
         }
     });
 }
+

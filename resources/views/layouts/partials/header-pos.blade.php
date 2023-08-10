@@ -32,7 +32,13 @@
         
         <p >
           <strong>@lang('business.register_number'): {{  $register_number }} &nbsp;&nbsp;<br>
-          <strong>Cashier: {{ Auth::User()->first_name }} {{ Auth::User()->last_name }} <input type="hidden" id="user_id_pin" value="{{ Auth::User()->id }}"></strong>
+          @php
+            $fullname = Auth::User()->first_name .' '. Auth::User()->last_name ;
+          @endphp
+          <strong>Cashier: {{ $fullname }} 
+            <input type="hidden" id="user_id_pin" value="{{ Auth::User()->id }}">
+            <input type="hidden" id="user_name_pin" value="{{ $fullname }} ">
+          </strong>
         </strong> 
         <p ><strong>@lang('sale.location'): &nbsp;</strong> 
           @if(empty($transaction->location_id))
