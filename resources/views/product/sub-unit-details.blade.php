@@ -85,17 +85,20 @@
                 <th>@lang('report.current_stock')</th>
             </tr>
             @foreach($units as $unit)
-            @php
-                $stock_temp = intval($stock_details['current_stock'] / $unit->base_unit_multiplier);
-				$stock = floor($stock_temp*100)/100;
-            @endphp
-            <tr>
-				<td>{{ $unit->actual_name }}</td>
-				<td>
-					<span>{{$stock}}</span> {{ $unit->short_name }}
-				</td>
-			</tr>
-            @endforeach
+				@if($unit->base_unit_multiplier != 0)
+					@php
+						$stock_temp = intval($stock_details['current_stock'] / $unit->base_unit_multiplier);
+						$stock = floor($stock_temp*100)/100;
+					@endphp
+					<tr>
+						<td>{{ $unit->actual_name }}</td>
+						<td>
+							<span>{{$stock}}</span> {{ $unit->short_name }}
+						</td>
+					</tr>
+				@endif
+			@endforeach
+
 		</table>
 	</div>
 	@endif

@@ -444,7 +444,12 @@
 	</td>
 
 	<td class="text-center v-center">
-		@if($product->res_line_order_status != 'received' && $product->res_line_order_status != 'ready' && $product->res_line_order_status != 'served')
+		@if(
+			$product->res_line_order_status != 'received' && 
+			$product->res_line_order_status != 'ready' && 
+			$product->res_line_order_status != 'served' &&
+			$product->cook_start != null
+		)
 		<i class="fa fa-times text-danger pos_remove_row cursor-pointer" aria-hidden="true"></i>
 		@endif
 	</td>
