@@ -41,7 +41,7 @@
 				<div class="box-body">
 					<div class="row">
 						@if(!empty($pos_settings['enable_transaction_date']))
-							<div class="col-md-4 col-sm-6">
+							<div class="col-md-4 col-sm-6 transaction_date_wrapper">
 								<div class="form-group">
 									{!! Form::label('transaction_date', __('sale.sale_date') . ':*') !!}
 									<div class="input-group">

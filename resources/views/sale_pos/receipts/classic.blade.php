@@ -386,7 +386,10 @@
 	<div class="col-xs-6">
 
 		<table class="table table-slim">
-
+			@php
+				$is_by_card = false;
+				$payment_collect_response = "";
+			@endphp
 			@if(!empty($receipt_details->payments))
 				@foreach($receipt_details->payments as $payment)
 					<tr>
@@ -399,11 +402,15 @@
 						<td class="text-right">{{$payment['date']}}</td>
 					</tr>
 					@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
-					<tr>
-						<td>@lang('lang_v1.card_charge') {{$payment['card_charge_percent']}}%</td>
-						<td class="text-right">{{$payment['card_charge_amount']}}</td>
-						<td class="text-right">{{$payment['date']}}</td>
-					</tr>
+						@php
+							$is_by_card = true;
+							$payment_collect_response = $payment['payment_collect_response'];
+						@endphp
+						<tr>
+							<td>@lang('lang_v1.card_charge') {{$payment['card_charge_percent']}}%</td>
+							<td class="text-right">(+) {{$payment['card_charge_amount']}}</td>
+							<td class="text-right">{{$payment['date']}}</td>
+						</tr>
 					@endif
 				@endforeach
 			@endif
@@ -488,7 +495,7 @@
 								{!! $receipt_details->gratuity_label.' ('.$receipt_details->gratuity_percentage.'%)' !!}:
 							</th>
 							<td class="text-right">
-								{{$receipt_details->gratuity_charges}}
+								(+) {{$receipt_details->gratuity_charges}}
 							</td>
 						</tr>
 					@endif
@@ -500,7 +507,7 @@
 								@lang('lang_v1.tips'):
 							</th>
 							<td class="text-right">
-								{{$receipt_details->tips_amount}}
+								(+) {{$receipt_details->tips_amount}}
 							</td>
 						</tr>
 					@endif
@@ -522,7 +529,7 @@
 								{!! $receipt_details->shipping_charges_label !!}
 							</th>
 							<td class="text-right">
-								{{$receipt_details->shipping_charges}}
+								(+) {{$receipt_details->shipping_charges}}
 							</td>
 						</tr>
 					@endif
@@ -533,7 +540,7 @@
 								{!! $receipt_details->packing_charge_label !!}
 							</th>
 							<td class="text-right">
-								{{$receipt_details->packing_charge}}
+								(+) {{$receipt_details->packing_charge}}
 							</td>
 						</tr>
 					@endif
@@ -677,7 +684,25 @@
 	    	<p><strong>Note:</strong> {!! nl2br($receipt_details->additional_notes) !!}</p>
 	    </div>
     @endif
-    
+	
+	@if($is_by_card && $payment_collect_response != "")
+    <div class="col-xs-12" style="padding-top:30px;">
+        @php
+            $decode_collect_response = json_decode($payment_collect_response, true);
+           	$customer_sign = $decode_collect_response['response']['Sign'];
+        @endphp
+        @if($customer_sign != "")
+        <p><strong>Customer Signed:</strong></p>
+        <div style="display: block; padding-bottom:20px;">
+            <img src="data:image/bmp;base64,{{ $customer_sign }}" style="display: block; width:auto; height:auto;">
+        </div>
+		<span>{{ $receipt_details->invoice_date }}</span>
+        @endif
+    </div>
+    @endif
+
+	
+
 </div>
 <div class="row" style="color: #000000 !important;">
 	@if(!empty($receipt_details->footer_text))

@@ -235,6 +235,10 @@
 
 @include('sale_pos.partials.user_pin_modal')
 
+@if(strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != false)
+<span class="android-device-check"></span>
+@endif
+
 @stop
 @section('css')
 	<!-- include module css -->
