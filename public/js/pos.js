@@ -2290,9 +2290,12 @@ function pos_total_row_b() {
 function get_subtotal() {
 
     //Check dp rule not run in android device
+    /*
     if(app_is_run_android_device() == false){
         dp_rules(0, 0, true, ['product', 'product_cat', 'matched_products'], cart_total_amount = false);
     }
+    */
+    
 
     var price_total = 0;
 
@@ -2404,9 +2407,11 @@ function calculate_billing_details(price_total, dp = true) {
 
 
     //Check DP rule not run in mobile device
+    /*
     if(app_is_run_android_device() == false){
         shown_total = dp_rules(shown_total, price_total, dp);
     }
+    */
 
     var has_dp = 0;
     $('.has_dp').each(function(){
@@ -2473,6 +2478,7 @@ function conditions_operator(value, limit, operator){
     }
 }
 
+/*
 function dp_rules(shown_total, sub_total, dp, type="all", cart_total_amount = true) {
     
     if(app_is_run_android_device() == false){
@@ -3142,6 +3148,7 @@ function dp_rule_reset_row(index, product_class) {
         $(product_class).attr('data-has-dp', 0);
     }
 }
+*/
 
 function arraysEqual(a, b) {
   if (a === b) return true;
