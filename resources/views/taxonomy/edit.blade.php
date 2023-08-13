@@ -44,6 +44,13 @@
         {!! Form::label('description', __( 'lang_v1.description' ) . ':') !!}
         {!! Form::textarea('description', $category->description, ['class' => 'form-control', 'placeholder' => __( 'lang_v1.description'), 'rows' => 3]); !!}
       </div>
+      <div class="form-group">
+            <div class="checkbox">
+              <label>
+                 {!! Form::checkbox('do_not_show', 1, $category->do_not_show,[  ]); !!} Do not show in POS
+              </label>
+            </div>
+        </div>
       @if(!empty($parent_categories) && $enable_sub_category)
           <div class="form-group">
             <div class="checkbox">

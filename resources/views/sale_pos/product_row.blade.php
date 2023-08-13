@@ -435,23 +435,12 @@
 		@php
 			$subtotal_type = !empty($pos_settings['is_pos_subtotal_editable']) ? 'text' : 'hidden';
 		@endphp
-
-
-			
-			<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
-			<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
-	
+		<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
+		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
 	</td>
 
 	<td class="text-center v-center">
-		@if(
-			$product->res_line_order_status != 'received' && 
-			$product->res_line_order_status != 'ready' && 
-			$product->res_line_order_status != 'served' &&
-			$product->cook_start == null
-		)
-		<i class="fa fa-times text-danger pos_remove_row cursor-pointer" aria-hidden="true"></i>
-		@endif
+		<i class="fa fa-times text-danger pos_remove_row cursor-pointer @if ($action == 'edit') edit @else create @endif" aria-hidden="true"></i>
 	</td>
 
 </tr>

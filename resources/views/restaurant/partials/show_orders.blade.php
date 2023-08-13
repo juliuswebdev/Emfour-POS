@@ -111,7 +111,7 @@
 								$product = \App\Product::where('id', $row->product_id)->select('product_custom_field1', 'type', 'name', 'product_description', 'unit_id')->first();
 							@endphp
 							
-							@if(  $row->quantity > 0 && ($product->product_custom_field1 == 1 && ($row->res_line_order_status != 'served' && $row->res_line_order_status != 'ready' || $order->is_kitchen_again != 1)) || ($orders_for == 'waiter' ))
+							@if( ($product->product_custom_field1 == 1 && ($row->res_line_order_status != 'served' && $row->res_line_order_status != 'ready' || $order->is_kitchen_again != 1)) || ($orders_for == 'waiter' ))
 								<tr>
 									<td class="mob-tr-text-left">
 										

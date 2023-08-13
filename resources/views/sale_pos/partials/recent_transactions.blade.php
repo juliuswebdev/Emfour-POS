@@ -30,7 +30,7 @@
 				</td>
 				<td>
 					@if(auth()->user()->can('sell.update') || auth()->user()->can('direct_sell.update'))
-					<a href="{{action([\App\Http\Controllers\SellPosController::class, 'edit'], [$transaction->id]).$subtype}}">
+					<a href="{{action([\App\Http\Controllers\SellPosController::class, 'edit'], [$transaction->id]).$subtype}}" class="edit_pin_remove">
 	    				<i class="fas fa-pen text-muted" style="padding-left: 20px; padding-right: 20px" aria-hidden="true" title="{{__('lang_v1.click_to_edit')}}"></i>
 	    			</a>
 	    			@endif

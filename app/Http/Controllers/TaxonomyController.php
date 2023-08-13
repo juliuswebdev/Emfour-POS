@@ -144,7 +144,7 @@ class TaxonomyController extends Controller
         }
 
         try {
-            $input = $request->only(['name', 'short_code', 'category_type', 'description', 'logo']);
+            $input = $request->only(['name', 'short_code', 'category_type', 'description', 'do_not_show','logo']);
             $input['business_id'] = $request->session()->get('user.business_id');
             $input['created_by'] = $request->session()->get('user.id');
 
@@ -165,7 +165,7 @@ class TaxonomyController extends Controller
 
                 //slug
                 $input['slug'] = Str::slug($input['name'], "-");
-
+                
                 $category = Category::create($input);
                 $output = ['success' => true,
                     'data' => $category,
@@ -251,7 +251,7 @@ class TaxonomyController extends Controller
     {
         if (request()->ajax()) {
             try {
-                $input = $request->only(['name', 'description', 'slug']);
+                $input = $request->only(['name', 'description', 'slug', 'do_not_show']);
                 $business_id = $request->session()->get('user.business_id');
 
                 $category = Category::where('business_id', $business_id)->findOrFail($id);
@@ -270,7 +270,7 @@ class TaxonomyController extends Controller
                 $category->description = $input['description'];
                 $category->slug = $input['slug'];
                 $category->short_code = $request->input('short_code');
-
+                $category->do_not_show = $request->input('do_not_show');
                 if (! empty($request->input('add_as_sub_cat')) && $request->input('add_as_sub_cat') == 1 && ! empty($request->input('parent_id'))) {
                     $category->parent_id = $request->input('parent_id');
                 } else {

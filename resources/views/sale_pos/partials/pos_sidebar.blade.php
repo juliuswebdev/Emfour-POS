@@ -151,6 +151,7 @@
 					$subcategory = count($category['sub_categories']);
 				@endphp
 			@endif
+		@if(!$category['do_not_show'])
 		<div class="col-md-3 col-xs-4 main-category no-print">
 			<div class="category_box" data-direct-product="0" data-parent-id="" data-level="1" data-subcategory-count="{{ $subcategory }}" title="{{$category['name']}}" data-id="{{ $category['id'] }}">
 				<div class="image-container">
@@ -163,6 +164,7 @@
 				</div>
 			</div>
 		</div>
+		@endif
 	@endforeach
 </div>
 <div class="row" id="subcategory-list-wrapper">

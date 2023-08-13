@@ -466,7 +466,9 @@ class TransactionUtil extends Util
 
         //Delete the products removed and increment product stock.
         $deleted_lines = [];
+        
         if (! empty($edit_ids)) {
+ 
             $deleted_lines_query = TransactionSellLine::where('transaction_id', $transaction->id)
                     ->whereNotIn('id', $edit_ids)
                     ->select('id')->get();
@@ -474,8 +476,11 @@ class TransactionUtil extends Util
             foreach($deleted_lines_query as $item) {
                 $deleted_lines_query_arr[] = $item->id;
             }
+        
             $combo_delete_lines = TransactionSellLine::whereIn('parent_sell_line_id', $deleted_lines_query_arr)->where('children_type', 'combo')->select('id')->get()->toArray();
-            $deleted_lines = array_merge($deleted_lines, $combo_delete_lines);
+            $delete_temp = array_merge($combo_delete_lines, $deleted_lines);
+
+            $deleted_lines = array_merge($delete_temp, $deleted_lines_query_arr);
 
             $adjust_qty = $status_before == 'draft' ? false : true;
 

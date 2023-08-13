@@ -457,54 +457,13 @@ $(document).ready(function() {
         tr_temp = tr;
         entered_qty_temp = entered_qty;
 
-        if(entered_qty > -1) {
-
-            update_all_change_quantity(tr, entered_qty);
-
-
-        } else {
-            $.ajax({
-                context: this,
-                method: "POST",
-                url: '/user/check-has-pin',
-                data: { user_id : $('#user_id_pin').val() },
-                dataType: "json",
-                success: function(result) {
-                    if(result.success == true) {
-                        $('#check_user_pin').addClass('entered_qty');
-                        $('#pin_server_modal').modal('show');
-                        price_override_id = $(this).attr('data-target');
-                    } else {
-                        toastr.error(result.msg);
-                    }
-                }
-            });
-        }
+        update_all_change_quantity(tr, entered_qty);
 
     });
 
-    $(document).on('submit', '#check_user_pin.entered_qty', function(e) {
-        e.preventDefault();
-        var data = $(this).serialize();
-        $.ajax({
-            context: this,
-            method: "POST",
-            url: $(this).attr("action"),
-            data: data,
-            dataType: "json",
-            success: function(result) {
-                if(result.success == true) {
-                    update_all_change_quantity(tr_temp, entered_qty_temp);
-                    toastr.success(result.msg);
-                    $('#pin_server_modal').modal('hide');
-                } else {
-                    toastr.error(result.msg);
-                }
-                $('#check_user_pin #pin').val('');
-                $('#check_user_pin button').removeAttr('disabled');
-            }
-        });
-    });
+
+
+
 
     function update_all_change_quantity(tr, entered_qty) {
         
@@ -695,6 +654,61 @@ $(document).ready(function() {
             .parents('tr')
             .remove();
         pos_total_row();
+    });
+    var redirect_edit = '';
+    var not_prompt_again = false;
+    var pos_remove_row_temp = '';
+    $(document).on('click', 'a.edit_pin_remove', function(e) {
+        e.preventDefault();
+        if(!not_prompt_again) {
+            $.ajax({
+                context: this,
+                method: "POST",
+                url: '/user/check-has-pin',
+                data: { user_id : $('#user_id_pin').val() },
+                dataType: "json",
+                success: function(result) {
+                    if(result.success == true) {
+                        pos_remove_row_temp = $(this);
+                        redirect_edit = $(this).attr('href');
+                        $('#check_user_pin').addClass('edit_pin_remove');
+                        $('#pin_server_modal').modal('show');
+                        populate_textarea_override_price($(this));
+                    } else {
+                        toastr.error(result.msg);
+                    }
+                }
+            });
+        } else {
+            $(this).parents('tr').remove();
+            pos_total_row();
+        }
+    });
+
+    $(document).on('submit', '#check_user_pin.edit_pin_remove', function(e) {
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            context: this,
+            method: "POST",
+            url: $(this).attr("action"),
+            data: data,
+            dataType: "json",
+            success: function(result) {
+                if(result.success == true) {
+                    not_prompt_again = true;
+                    window.location.href = redirect_edit;
+                    // pos_remove_row_temp.parents('tr').remove();
+                    // pos_total_row();
+                    toastr.success(result.msg);
+                    $('#pin_server_modal').modal('hide');
+                } else {
+                    toastr.error(result.msg);
+                }
+                $('#check_user_pin #pin').val('');
+                $('#check_user_pin button').removeAttr('disabled');
+            }
+        });
     });
 
     //Cancel the invoice
