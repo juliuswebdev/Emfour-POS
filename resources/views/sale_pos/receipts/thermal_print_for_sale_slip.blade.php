@@ -521,7 +521,7 @@
 									@lang('lang_v1.card_charge') ({{$payment['card_charge_percent']}}%)
 								</p>
 								<p class="width-50 text-right sub-headings">
-									{{$payment['card_charge_amount']}}
+									(+){{$payment['card_charge_amount']}}
 								</p>
 							</div>
 						@endif
@@ -536,7 +536,7 @@
 						{!! $receipt_details->gratuity_label.' ('.$receipt_details->gratuity_percentage.'%)' !!}
 					</p>
 					<p class="width-50 text-right sub-headings">
-						{{$receipt_details->gratuity_charges}}
+						(+){{$receipt_details->gratuity_charges}}
 					</p>
 				</div>
 				@endif
@@ -548,7 +548,7 @@
 							@lang('lang_v1.tips')
 					</p>
 					<p class="width-50 text-right sub-headings">
-							{{$receipt_details->tips_amount}}
+						(+){{$receipt_details->tips_amount}}
 					</p>
 				</div>
 				@endif
@@ -559,8 +559,8 @@
 						<p class="sub-headings">
 							{!! $receipt_details->shipping_charges_label !!}
 						</p>
-						<p class="width-50 text-right">
-							{{$receipt_details->shipping_charges}}
+						<p class="width-50 text-right sub-headings">
+							(+){{$receipt_details->shipping_charges}}
 						</p>
 					</div>
 				@endif
@@ -570,8 +570,8 @@
 						<p class="sub-headings">
 							{!! $receipt_details->packing_charge_label !!}
 						</p>
-						<p class="width-50 text-right">
-							{{$receipt_details->packing_charge}}
+						<p class="width-50 text-right sub-headings">
+							(+){{$receipt_details->packing_charge}}
 						</p>
 					</div>
 				@endif
@@ -583,8 +583,8 @@
 							{!! $receipt_details->discount_label !!}
 						</p>
 
-						<p class="width-50 text-right">
-							(-) {{$receipt_details->discount}}
+						<p class="width-50 text-right sub-headings">
+							(-){{$receipt_details->discount}}
 						</p>
 					</div>
 				@endif
@@ -595,8 +595,8 @@
 							{!! $receipt_details->line_discount_label !!}
 						</p>
 
-						<p class="width-50 text-right">
-							(-) {{$receipt_details->total_line_discount}}
+						<p class="width-50 text-right sub-headings">
+							(-){{$receipt_details->total_line_discount}}
 						</p>
 					</div>
 				@endif
@@ -612,8 +612,8 @@
 							<p class="sub-headings">
 								{!! $item->label !!}
 							</p>
-							<p class="width-50 text-right">
-								{{$item->discount}}
+							<p class="width-50 text-right sub-headings">
+								(-){{$item->discount}}
 							</p>
 						</div>
 					@endforeach
@@ -628,8 +628,8 @@
 								{{$key}}:
 							</p>
 
-							<p class="width-50 text-right">
-								(+) {{$val}}
+							<p class="width-50 text-right sub-headings">
+								(+){{$val}}
 							</p>
 						</div>
 					@endforeach
@@ -641,8 +641,8 @@
 							{!! $receipt_details->reward_point_label !!}
 						</p>
 
-						<p class="width-50 text-right">
-							(-) {{$receipt_details->reward_point_amount}}
+						<p class="width-50 text-right sub-headings">
+							(-){{$receipt_details->reward_point_amount}}
 						</p>
 					</div>
 				@endif
@@ -652,8 +652,8 @@
 						<p class="sub-headings">
 							{!! $receipt_details->tax_label !!}
 						</p>
-						<p class="width-50 text-right">
-							(+) {{$receipt_details->tax}}
+						<p class="width-50 text-right sub-headings">
+							(+){{$receipt_details->tax}}
 						</p>
 					</div>
 				@endif
@@ -663,22 +663,13 @@
 						<p class="sub-headings">
 							{!! $receipt_details->round_off_label !!} 
 						</p>
-						<p class="width-50 text-right">
+						<p class="width-50 text-right sub-headings">
 							{{$receipt_details->round_off}}
 						</p>
 					</div>
 				@endif
 
-				{{--
-                <div class="flex-box">
-					<p class="width-50 text-right sub-headings">
-						{!! $receipt_details->total_label !!}
-					</p>
-					<p class="width-50 text-right sub-headings">
-						{{$receipt_details->total}}
-					</p>
-				</div>
-                --}}
+				
 
                 <div class="flex-box">
 					<p class="sub-headings">
@@ -733,6 +724,7 @@
                 --}}
 
 				<!-- Total Due-->
+				{{-- 				
 				@if(!empty($receipt_details->total_due) && !empty($receipt_details->total_due_label))
 					<div class="flex-box">
 						<p class="width-50 text-right">
@@ -742,7 +734,7 @@
 							{{$receipt_details->total_due}}
 						</p>
 					</div>
-				@endif
+				@endif --}}
 
 				@if(!empty($receipt_details->all_due))
 					<div class="flex-box">
@@ -776,6 +768,7 @@
                 $ex_cart = $ext_data[2];
                 $ex_x_cart = explode('=', $ex_cart);
                 $card_issue_by = end($ex_x_cart);
+				$customer_sign = $online_sale_payment['response']['Sign'];
             @endphp
 
             <div class="textbox-info">
@@ -837,9 +830,9 @@
             @endif
 
             @if(!empty($receipt_details->additional_notes))
-	            <p class="centered">
-	            	<strong>Note:</strong> {!! nl2br($receipt_details->additional_notes) !!}
-	            </p>
+				<div class="textbox-info" style="margin-bottom:35px;">
+					<p class="f-left"><strong>Note:</strong> {!! nl2br($receipt_details->additional_notes) !!}</p>
+				</div>
             @endif
 
             {{-- Barcode --}}
@@ -857,6 +850,19 @@
 					{!! $receipt_details->footer_text !!}
 				</p>
 			@endif
+			
+
+			<div class="width-100" style="margin-top:10px; margin-bottom:20px;">
+                <p class="centered">
+                    Customer Signed
+                </p>
+				<div class="centered" style="display: block; padding-bottom:20px;">
+					<img src="data:image/bmp;base64,{{ $customer_sign }}" style="display: block; width:auto; height:auto;">
+				</div>
+				<div class="centered">{{ $receipt_details->invoice_date }}</div>
+            </div>
+
+
             <div class="centered">**************************************************</div>
             <div>
                 <p class="centered">

@@ -18,7 +18,7 @@
 				value="{{ $walk_in_customer['selling_price_group_id'] ?? ''}}" >
 				@endif
 				{!! Form::select('contact_id', 
-					[], null, ['class' => 'form-control mousetrap', 'id' => 'customer_id', 'placeholder' => 'Enter Customer name / phone', 'required']); !!}
+					[], null, ['class' => 'form-control mousetrap', 'id' => 'customer_id', 'placeholder' => 'Walk-in', 'required']); !!}
 				<span class="input-group-btn">
 					<button type="button" class="btn btn-default bg-white btn-flat add_new_customer" data-name=""  @if(!auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
 				</span>
@@ -75,7 +75,7 @@
 		</div>
 	@endif
 	@if(!empty($pos_settings['enable_transaction_date']))
-		<div class="col-md-4 col-sm-6">
+		<div class="col-md-4 col-sm-6 transaction_date_wrapper">
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon">

@@ -776,7 +776,7 @@ return [
     'enable_custom_fields' => 'Enable custom fields',
     'edit_type_of_service' => 'Edit type of service',
     'types_of_service_help' => 'Type of service means services like dine-in, parcel, home delivery, third party delivery etc.',
-    'select_types_of_service' => 'Select type of service',
+    'select_types_of_service' => 'Select Type of Service',
     'service_custom_field_1' => 'Custom Field 1',
     'service_custom_field_2' => 'Custom Field 2',
     'service_custom_field_3' => 'Custom Field 3',

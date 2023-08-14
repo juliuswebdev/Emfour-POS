@@ -762,6 +762,9 @@ class TransactionUtil extends Util
         }
         $contact_balance = Contact::where('id', $transaction->contact_id)->value('balance');
         $denominations = [];
+
+        
+
         foreach ($payments as $payment) {
             //Check if transaction_sell_lines_id is set.
             if (! empty($payment['payment_id'])) {
@@ -809,6 +812,8 @@ class TransactionUtil extends Util
                         'account_id' => ! empty($payment['account_id']) && $payment['method'] != 'advance' ? $payment['account_id'] : null,
                     ];
 
+                    
+                   
                     for ($i = 1; $i < 8; $i++) {
                         if ($payment['method'] == 'custom_pay_'.$i) {
                             $payment_data['transaction_no'] = $payment["transaction_no_{$i}"];
@@ -821,6 +826,7 @@ class TransactionUtil extends Util
                     
                     if($payment['method']  == 'card'){
                         $business = Business::find($business_id);
+                        
                         /*
                         $card_charge = $business->card_charge ? $business->card_charge/100 : 0;
                         $card_charge_amount = ($payment_data['amount'] * $card_charge);
@@ -829,16 +835,18 @@ class TransactionUtil extends Util
                         $payment_data['card_charge_percent'] = $business->card_charge;
                         $payment_data['amount'] = $payment_data['amount'] + $card_charge_amount; 
                         */
-
+                        
                         $card_charge = $business->card_charge;
                         $card_charge_amount = ($transaction['total_before_tax'] * $card_charge / 100);
                         $card_charge_amount = sprintf('%0.2f', $card_charge_amount);
+                       
 
                         $payment_data['original_amount'] = $transaction['total_before_tax'];
                         $payment_data['card_charge_amount'] = $card_charge_amount;
                         $payment_data['card_charge_percent'] = $card_charge;
-                        $payment_data['amount'] = $payment_data['amount'] + $card_charge_amount;
+                        $payment_data['amount'] = ($payment_data['amount'] + $card_charge_amount);
                     }
+                    
                     
                     $payments_formatted[] = new TransactionPayment($payment_data);
 
@@ -856,7 +864,7 @@ class TransactionUtil extends Util
                 }
             }
         }
-
+        
         //Delete the payment lines removed.
         if (! empty($edit_ids)) {
             $deleted_transaction_payments = $transaction->payment_lines()->whereNotIn('id', $edit_ids)->get();
@@ -1583,7 +1591,8 @@ class TransactionUtil extends Util
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
                                     'card_charge_amount' => isset($value['card_charge_amount']) ? $this->num_f($value['card_charge_amount'], $show_currency, $business_details) : '',
                                     'card_charge_percent' => isset($value['card_charge_percent']) ? $value['card_charge_percent'] : '',
-                                    'original_amount' => isset($value['original_amount']) ? $this->num_f($value['original_amount'], $show_currency, $business_details) : ''
+                                    'original_amount' => isset($value['original_amount']) ? $this->num_f($value['original_amount'], $show_currency, $business_details) : '',
+                                    'payment_collect_response' => isset($value['payment_collect_response']) ? $value['payment_collect_response'] : ''
                                 ];
                         } elseif ($value['method'] == 'cheque') {
                             $output['payments'][] =

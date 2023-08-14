@@ -468,13 +468,14 @@ class SellPosController extends Controller
                 $invoice_total['total_before_tax'] = ($invoice_total_total_before_tax_temp - ($gratuity_charge_amount + $tips_amount));
                 $invoice_total['final_total'] = $invoice_total_final_total_temp;
                 */
-
+               
                 //Card Charges applied only sub total
                 if($business->card_charge > 0){
                     $card_charge_percentage = $business->card_charge;
-                    foreach($input['payment'] as $payment) {
+                    foreach($input['payment'] as $key => $payment) {
                         if(isset($payment['method'])) {
                             if($payment['method']  == 'card'){
+                                $input['payment'][$key]['amount'] = ($invoice_total['final_total']);
                                 $total_card_charge = ($invoice_total['total_before_tax'] * $card_charge_percentage / 100);
                                 $total_card_charge = sprintf('%0.2f', $total_card_charge);
                                 $input['total_card_charge'] = $total_card_charge;
@@ -486,6 +487,7 @@ class SellPosController extends Controller
                 
                 //Modify Final amount with include tip, card charge & gratuity
                 $input['final_total'] = $invoice_total['final_total'];
+                
 
                 //dd($invoice_total);
                 DB::beginTransaction();
@@ -594,6 +596,7 @@ class SellPosController extends Controller
                 // }
               
 
+                
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
@@ -604,11 +607,11 @@ class SellPosController extends Controller
 
                 $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
 
+                
                 $change_return['amount'] = $input['change_return'] ?? 0;
                 $change_return['is_return'] = 1;
-
                 $input['payment'][] = $change_return;
-
+                
                 $is_credit_sale = isset($input['is_credit_sale']) && $input['is_credit_sale'] == 1 ? true : false;
 
                 $send_to_kitchen = ($request->has('send_to_kitchen') && $request->filled('send_to_kitchen')) ? $input['send_to_kitchen'] : 0;
@@ -1468,6 +1471,26 @@ class SellPosController extends Controller
                 }
 
 
+                //Card Charges applied only sub total
+                if($business->card_charge > 0){
+                    $card_charge_percentage = $business->card_charge;
+                    foreach($input['payment'] as $key => $payment) {
+                        if(isset($payment['method'])) {
+                            if($payment['method']  == 'card'){
+                                $input['payment'][$key]['amount'] = ($invoice_total['final_total']);
+                                $total_card_charge = ($invoice_total['total_before_tax'] * $card_charge_percentage / 100);
+                                $total_card_charge = sprintf('%0.2f', $total_card_charge);
+                                $input['total_card_charge'] = $total_card_charge;
+                                $invoice_total['final_total'] = ($invoice_total['final_total'] + $total_card_charge);
+                            } 
+                        }
+                    }
+                }
+                
+                //Modify Final amount with include tip, card charge & gratuity
+                $input['final_total'] = $invoice_total['final_total'];
+
+        
                 if (! empty($request->input('transaction_date'))) {
                     $input['transaction_date'] = $this->productUtil->uf_date($request->input('transaction_date'), true);
                 }
@@ -1699,12 +1722,37 @@ class SellPosController extends Controller
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
                 $this->transactionUtil->activityLog($transaction, 'edited', $transaction_before);
+                
+                //Card Payment Initial
+                if(isset($input['payment'][0]['method'])){
+                    if($input['payment'][0]['method'] == "card"){
+                        //Make Payment through card
+                        $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
+                        $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
+                        if($response_of_payment['success'] == 0){
+                            //Payment Failed Rollback Transaction
+                            DB::rollback();
+                            $output = [
+                                'success' => 0,
+                                'msg' => $response_of_payment['msg']
+                            ];
+                            return $output;
+                        }else{
+                            //Store Payment Response
+                            $payment_response_json = json_encode($response_of_payment['data'], true);
+                            TransactionPayment::where('transaction_id', $transaction->id)
+                                                ->where('business_id', $business_id)
+                                                ->update(['payment_collect_response' => $payment_response_json]);
+                        }
+                    }
+                }
+
 
                 DB::commit();
 
                 if ($request->input('is_save_and_print') == 1) {
                     $url = $this->transactionUtil->getInvoiceUrl($id, $business_id);
-
                     return redirect()->to($url.'?print_on_load=true');
                 }
 
@@ -1725,7 +1773,16 @@ class SellPosController extends Controller
                 } elseif ($input['status'] == 'final') {
                     $msg = trans('sale.pos_sale_updated');
                     if (! $is_direct_sale && $can_print_invoice) {
-                        $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+                        //Print receipt in thermal printer
+                        if(isset($input['payment'][0]['method'])){
+                            if($input['payment'][0]['method'] == "card"){
+                                $receipt = $this->receiptContentForThermal($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+                            }else{
+                                $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);        
+                            }
+                        }else{
+                            $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
+                        }
                     } else {
                         $receipt = '';
                     }
@@ -2215,8 +2272,9 @@ class SellPosController extends Controller
                 $is_delivery_note = ! empty($request->input('delivery_note')) ? true : false;
 
                 $invoice_layout_id = $transaction->is_direct_sale ? $transaction->location->sale_invoice_layout_id : null;
-                $receipt = $this->receiptContent($business_id, $transaction->location_id, $transaction_id, $printer_type, $is_package_slip, false, $invoice_layout_id, $is_delivery_note);
-
+                $receipt = $this->receiptContent($business_id, $transaction->location_id, $transaction_id, $printer_type, 
+                $is_package_slip, false, $invoice_layout_id, $is_delivery_note);
+                
                 if (! empty($receipt)) {
                     $output = ['success' => 1, 'receipt' => $receipt];
                 }

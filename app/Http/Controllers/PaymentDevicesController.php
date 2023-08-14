@@ -368,8 +368,7 @@ class PaymentDevicesController extends Controller
             
             $register_id = $payment_setting['register_id'];
             $auth_key = $payment_setting['auth_key'];
-            //$amount = "1.10";
-
+           
             $check_terminal = $this->checkTerminalIsActive($register_id);
             //$check_terminal = "Online";
             if($check_terminal == "Online"){
@@ -386,9 +385,10 @@ class PaymentDevicesController extends Controller
                             <RegisterId>'. $register_id .'</RegisterId>
                             <AuthKey>'. $auth_key .'</AuthKey>
                             <PrintReceipt>No</PrintReceipt>
-                            <SigCapture>No</SigCapture>
+                            <SigCapture>Yes</SigCapture>
                         </request>';
             
+                
                 $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
 
                 $response = Http::timeout(1000)->get($request_url);
@@ -396,11 +396,10 @@ class PaymentDevicesController extends Controller
                 $xml_response = simplexml_load_string($xml_data);
                 $json_response = json_encode($xml_response);
                 $array_response = json_decode($json_response,TRUE);
-
+                
                 /*
-                $t = TransactionPayment::where('id', '210')->pluck('payment_collect_response')->first();
-                $array_response = json_decode($t, true);
-                $payment_response_message = $array_response['response']['Message'];
+                $json_response = '{"response":{"RefId":"1136","RegisterId":"116058002","TransNum":"23","ResultCode":"0","RespMSG":"APPROVAL%20DSC742","Message":"Approved","AuthCode":"DSC742","PNRef":"322316500718","PaymentType":"Credit","Voided":"false","TransType":"Sale","SN":"WP22331Q23201745","ExtData":"Amount=1.12,InvNum=23,CardType=DISCOVER,BatchNum=1,Tip=0.00,CashBack=0.00,Fee=0.00,AcntLast4=7449,BIN=601195,Name=PELEGRINO%2fGLEN%20%20%20%20%20%20%20%20%20%20%20%20,SVC=0.00,TotalAmt=1.12,DISC=0.00,Donation=0.00,SHFee=0.00,RwdPoints=0,RwdBalance=0,RwdIssued=,EBTFSLedgerBalance=,EBTFSAvailBalance=,EBTFSBeginBalance=,EBTCashLedgerBalance=,EBTCashAvailBalance=,EBTCashBeginBalance=,RewardCode=,AcqRefData=,ProcessData=,RefNo=,RewardQR=,Language=English,EntryType=CHIP,table_num=0,clerk_id=0,ticket_num=,ControlNum=,TaxCity=0.00,TaxState=0.00,TaxReducedState=0.00,Cust1=,Cust1Value=,Cust2=,Cust2Value=,Cust3=,Cust3Value=,AcntFirst4=6011,TaxAmount=0.00,AVSRsp=,CVVRsp=,TransactionID=123456789012345,ExtraHostData=00%2dAPPROVAL%2dApproved%20and%20Completed","EMVData":"AID=A0000001523010,AppName=Discover,TVR=8000008000,TSI=6800,IAD=0102030405060708,ARC=","Sign":"Qk0OAwAAAAAAAD4AAAAoAAAALAEAABIAAAABAAEAAAAAANACAADEDgAAxA4AAAAAAAAAAAAAAAAAAP\/\/\/wD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/4AA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AA\/\/\/\/\/\/\/\/\/\/\/\/\/+AAAA\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAP\/\/\/\/\/\/\/\/\/\/\/\/gAAAAAAP\/\/\/\/\/\/\/\/\/\/\/gAAAAA\/\/\/\/\/\/\/\/\/\/\/\/wAAD\/\/\/\/\/\/\/\/\/\/\/4AAAAAAAAAf\/\/\/\/\/\/\/\/\/8P8AAAAAP\/\/\/\/\/\/\/\/\/8AAA\/\/\/\/\/\/\/\/\/\/\/gAAAAP8AAAAD\/\/\/\/\/\/\/\/\/B\/\/8AAAAAD\/\/\/\/\/\/AAAAAB\/\/\/\/\/\/\/\/\/+AAH\/\/\/\/\/\/AAAD\/\/\/\/\/\/\/\/4f\/\/\/8AAAAAB\/\/\/AAAAAAAf\/\/\/\/\/\/\/\/wAB\/\/\/\/\/\/\/\/+AAAB\/\/\/\/\/\/\/D\/\/\/\/\/\/AAAAAAAAAAAAAAD\/\/\/\/\/\/\/4AAH\/\/\/\/\/\/\/\/\/\/wAAAH\/\/\/AAA\/\/\/\/\/\/\/\/wAAAAAAP\/AAAAf\/\/\/\/\/\/AAAf\/\/\/\/\/\/\/\/\/\/\/wAAAAAAAAAP\/\/\/\/\/\/\/\/\/4AAAP\/\/wAACH\/\/\/\/\/8AAD\/\/\/\/\/\/\/\/\/\/\/\/\/8YAAAAAAAH\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAAw\/\/\/\/\/wAB\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/gAAAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAMP\/\/\/+AAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAADj\/\/\/4AA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA4f\/\/AAD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAOH\/wAAf\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAADwAAAB\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA8AAAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAPgAD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAAA=","CVMResult":"2"}}';
+                $array_response = json_decode($json_response,TRUE);
                 */
 
                 $payment_response_message = $array_response['response']['Message'];

@@ -60,7 +60,7 @@ return [
     'order_details' => 'Order details',
     'refresh' => 'Refresh',
     'no_orders_found' => 'No orders found',
-    'select_service_staff' => 'Select service staff',
+    'select_service_staff' => 'Select Service Staff',
     'service_staff' => 'Service staff',
     'kitchen_for_restaurant' => 'Kitchen (For restaurants)',
     'products_for_modifier' => 'Products for modifier',
