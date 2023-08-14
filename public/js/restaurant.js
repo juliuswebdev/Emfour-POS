@@ -38,6 +38,7 @@ $(document).ready(function() {
 });
 
 function getLocationTables(location_id, $type=null) {
+    
     var transaction_id = $('span#restaurant_module_span').data('transaction_id');
 
     if (location_id != '') {
@@ -76,6 +77,9 @@ function getLocationTables(location_id, $type=null) {
 							}
 					});
                 }
+
+                //Check table occupied
+                check_table_is_occupied();
 
             },
         });

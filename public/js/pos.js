@@ -322,7 +322,8 @@ $(document).ready(function() {
 
                         if ((ui.item.enable_stock == 1 && ui.item.qty_available > 0) || 
                                 (ui.item.enable_stock == 0) || is_overselling_allowed || for_so) {
-                            $(this)
+                                
+                                $(this)
                                 .data('ui-autocomplete')
                                 ._trigger('select', 'autocompleteselect', ui);
                             $(this).autocomplete('close');
@@ -355,8 +356,19 @@ $(document).ready(function() {
                     }
 
                     if (ui.item.enable_stock != 1 || ui.item.qty_available > 0 || is_overselling_allowed || for_so || is_draft) {
-                        $(this).val(null);
+                        
+                        //Check validate service staff selection
+                        var service_waiter_length = $('#res_waiter_id').length;
+                        if(service_waiter_length != 0){
+                            var service_waiter_val = $('#res_waiter_id').val();
+                            if(service_waiter_val == ""){
+                                toastr.warning(LANG.validate_service_staff);
+                                return false;
+                            }
+                        }
 
+                        
+                        $(this).val(null);
                         //Pre select lot number only if the searched term is same as the lot number
                         var purchase_line_id = ui.item.purchase_line_id && searched_term == ui.item.lot_number ? ui.item.purchase_line_id : null;
                         pos_product_row(ui.item.variation_id, purchase_line_id);
@@ -1857,6 +1869,10 @@ Name: ${ name }`;
     }, 60000);
 
     set_search_fields();
+
+    
+
+
 });
 
 
@@ -3372,9 +3388,9 @@ function reset_pos_form(){
     });
 
     //Disabled table in pos
-    // if($('select[name="res_table_id"]').length != 0){
-    //     check_table_is_occupied();
-    // }
+    if($('select[name="res_table_id"]').length != 0){
+        check_table_is_occupied();
+    }
     
 }
 
@@ -4872,20 +4888,20 @@ function check_location_is_open(){
 
 
 //Check table occupied
-// function check_table_is_occupied(){
-//     $.ajax({
-//     method: 'GET',
-//     url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
-//         success: function(result){
-//             $('select[name="res_table_id"] option').each(function(){
-//                 var id = $(this).attr('value');
-//                 if(result.includes(id)) {
-//                     $(this).attr('disabled', 'disabled');
-//                 }
-//             });
-//         }
-//     });
-// }
+function check_table_is_occupied(){
+    $.ajax({
+    method: 'GET',
+    url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
+        success: function(result){
+            $('select[name="res_table_id"] option').each(function(){
+                var id = $(this).attr('value');
+                if(result.includes(id)) {
+                    $(this).attr('disabled', 'disabled');
+                }
+            });
+        }
+    });
+}
 
 
 //Check app execute in android app.
