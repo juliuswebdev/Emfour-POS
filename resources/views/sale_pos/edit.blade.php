@@ -235,7 +235,7 @@
 	@if( ($__is_table_mapping_enabled) && (strpos($_SERVER['HTTP_USER_AGENT'], 'Android') != true) )
 		<style>
 			.table-mapping-dropdown {
-				display: none;
+				display: block;
 			}
 			.table-mapping-dropdown.active {
 				display: block;
@@ -244,28 +244,6 @@
 		<div class="modal fade" id="restaurant_booking_table_modal" tabindex="-1" role="dialog"></div>
 		<div class="modal fade" id="tables_modal" tabindex="-1" role="dialog"></div>
 		<script>
-			$.ajax({
-				method: 'GET',
-				url: '/bookings/get-table-mapping?location_id=' + $('#select_location_id').val(),
-				success: function(result){
-					$('#restaurant_booking_table_modal').html(result);
-					$('.table-mapping-dropdown').addClass('active');
-					$.ajax({
-						method: 'GET',
-						url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
-							success: function(result){
-					
-								$('select[name="res_table_id"] option').each(function(){
-									var id = $(this).attr('value');
-									var selected = $(this).attr('selected');
-									if(result.includes(id) && !selected) {
-										$(this).attr('disabled', 'disabled');
-									}
-								});
-							}
-					});
-				}
-			});
 
 			$.ajax({
 				method: 'GET',
@@ -304,19 +282,43 @@
 
 			$(document).on('click', '.table-mapping-btn', function(e) {
 				e.preventDefault();
-				$.ajax({
-				method: 'GET',
-				url: '/bookings/get-table-chair-selected?location_id=' + $('#select_location_id').val(),
-					success: function(result){
-						console.log(result);
-						$('.table-chair-btn').each(function(){
-							var id = $(this).attr('data-table-chair-id');
-							if(result.includes(id)) {
-								$(this).addClass('active locked');
+					if($('#restaurant_booking_table_modal .modal-dialog').length > 0) {
+						$.ajax({
+							method: 'GET',
+							url: '/bookings/get-table-chair-selected?location_id=' + $('#select_location_id').val(),
+								success: function(result){
+									$('.table-chair-btn').removeClass('active locked');
+									$('.table-chair-btn').each(function(){
+										var id = $(this).attr('data-table-chair-id');
+										if(result.includes(id)) {
+											$(this).addClass('active locked');
+										}
+									});
+								}
+						});
+					} else {
+						$.ajax({
+							method: 'GET',
+							url: '/bookings/get-table-mapping?location_id=' + $('#select_location_id').val(),
+							success: function(result){
+								$('#restaurant_booking_table_modal').html(result);
+								$('.table-mapping-dropdown').addClass('active');
+								$.ajax({
+									method: 'GET',
+									url: '/bookings/get-table-chair-selected?location_id=' + $('#select_location_id').val(),
+										success: function(result){
+											$('.table-chair-btn').removeClass('active locked');
+											$('.table-chair-btn').each(function(){
+												var id = $(this).attr('data-table-chair-id');
+												if(result.includes(id)) {
+													$(this).addClass('active locked');
+												}
+											});
+										}
+								});
 							}
 						});
 					}
-				});
 
 				$('#restaurant_booking_table_modal').modal('show');
 			});
@@ -379,23 +381,7 @@
 	@endif
 	
 	
-	<script>
-		$(document).ready(function() {
-		$.ajax({
-			method: 'GET',
-			url: '/bookings/get-occupied-table-chairs?location_id=' + $('#select_location_id').val(),
-				success: function(result){
-					$('select[name="res_table_id"] option').each(function(){
-						var id = $(this).attr('value');
-						var selected = $(this).attr('selected');
-						if(result.includes(id) && !selected) {
-							$(this).attr('disabled', 'disabled');
-						}
-					});
-				}
-			});
-		});
-	</script>
+
 	
 
 @endsection

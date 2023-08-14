@@ -614,6 +614,7 @@
 						</tr>
 					@endif
 					
+					{{-- 
 					@if( !empty($receipt_details->dp_discount) )
 						@php
 							$dp_discount = json_decode($receipt_details->dp_discount);
@@ -631,7 +632,7 @@
 							@endforeach
 						@endif
 					@endif
-
+					--}}
 					<!-- Total -->
 					<tr>
 						<th>

@@ -601,6 +601,7 @@
 					</div>
 				@endif
 
+				{{--
 				@if( !empty($receipt_details->dp_discount) )
 					@php
 					 	$dp_discount = json_decode($receipt_details->dp_discount);
@@ -618,6 +619,7 @@
 					@endforeach
 					@endif
 				@endif
+				--}}
 
 				@if( !empty($receipt_details->additional_expenses) )
 					@foreach($receipt_details->additional_expenses as $key => $val)

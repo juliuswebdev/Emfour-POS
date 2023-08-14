@@ -290,7 +290,7 @@ class SellPosController extends Controller
                                 ->where('user_id', auth()->user()->id)
                                 ->whereNull('clock_out_time')
                                 ->first();
-        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+        // $dp_rules = $this->productUtil->getActiveDPRules($business_id);
 
         $types_of_service_active = TypesOfService::where('business_id', $business_id)->where('is_default', 1)->first();
         $types_of_service_active = ($types_of_service_active) ? $types_of_service_active->id : null;
@@ -298,7 +298,7 @@ class SellPosController extends Controller
         return view('sale_pos.create')
             ->with(compact(
                 'types_of_service_active',
-                'dp_rules',
+                // 'dp_rules',
                 'clock_in',
                 '__is_table_mapping_enabled',
                 '__is_essentials_enabled',
@@ -587,11 +587,11 @@ class SellPosController extends Controller
                     $input['res_waiter_id'] = request()->get('res_waiter_id');
                 }
 
-                $input['dp_flag'] = $request->input('dp_flag');
-                $input['dp_discount'] = $request->input('dp_discount');
-                if($input['dp_flag']) {
-                    $input['final_total'] = $request->input('final_total');
-                }
+                // $input['dp_flag'] = $request->input('dp_flag');
+                // $input['dp_discount'] = $request->input('dp_discount');
+                // if($input['dp_flag']) {
+                //     $input['final_total'] = $request->input('final_total');
+                // }
               
 
                 //upload document
@@ -1333,12 +1333,12 @@ class SellPosController extends Controller
             }
             */
         }
-        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+        // $dp_rules = $this->productUtil->getActiveDPRules($business_id);
         //$dp_rules = $this->productUtil->getActiveDPRules($business_id);
         $types_of_service_active = TypesOfService::where('business_id', $business_id)->where('is_default', 1)->first();
         $types_of_service_active = ($types_of_service_active) ? $types_of_service_active->id : null;
         return view('sale_pos.edit')
-            ->with(compact('types_of_service_active', 'dp_rules', '__is_table_mapping_enabled', '__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
+            ->with(compact('types_of_service_active', '__is_table_mapping_enabled', '__is_essentials_enabled','is_employee_allowed','clock_in', 'business_details', 'taxes', 'payment_types', 'walk_in_customer',
             'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
             'commission_agent', 'categories', 'pos_settings', 'change_return', 'types', 'customer_groups',
             'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
@@ -2013,10 +2013,10 @@ class SellPosController extends Controller
                 $edit_discount = auth()->user()->can('edit_product_discount_from_pos_screen');
                 $edit_price = auth()->user()->can('edit_product_price_from_pos_screen');
             }
-            $dp_rules = $this->productUtil->getActiveDPRules($business_id);
+            //$dp_rules = $this->productUtil->getActiveDPRules($business_id);
            
             $output['html_content'] = view('sale_pos.product_row')
-                        ->with(compact('dp_rules', 'product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order', 'last_sell_line'))
+                        ->with(compact('product', 'row_count', 'tax_dropdown', 'enabled_modules', 'pos_settings', 'sub_units', 'discount', 'waiters', 'edit_discount', 'edit_price', 'purchase_line_id', 'warranties', 'quantity', 'is_direct_sell', 'so_line', 'is_sales_order', 'last_sell_line'))
                         ->render();
         }
         return $output;
@@ -3617,9 +3617,10 @@ class SellPosController extends Controller
     }
 
     public function getDPRules() {
-        $business_id = request()->session()->get('user.business_id');
-        $dp_rules = $this->productUtil->getActiveDPRules($business_id);
-        return response()->json($dp_rules);
+        //$business_id = request()->session()->get('user.business_id');
+        //$dp_rules = $this->productUtil->getActiveDPRules($business_id);
+        //return response()->json($dp_rules);
+        return [];
     }
 
     public function getProductVariation($business_id, $sku) {

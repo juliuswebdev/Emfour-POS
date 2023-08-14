@@ -304,7 +304,7 @@
             </tr>
             @endif
 
-
+            {{-- 
             @if( !empty($sell->dp_discount) )
               @php
                 $dp_discount = json_decode($sell->dp_discount);
@@ -323,6 +323,7 @@
                 @endforeach
               @endif
             @endif
+            --}}
 
             <tr>
               <th>{{ __('sale.discount') }}:</th>

@@ -116,7 +116,7 @@
           success: function(result) {
               if (result.success == 1) {
                   toastr.success('Success!');
-                  localStorage.setItem('dp_rules', JSON.stringify(result.dp_rules));
+                  //localStorage.setItem('dp_rules', JSON.stringify(result.dp_rules));
                   location.reload();
               } else {
                   toastr.error('Error!');
