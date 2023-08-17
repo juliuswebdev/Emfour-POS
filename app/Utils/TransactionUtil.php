@@ -743,6 +743,7 @@ class TransactionUtil extends Util
      */
     public function createOrUpdatePaymentLines($transaction, $payments, $business_id = null, $user_id = null, $uf_data = true)
     {
+        
         $payments_formatted = [];
         $edit_ids = [0];
         $account_transactions = [];
@@ -764,7 +765,7 @@ class TransactionUtil extends Util
         $denominations = [];
 
         
-
+        $is_deduct_card_fees = true;
         foreach ($payments as $payment) {
             //Check if transaction_sell_lines_id is set.
             if (! empty($payment['payment_id'])) {
@@ -837,15 +838,44 @@ class TransactionUtil extends Util
                         */
                         
                         $card_charge = $business->card_charge;
-                        $card_charge_amount = ($transaction['total_before_tax'] * $card_charge / 100);
-                        $card_charge_amount = sprintf('%0.2f', $card_charge_amount);
-                       
+                        $card_fixed_fees = $business->card_fixed_fees;
+                        $card_label = $business->card_label;
 
-                        $payment_data['original_amount'] = $transaction['total_before_tax'];
-                        $payment_data['card_charge_amount'] = $card_charge_amount;
-                        $payment_data['card_charge_percent'] = $card_charge;
-                        $payment_data['amount'] = ($payment_data['amount'] + $card_charge_amount);
+                        if($transaction->is_split_payment == 1){
+                            if($is_deduct_card_fees == 1){
+
+                                $card_charge_with_fees_amount = $transaction->total_card_charges;
+                                $card_charge_amount = ($card_charge_with_fees_amount - $card_fixed_fees);
+                                $card_charge_amount = sprintf('%0.2f', $card_charge_amount);
+
+                                $payment_data['original_amount'] = $payment_data['amount'];
+                                $payment_data['card_charge_amount'] = $card_charge_amount;
+                                $payment_data['card_fixed_fees'] = $card_fixed_fees;
+                                $payment_data['card_charge_percent'] = $card_charge;
+                                $payment_data['card_label'] = $card_label;
+                                $payment_data['amount'] = ($payment_data['amount'] + $card_charge_amount + $card_fixed_fees);
+
+                            }else{
+                                $payment_data['original_amount'] = $payment_data['amount'];
+                                $payment_data['card_charge_amount'] = 0;
+                                $payment_data['card_fixed_fees'] = 0;
+                                $payment_data['card_charge_percent'] = 0;
+                                $payment_data['card_label'] = NULL;
+                            }
+                        }else{
+                            $card_charge_amount = ($transaction['total_before_tax'] * $card_charge / 100);
+                            $card_charge_amount = sprintf('%0.2f', $card_charge_amount);
+                        
+
+                            $payment_data['original_amount'] = $transaction['total_before_tax'];
+                            $payment_data['card_charge_amount'] = $card_charge_amount;
+                            $payment_data['card_fixed_fees'] = $card_fixed_fees;
+                            $payment_data['card_charge_percent'] = $card_charge;
+                            $payment_data['card_label'] = $card_label;
+                            $payment_data['amount'] = ($payment_data['amount'] + $card_charge_amount + $card_fixed_fees);
+                        }
                     }
+                    
                     
                     
                     $payments_formatted[] = new TransactionPayment($payment_data);
@@ -864,6 +894,10 @@ class TransactionUtil extends Util
                 }
             }
         }
+
+        unset($transaction->is_split_payment);
+        unset($transaction->total_card_charges);
+        
         
         //Delete the payment lines removed.
         if (! empty($edit_ids)) {
@@ -1579,6 +1613,7 @@ class TransactionUtil extends Util
                         if ($value['method'] == 'cash') {
                             $output['payments'][] =
                                 ['method' => $method.($value['is_return'] == 1 ? ' ('.$il->change_return_label.')(-)' : ''),
+                                    'amount_unformatted' => $value['amount'],
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
                                 ];
@@ -1587,9 +1622,14 @@ class TransactionUtil extends Util
                         } elseif ($value['method'] == 'card') {
                             $output['payments'][] =
                                 ['method' => $method.(! empty($value['card_transaction_number']) ? (', Transaction Number:'.$value['card_transaction_number']) : ''),
+                                    'amount_unformatted' => $value['amount'],
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
+                                    'card_fixed_fees' => isset($value['card_fixed_fees']) ? $this->num_f($value['card_fixed_fees'],$show_currency, $business_details) : 0,
+                                    'card_label' => isset($value['card_label']) ? $value['card_label'] : '',
                                     'card_charge_amount' => isset($value['card_charge_amount']) ? $this->num_f($value['card_charge_amount'], $show_currency, $business_details) : '',
+                                    'total_card_charge' => $this->num_f( ($value['card_charge_amount'] + $value['card_fixed_fees']), $show_currency, $business_details),
+                                    'total_card_charge_unformatted' => ($value['card_charge_amount'] + $value['card_fixed_fees']),
                                     'card_charge_percent' => isset($value['card_charge_percent']) ? $value['card_charge_percent'] : '',
                                     'original_amount' => isset($value['original_amount']) ? $this->num_f($value['original_amount'], $show_currency, $business_details) : '',
                                     'payment_collect_response' => isset($value['payment_collect_response']) ? $value['payment_collect_response'] : ''
@@ -1597,24 +1637,28 @@ class TransactionUtil extends Util
                         } elseif ($value['method'] == 'cheque') {
                             $output['payments'][] =
                                 ['method' => $method.(! empty($value['cheque_number']) ? (', Cheque Number:'.$value['cheque_number']) : ''),
+                                    'amount_unformatted' => $value['amount'],
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
                                 ];
                         } elseif ($value['method'] == 'bank_transfer') {
                             $output['payments'][] =
                                 ['method' => $method.(! empty($value['bank_account_number']) ? (', Account Number:'.$value['bank_account_number']) : ''),
+                                    'amount_unformatted' => $value['amount'],
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
                                 ];
                         } elseif ($value['method'] == 'advance') {
                             $output['payments'][] =
                                 ['method' => $method,
+                                    'amount_unformatted' => $value['amount'],
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
                                 ];
                         } elseif ($value['method'] == 'other') {
                             $output['payments'][] =
                                 ['method' => $method,
+                                    'amount_unformatted' => $value['amount'],
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
                                 ];
@@ -1624,6 +1668,7 @@ class TransactionUtil extends Util
                             if ($value['method'] == "custom_pay_{$i}") {
                                 $output['payments'][] =
                                     ['method' => $method.(! empty($value['transaction_no']) ? (', '.trans('lang_v1.transaction_no').':'.$value['transaction_no']) : ''),
+                                        'amount_unformatted' => $value['amount'],
                                         'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                         'date' => $this->format_date($value['paid_on'], false, $business_details),
                                     ];

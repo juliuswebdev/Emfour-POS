@@ -49,6 +49,22 @@ function getLocationTables(location_id, $type=null) {
             dataType: 'html',
             success: function(result) {
                 $('span#restaurant_module_span').html(result);
+
+                //Inject the service staff box in after the walk in
+                if($('#res_waiter_id').length != 0){
+                    var box_service_staff = $('.box-of-service-staff').html();
+                    $('.inject-service-staff').html(box_service_staff);
+                    $('#restaurant_module_span').find('.box-of-service-staff').remove();
+                }
+                
+                //Inject the table list in after the type of services
+                if($('.table-mapping-dropdown').length != 0){
+                    var box_table_mapping = $('.table-mapping-dropdown').html();
+                    $('.inject-tables').html(box_table_mapping);
+                    $('#restaurant_module_span').remove();
+                    $('.inject-tables').attr('id', 'restaurant_module_span');
+                }
+
                 //REPAIR MODULE:set technician from repair module
                 if ($("#repair_technician").length) {
                     $("select#res_waiter_id").val($("#repair_technician").val()).change();

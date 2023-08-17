@@ -848,6 +848,8 @@ $(document).ready(function() {
         var total_payable = parseFloat($('#total_payable').text());
         var card_charge_percent = parseFloat($('#card_charge_percent_hidden').val()) / 100;
         var total_payable = $('#__symbol').val() +' '+ (total_payable + ( total_payable * card_charge_percent ))
+
+        
         $('#card_total_payable').text( total_payable );
        
         
@@ -998,7 +1000,9 @@ $(document).ready(function() {
 
                     var total_payable = __read_number($('input#final_total_input'));
                     var total_paying = __read_number($('input#total_paying_input'));
-                    var b_due = total_payable - total_paying;
+                    var card_charge_amount = $('input#total_card_charges').val();
+
+                    var b_due = (total_payable - total_paying) + card_charge_amount;
                     $(appended)
                         .find('input.payment-amount')
                         .focus();
@@ -2392,7 +2396,7 @@ function calculate_billing_details(price_total, dp = true) {
         $('#tips_text').text("0"); 
     }
     
-  
+    
 
     if($('.wrapper-of-sale-return').length > 0){
         var total_payable = price_total;
@@ -3248,6 +3252,13 @@ function calculate_balance_due() {
         $('#change_return_payment_data').addClass('hide');
     }
 
+    //Added credit card charges in total_payment.
+    var total_card_charges = $('.additional_card_charge_split_payment').attr('data-cc-charges');
+    total_card_charges = (total_card_charges == undefined) ? 0 : parseFloat(total_card_charges);
+    $('#total_card_charges').val(total_card_charges);
+
+    total_paying = (total_paying + total_card_charges);
+
     __write_number($('input#total_paying_input'), total_paying);
     $('span.total_paying').text(__currency_trans_from_en(total_paying, true));
 
@@ -3857,6 +3868,7 @@ $(document).on('click', '.service_modal_btn', function(e) {
 });
 
 $(document).on('change', '.payment_types_dropdown', function(e) {
+   
     var default_accounts = $('select#select_location_id').length ? 
                 $('select#select_location_id')
                 .find(':selected')
@@ -3898,6 +3910,7 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
             account_dropdown.closest('.form-group').removeClass('hide');
         }    
     }
+
 });
 
 $(document).on('show.bs.modal', '#recent_transactions_modal', function () {
@@ -4451,24 +4464,31 @@ function cardChargeSplitPayment()
     var charge = 0;
     var symbol = $('#__symbol').val();
     var card_charge_percent = parseFloat($('#card_charge_percent_hidden').val()) / 100;
+    var card_fixed_fees = parseFloat($('#card_fixed_fees').val());
+
     $('.payment_types_dropdown').each(function(){
         var val = $(this).val();
         if(val === 'card') {
            var parent = $(this).parents('.payment_row');
            var amount = parent.find('.payment-amount').val();
-           charge += amount * card_charge_percent;
+           charge += ( (amount * card_charge_percent) + card_fixed_fees);
            //console.log('test: ', amount * card_charge_percent);
         }
     });
+    $('.additional_card_charge_split_payment').attr('data-cc-charges', charge.toFixed(2))
     $('.additional_card_charge_split_payment').text(symbol +' '+ charge.toFixed(2))
+
+
 }
 
 $(document).on('change', '.payment_types_dropdown', function(){
     cardChargeSplitPayment();
+    calculate_balance_due();
 });
 
-$(document).on('keyup', '.payment-amount', function(){
+$(document).on('input', '.payment-amount', function(){
     cardChargeSplitPayment();
+    calculate_balance_due();
 });
 
 $(document).on('hidden.bs.modal', '.view_modal', function(){
@@ -4913,3 +4933,22 @@ function app_is_run_android_device(){
 if($('.transaction_date_wrapper').length != 0){
     $('.transaction_date_wrapper').hide();
 }
+
+//Manage Cash Payment Modal
+$(document).on('show.bs.modal','#modal_cash_payment', function () {
+    $('#modal_cash_payment').find('.payment-amount').removeAttr('disabled');
+});
+
+$(document).on('hide.bs.modal','#modal_cash_payment', function () {
+    $('#modal_cash_payment').find('.payment-amount').attr('disabled', 'disabled');
+});
+
+//Manage Split Payment Modal
+
+$(document).on('show.bs.modal','#modal_payment', function () {
+    $('#modal_payment').find('#is_split_payment').val(1);
+});
+
+$(document).on('hide.bs.modal','#modal_payment', function () {
+    $('#modal_payment').find('#is_split_payment').val(0);
+});

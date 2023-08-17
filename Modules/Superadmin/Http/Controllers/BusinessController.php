@@ -615,7 +615,11 @@ class BusinessController extends BaseController
     public function updateSettings(Request $request, $id)
     {
         $business = Business::find($id);
+        $business->card_label = $request->input('card_charge_label');
         $business->card_charge = $request->input('card_charge');
+        if($request->filled('card_dollar') && $request->has('card_dollar')){
+            $business->card_fixed_fees = $request->input('card_dollar');
+        }
         $business->update();
         return redirect()->back();
     }

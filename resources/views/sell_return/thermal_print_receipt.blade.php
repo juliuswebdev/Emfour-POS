@@ -173,17 +173,21 @@
             </table>
 			
 
-            <div class="flex-box">
-                <p class="width-50 text-right sub-headings">
+            <div class="textbox-info">
+                <p class="f-left sub-headings">
                     @lang('lang_v1.receipt_total_return')
                 </p>
-                <p class="width-50 text-right sub-headings">
+                <p class="f-right sub-headings">
                     {{$receipt_details->subtotal}}
                 </p>
             </div>
 
+
+
             @if($receipt_details->payment_response_json != null)
-            <div class="centered">**************************************************</div>
+            <div class="textbox-info">
+                <div class="centered">**************************************************</div>
+            </div>
             @php
                 $payment_response_json = json_decode($receipt_details->payment_response_json, true);
                 $ext_data = explode(',', $payment_response_json['response']['ExtData']);

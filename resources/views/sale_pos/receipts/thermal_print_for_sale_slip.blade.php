@@ -511,24 +511,7 @@
                     </p>
                 </div>
 
-				<!-- Added Card Charges in Invoice -->
-				@if(!empty($receipt_details->payments))
-					@foreach($receipt_details->payments as $payment)
-						
-						@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
-							<div class="flex-box">
-								<p class="sub-headings">
-									@lang('lang_v1.card_charge') ({{$payment['card_charge_percent']}}%)
-								</p>
-								<p class="width-50 text-right sub-headings">
-									(+){{$payment['card_charge_amount']}}
-								</p>
-							</div>
-						@endif
-								
-					@endforeach
-				@endif
-				
+
 				<!-- Gratuity Amount-->
 				@if( ($receipt_details->gratuity_unformatted_charges > 0) && ($receipt_details->gratuity_label != "") )
 				<div class="flex-box">
@@ -553,7 +536,7 @@
 				</div>
 				@endif
 
-                <!-- Shipping Charges -->
+				<!-- Shipping Charges -->
 				@if(!empty($receipt_details->shipping_charges))
 					<div class="flex-box">
 						<p class="sub-headings">
@@ -600,27 +583,7 @@
 						</p>
 					</div>
 				@endif
-
-				{{--
-				@if( !empty($receipt_details->dp_discount) )
-					@php
-					 	$dp_discount = json_decode($receipt_details->dp_discount);
-					@endphp
-					@if($dp_discount)
-					@foreach($dp_discount as $item)
-						<div class="flex-box">
-							<p class="sub-headings">
-								{!! $item->label !!}
-							</p>
-							<p class="width-50 text-right sub-headings">
-								(-){{$item->discount}}
-							</p>
-						</div>
-					@endforeach
-					@endif
-				@endif
-				--}}
-
+				
 				@if( !empty($receipt_details->additional_expenses) )
 					@foreach($receipt_details->additional_expenses as $key => $val)
 						<div class="flex-box">
@@ -670,24 +633,129 @@
 				@endif
 
 				
+				@if(!empty($receipt_details->payments))
+                    @php
+                        $total_card_charges = 0;
+						$total_amount = 0;
+                    @endphp
+                    @foreach($receipt_details->payments as $payment)
+                        @if($payment['card_label'] != NULL)
+                            @php
+                                $total_card_charges = $payment['total_card_charge_unformatted'];
+                            @endphp
+							@break
+						@endif      
+                    @endforeach
+                @endif
 
-                <div class="flex-box">
+
+				<div class="flex-box">
 					<p class="sub-headings">
-						{!! $receipt_details->total_paid_label !!}
+						TOTAL PAYABLE
 					</p>
 					<p class="width-50 text-right sub-headings">
-						{{$receipt_details->total}}
+						<span class="display_currency pull-right sub-headings" data-currency_symbol="true">
+						@if(count($receipt_details->payments) == 1)
+							{{($receipt_details->total_unformatted - $total_card_charges)}}
+						@else
+							{{($receipt_details->total_unformatted)}}
+						@endif
+						</span>
 					</p>
 				</div>
 
-				@if(!empty($receipt_details->total_in_words))
-				<p colspan="2" class="text-right mb-0">
-					<small>
-					({{$receipt_details->total_in_words}})
-					</small>
-				</p>
-				@endif
 
+				<!-- Added Card Charges in Invoice -->
+				
+				@if(!empty($receipt_details->payments))
+					@php
+						$total_paid = 0;
+					@endphp
+					@foreach($receipt_details->payments as $payment)
+						@php
+							$payment_total_amount = (float)$payment['amount_unformatted'];
+							$total_paid += $payment_total_amount;
+						@endphp
+						@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
+							
+							<div class="flex-box">
+								<p class="sub-headings">
+									CARD PAYMENT
+								</p>
+								<p class="width-50 text-right sub-headings">
+									<span class="display_currency pull-right sub-headings" data-currency_symbol="true">{{ $payment['amount'] }}</span>
+								</p>
+							</div>
+
+							
+							@if($payment['card_label'] != NULL)
+								<div class="flex-box">
+									<p class="sub-headings">
+										@if($payment['card_fixed_fees'] != 0)
+											{{ $payment['card_label'].' ('.$payment['card_charge_percent'].'%) + '.$payment['card_fixed_fees']}}
+										@else
+											{{ $payment['card_label'].' ('.$payment['card_charge_percent'].'%)'}}
+										@endif
+									</p>
+									<p class="width-50 text-right sub-headings">
+									(+) {{ ($payment['total_card_charge']) }}
+									</p>
+								</div>
+							@endif
+
+						@else
+						<div class="flex-box">
+							<p class="sub-headings">
+								{{ strtoupper($payment['method']) }}
+							</p>
+							<p class="width-50 text-right sub-headings">
+								<span class="display_currency pull-right sub-headings" data-currency_symbol="true">{{ $payment['amount'] }}</span>
+							</p>
+						</div>
+						@endif
+								
+					@endforeach
+				@endif
+				
+				
+				<div class="flex-box">
+					<p class="sub-headings">
+						TOTAL PAID
+					</p>
+					<p class="width-50 text-right sub-headings">
+						<span class="display_currency pull-right sub-headings" data-currency_symbol="true">{{ $total_paid }}</span>
+					</p>
+				</div>
+				
+
+                
+
+				{{--
+				@if( !empty($receipt_details->dp_discount) )
+					@php
+					 	$dp_discount = json_decode($receipt_details->dp_discount);
+					@endphp
+					@if($dp_discount)
+					@foreach($dp_discount as $item)
+						<div class="flex-box">
+							<p class="sub-headings">
+								{!! $item->label !!}
+							</p>
+							<p class="width-50 text-right sub-headings">
+								(-){{$item->discount}}
+							</p>
+						</div>
+					@endforeach
+					@endif
+				@endif
+				--}}
+
+				
+				
+
+                
+
+				
                 {{--
 				@if(!empty($receipt_details->payments))
 					@foreach($receipt_details->payments as $payment)

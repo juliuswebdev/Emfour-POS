@@ -1,5 +1,5 @@
 <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-6 col-sm-6">
 		<div class="form-group">
 			<div class="input-group">
 				<span class="input-group-addon">
@@ -26,6 +26,12 @@
 			<small class="text-danger hide contact_due_text"><strong>@lang('account.customer_due'):</strong> <span></span></small>
 		</div>
 	</div>
+
+	<div class="col-md-6 col-sm-6 inject-service-staff">
+
+	</div>
+
+	{{-- 
 	<div class="col-md-8">
 		<div class="form-group">
 			<div class="input-group">
@@ -50,6 +56,8 @@
 			</div>
 		</div>
 	</div>
+	 --}}
+
 </div>
 <div class="row">
 	@if(!empty($pos_settings['show_invoice_layout']))
@@ -75,7 +83,7 @@
 		</div>
 	@endif
 	@if(!empty($pos_settings['enable_transaction_date']))
-		<div class="col-md-4 col-sm-6 transaction_date_wrapper">
+		<div class="col-md-6 col-sm-6 transaction_date_wrapper">
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon">
@@ -87,7 +95,7 @@
 		</div>
 	@endif
 	@if(config('constants.enable_sell_in_diff_currency') == true)
-		<div class="col-md-4 col-sm-6">
+		<div class="col-md-6 col-sm-6">
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon">
@@ -99,7 +107,7 @@
 		</div>
 	@endif
 	@if(!empty($price_groups) && count($price_groups) > 1)
-		<div class="col-md-4 col-sm-6">
+		<div class="col-md-6 col-sm-6">
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon">
@@ -126,9 +134,38 @@
 	@if(!empty($default_price_group_id))
 		{!! Form::hidden('default_price_group', $default_price_group_id, ['id' => 'default_price_group']) !!}
 	@endif
+	
+
+	<div class="col-md-6 col-sm-6">
+		<div class="form-group">
+			<div class="input-group">
+				<div class="input-group-btn">
+					<button type="button" class="btn btn-default bg-white btn-flat" data-toggle="modal" data-target="#configure_search_modal" title="{{__('lang_v1.configure_product_search')}}"><i class="fas fa-search-plus"></i></button>
+				</div>
+				{!! Form::text('search_product', null, ['class' => 'form-control mousetrap', 'id' => 'search_product', 'placeholder' => __('lang_v1.search_product_placeholder'),
+				'disabled' => is_null($default_location)? true : false,
+				'autofocus' => is_null($default_location)? false : true,
+				]); !!}
+				<span class="input-group-btn">
+
+					<!-- Show button for weighing scale modal -->
+					@if(isset($pos_settings['enable_weighing_scale']) && $pos_settings['enable_weighing_scale'] == 1)
+						<button type="button" class="btn btn-default bg-white btn-flat" id="weighing_scale_btn" data-toggle="modal" data-target="#weighing_scale_modal" 
+						title="@lang('lang_v1.weighing_scale')"><i class="fa fa-digital-tachograph text-primary fa-lg"></i></button>
+					@endif
+					
+
+					<button type="button" class="btn btn-default bg-white btn-flat pos_add_quick_product" data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}" data-container=".quick_add_product_modal"><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+				</span>
+			</div>
+		</div>
+	</div>
+
+	
+	
 
 	@if(in_array('types_of_service', $enabled_modules) && !empty($types_of_service))
-		<div class="col-md-4 col-sm-6 mo-div-hide">
+		<div class="col-md-6 col-sm-6 mo-div-hide">
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon">
@@ -147,6 +184,10 @@
 		</div>
 		<div class="modal fade types_of_service_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>
 	@endif
+	
+	<div class="col-md-6 col-sm-6 inject-tables">
+
+	</div>
 
 	@if(!empty($pos_settings['show_invoice_scheme']))
 		@php
@@ -155,7 +196,7 @@
 				$invoice_scheme_id = $default_location->invoice_scheme_id;
 			}
 		@endphp
-		<div class="col-md-4 col-sm-6">
+		<div class="col-md-6 col-sm-6">
 			<div class="form-group">
 				{!! Form::select('invoice_scheme_id', $invoice_schemes, $invoice_scheme_id, 
 					['class' => 'form-control', 'placeholder' => __('lang_v1.select_invoice_scheme'), 
@@ -164,7 +205,7 @@
 		</div>
 	@endif
 	@if(in_array('subscription', $enabled_modules))
-		<div class="col-md-4 col-sm-6">
+		<div class="col-md-6 col-sm-6">
 			<label>
               {!! Form::checkbox('is_recurring', 1, false, ['class' => 'input-icheck', 'id' => 'is_recurring']); !!} @lang('lang_v1.subscribe')?
             </label><button type="button" data-toggle="modal" data-target="#recurringInvoiceModal" class="btn btn-link"><i class="fa fa-external-link-square-alt"></i></button>@show_tooltip(__('lang_v1.recurring_invoice_help'))

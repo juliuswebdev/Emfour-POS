@@ -235,6 +235,7 @@
               <th>{{ __('sale.payment_note') }}</th>
             </tr>
             @foreach($sell->payment_lines as $payment_line)
+           
               @php
                 if($payment_line->is_return == 1){
                   $total_paid -= $payment_line->amount;
@@ -247,13 +248,22 @@
                 <td>{{ @format_date($payment_line->paid_on) }}</td>
                 <td>{{ $payment_line->payment_ref_no }}</td>
                 <td><span class="display_currency" data-currency_symbol="true">{{ $payment_line->amount }}</span></td>
-                <td>
-                  {{ $payment_types[$payment_line->method] ?? $payment_line->method }}
+                <td style="font-size: 12px;">
+                  
 
                   @if($payment_types[$payment_line->method] == 'Card')
-                  <br>
-                  <small>{{ __('lang_v1.card_charge') }} {{ $payment_line->card_charge_percent }}%: </small>
-                  <span class="display_currency pull-right" data-currency_symbol="true">{{ $payment_line->card_charge_amount }}</span>
+                    @if($payment_line->card_fixed_fees > 0)
+                      <span>{!! $payment_line->card_label.' ('.$payment_line->card_charge_percent.'%) + ' !!}</span>
+                      <span class="display_currency" data-currency_symbol="true">{{ $payment_line->card_fixed_fees }}</span> 
+								    @else
+                      <span>{{ $payment_line->card_label.' ('.$payment_line->card_charge_percent.'%)'}}</span>
+								    @endif
+
+                   
+                    <span> : </span>
+                    <span class="display_currency pull-right" data-currency_symbol="true">{{ ($payment_line->card_charge_amount + $payment_line->card_fixed_fees) }}</span>
+                  @else
+                  {{ $payment_types[$payment_line->method] ?? $payment_line->method }}
                   @endif
 
                   @if($payment_line->is_return == 1)

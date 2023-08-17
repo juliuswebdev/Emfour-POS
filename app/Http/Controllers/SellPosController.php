@@ -468,23 +468,36 @@ class SellPosController extends Controller
                 $invoice_total['total_before_tax'] = ($invoice_total_total_before_tax_temp - ($gratuity_charge_amount + $tips_amount));
                 $invoice_total['final_total'] = $invoice_total_final_total_temp;
                 */
-               
+                
+                
+
                 //Card Charges applied only sub total
                 if($business->card_charge > 0){
                     $card_charge_percentage = $business->card_charge;
+                    $card_fixed_fees = $business->card_fixed_fees;
+                    $card_label = $business->card_label;
+
                     foreach($input['payment'] as $key => $payment) {
                         if(isset($payment['method'])) {
                             if($payment['method']  == 'card'){
-                                $input['payment'][$key]['amount'] = ($invoice_total['final_total']);
-                                $total_card_charge = ($invoice_total['total_before_tax'] * $card_charge_percentage / 100);
-                                $total_card_charge = sprintf('%0.2f', $total_card_charge);
-                                $input['total_card_charge'] = $total_card_charge;
-                                $invoice_total['final_total'] = ($invoice_total['final_total'] + $total_card_charge);
+                                if($request->is_split_payment != 1){
+                                    $total_card_charge = ($invoice_total['total_before_tax'] * $card_charge_percentage / 100);
+                                    $total_card_charge = sprintf('%0.2f', $total_card_charge);
+                                    $input['total_card_charge'] = $total_card_charge;
+                                    $input['card_label'] = $card_label;
+                                    $input['card_fixed_fees'] = $card_fixed_fees;
+
+                                    $input['payment'][$key]['amount'] = ($invoice_total['final_total']);
+                                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $total_card_charge + $card_fixed_fees);
+                                }
                             } 
                         }
                     }
                 }
                 
+                
+              
+
                 //Modify Final amount with include tip, card charge & gratuity
                 $input['final_total'] = $invoice_total['final_total'];
                 
@@ -606,7 +619,7 @@ class SellPosController extends Controller
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
 
                 $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
-
+                
                 
                 $change_return['amount'] = $input['change_return'] ?? 0;
                 $change_return['is_return'] = 1;
@@ -615,11 +628,14 @@ class SellPosController extends Controller
                 $is_credit_sale = isset($input['is_credit_sale']) && $input['is_credit_sale'] == 1 ? true : false;
 
                 $send_to_kitchen = ($request->has('send_to_kitchen') && $request->filled('send_to_kitchen')) ? $input['send_to_kitchen'] : 0;
-
+                
+                
+                $transaction->is_split_payment = $request->is_split_payment;
+                $transaction->total_card_charges = $request->total_card_charges;
                 if (! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale && $send_to_kitchen == 0) {
                     $this->transactionUtil->createOrUpdatePaymentLines($transaction, $input['payment']);
                 }
-                
+               
                 //Check for final and do some processing.
                 if ($input['status'] == 'final') {
                     if (! $is_direct_sale) {
@@ -706,9 +722,13 @@ class SellPosController extends Controller
                     $whatsapp_link = $this->notificationUtil->autoSendNotification($business_id, 'new_sale', $transaction, $transaction->contact);
                 }
 
+                
                 if (! empty($transaction->sales_order_ids)) {
                     $this->transactionUtil->updateSalesOrderStatus($transaction->sales_order_ids);
                 }
+                
+                unset($transaction->is_split_payment);
+                unset($transaction->total_card_charges);
 
                 $this->moduleUtil->getModuleData('after_sale_saved', ['transaction' => $transaction, 'input' => $input]);
 
@@ -716,31 +736,39 @@ class SellPosController extends Controller
 
                 $this->transactionUtil->activityLog($transaction, 'added');
                 
-                
-                if(isset($input['payment'][0]['method']) && $send_to_kitchen == 0){
-                    if($input['payment'][0]['method'] == "card"){
-                        //Make Payment through card
+                $card_payment_count = $transaction->payment_lines()->where('method', 'card')->where('payment_collect_response', NULL)->count();
+                if( ($card_payment_count != 0) && $send_to_kitchen == 0){
+                    
+                    //Make Payment through card
+                    if($request->is_split_payment == 1){
+                        $final_amount_for_payment = $transaction->payment_lines()->where('method', 'card')->sum('amount');
+                        $final_amount_for_payment = sprintf('%0.2f', $final_amount_for_payment);
+                    }else{
                         $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
-                        $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
-                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
-                        if($response_of_payment['success'] == 0){
-                            //Payment Failed Rollback Transaction
-                            DB::rollback();
-                            $output = [
-                                'success' => 0,
-                                'msg' => $response_of_payment['msg']
-                            ];
-                            return $output;
-                        }else{
-                            //Store Payment Response
-                            $payment_response_json = json_encode($response_of_payment['data'], true);
-                            TransactionPayment::where('transaction_id', $transaction->id)
-                                                ->where('business_id', $business_id)
-                                                ->update(['payment_collect_response' => $payment_response_json]);
-                        }
+                    }
+                    
+                    $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                    $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
+                    
+                    if($response_of_payment['success'] == 0){
+                        //Payment Failed Rollback Transaction
+                        DB::rollback();
+                        $output = [
+                            'success' => 0,
+                            'msg' => $response_of_payment['msg']
+                        ];
+                        return $output;
+                    }else{
+                        //Store Payment Response
+                        $payment_response_json = json_encode($response_of_payment['data'], true);
+                        TransactionPayment::where('transaction_id', $transaction->id)
+                                            ->where('business_id', $business_id)
+                                            ->where('method', 'card')
+                                            // ->where('card_label', '!=', NULL)
+                                            ->update(['payment_collect_response' => $payment_response_json]);
                     }
                 }
-                
+              
                 DB::commit();
 
                 if ($request->input('is_save_and_print') == 1) {
@@ -980,6 +1008,9 @@ class SellPosController extends Controller
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
+
+        
+
         $output['receipt_details'] = $receipt_details;
         $currency_details = [
             'symbol' => $business_details->currency_symbol,
@@ -1474,14 +1505,22 @@ class SellPosController extends Controller
                 //Card Charges applied only sub total
                 if($business->card_charge > 0){
                     $card_charge_percentage = $business->card_charge;
+                    $card_fixed_fees = $business->card_fixed_fees;
+                    $card_label = $business->card_label;
+
                     foreach($input['payment'] as $key => $payment) {
                         if(isset($payment['method'])) {
                             if($payment['method']  == 'card'){
-                                $input['payment'][$key]['amount'] = ($invoice_total['final_total']);
-                                $total_card_charge = ($invoice_total['total_before_tax'] * $card_charge_percentage / 100);
-                                $total_card_charge = sprintf('%0.2f', $total_card_charge);
-                                $input['total_card_charge'] = $total_card_charge;
-                                $invoice_total['final_total'] = ($invoice_total['final_total'] + $total_card_charge);
+                                if($request->is_split_payment != 1){
+                                    $total_card_charge = ($invoice_total['total_before_tax'] * $card_charge_percentage / 100);
+                                    $total_card_charge = sprintf('%0.2f', $total_card_charge);
+                                    $input['total_card_charge'] = $total_card_charge;
+                                    $input['card_label'] = $card_label;
+                                    $input['card_fixed_fees'] = $card_fixed_fees;
+
+                                    $input['payment'][$key]['amount'] = ($invoice_total['final_total']);
+                                    $invoice_total['final_total'] = ($invoice_total['final_total'] + $total_card_charge + $card_fixed_fees);
+                                }
                             } 
                         }
                     }
@@ -1657,6 +1696,9 @@ class SellPosController extends Controller
                     $this->transactionUtil->updateSalesOrderStatus($sales_order_ids);
                 }
 
+                //$transaction->is_split_payment = $request->is_split_payment;
+                //$transaction->total_card_charges = $request->total_card_charges;
+
                 if (! $transaction->is_suspend && ! $is_credit_sale) {
                     //Add change return
                     $change_return['amount'] = $input['change_return'] ?? 0;
@@ -1724,28 +1766,38 @@ class SellPosController extends Controller
                 $this->transactionUtil->activityLog($transaction, 'edited', $transaction_before);
                 
                 //Card Payment Initial
-                if(isset($input['payment'][0]['method'])){
-                    if($input['payment'][0]['method'] == "card"){
-                        //Make Payment through card
+                $card_payment_count = $transaction->payment_lines()->where('method', 'card')->where('payment_collect_response', NULL)->count();
+
+                if($card_payment_count != 0){
+                    
+                    //Make Payment through card
+                    if($request->is_split_payment == 1){
+                        $final_amount_for_payment = $transaction->payment_lines()->where('method', 'card')->sum('amount');
+                        $final_amount_for_payment = sprintf('%0.2f', $final_amount_for_payment);
+                    }else{
                         $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
-                        $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
-                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
-                        if($response_of_payment['success'] == 0){
-                            //Payment Failed Rollback Transaction
-                            DB::rollback();
-                            $output = [
-                                'success' => 0,
-                                'msg' => $response_of_payment['msg']
-                            ];
-                            return $output;
-                        }else{
-                            //Store Payment Response
-                            $payment_response_json = json_encode($response_of_payment['data'], true);
-                            TransactionPayment::where('transaction_id', $transaction->id)
-                                                ->where('business_id', $business_id)
-                                                ->update(['payment_collect_response' => $payment_response_json]);
-                        }
                     }
+
+                    $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                    $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
+                    if($response_of_payment['success'] == 0){
+                        //Payment Failed Rollback Transaction
+                        DB::rollback();
+                        $output = [
+                            'success' => 0,
+                            'msg' => $response_of_payment['msg']
+                        ];
+                        return $output;
+                    }else{
+                        //Store Payment Response
+                        $payment_response_json = json_encode($response_of_payment['data'], true);
+                        TransactionPayment::where('transaction_id', $transaction->id)
+                                            ->where('business_id', $business_id)
+                                            ->where('method', 'card')
+                                            //->where('card_label', '!=', NULL)
+                                            ->update(['payment_collect_response' => $payment_response_json]);
+                    }
+                   
                 }
 
 

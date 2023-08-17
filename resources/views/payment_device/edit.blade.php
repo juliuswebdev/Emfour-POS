@@ -62,6 +62,7 @@
                     $cgi_port = $settings->cgi_port ?? '';
                     $auth_key = $settings->auth_key ?? '';
                     $register_id = $settings->register_id ?? '';
+                    $allow_to_print_receipt = $settings->allow_to_print_receipt ?? '';
                 @endphp
                 <div class="form-group">
                     {!! Form::label('payment_device_model',__('payment_device.protocol') . ':*') !!}
@@ -91,6 +92,19 @@
                     {!! Form::text('settings1[register_id]', $register_id, ['class' => 'form-control', 'required',
                     'placeholder' => __('payment_device.register_id')]); !!}
                 </div>
+
+                <div class="form-group">
+                  {!! Form::label('payment_device_model',__('payment_device.allow_to_print_receipt') . ':*') !!}
+                  <select name="settings1[allow_to_print_receipt]" class="form-control select2" required>
+                      <option value="">@lang('payment_device.allow_to_print_receipt')</option>
+                      
+                      <option value="Yes" @if($allow_to_print_receipt == 'Yes') selected @endif>Yes</option>
+                      <option value="No" @if($allow_to_print_receipt == 'No') selected @endif>No</option>
+
+                  </select>
+               </div>
+
+
             </div>
         </div>
         <div class="col-sm-12">

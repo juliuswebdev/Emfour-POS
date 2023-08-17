@@ -16,6 +16,7 @@
 	@endphp
 	{!! Form::open(['url' => action([\App\Http\Controllers\SellPosController::class, 'store']), 'method' => 'post', 'id' => 'add_pos_sell_form' ]) !!}
 	<input type="hidden" id="card_charge_percent_hidden" value="{{ $business_details->card_charge }}">
+	<input type="hidden" id="card_fixed_fees" value="{{ $business_details->card_fixed_fees }}">
 	<input type="hidden" name="table_chair_selected" id="table_chair_selected" value="">
 	<div class="row mb-12">
 		<div class="col-md-12">
@@ -28,7 +29,7 @@
 							{!! Form::hidden('sub_type', isset($sub_type) ? $sub_type : null) !!}
 							<input type="hidden" id="item_addition_method" value="{{$business_details->item_addition_method}}">
 							
-							
+								
 								@include('sale_pos.partials.pos_form')
 
 								@include('sale_pos.partials.pos_form_totals')

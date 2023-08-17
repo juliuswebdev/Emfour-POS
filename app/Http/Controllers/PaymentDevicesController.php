@@ -368,6 +368,13 @@ class PaymentDevicesController extends Controller
             
             $register_id = $payment_setting['register_id'];
             $auth_key = $payment_setting['auth_key'];
+            $allow_to_print_receipt = isset($payment_setting['allow_to_print_receipt']) ? $payment_setting['allow_to_print_receipt'] : 'No';
+            
+            if($allow_to_print_receipt == "Yes"){
+                $xml_print_receipt = "<PrintReceipt>Customer</PrintReceipt><GetReceipt>Customer</GetReceipt>";
+            }else{
+                $xml_print_receipt = "<PrintReceipt>No</PrintReceipt>";
+            }
            
             $check_terminal = $this->checkTerminalIsActive($register_id);
             //$check_terminal = "Online";
@@ -384,10 +391,10 @@ class PaymentDevicesController extends Controller
                             <RefId>'. $invoice_num .'</RefId>
                             <RegisterId>'. $register_id .'</RegisterId>
                             <AuthKey>'. $auth_key .'</AuthKey>
-                            <PrintReceipt>No</PrintReceipt>
+                            '.$xml_print_receipt.'
                             <SigCapture>Yes</SigCapture>
                         </request>';
-            
+                
                 
                 $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
 

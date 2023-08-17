@@ -1479,6 +1479,8 @@ return [
     'quantity_precision_help' => 'Number of digits after decimal point for quantity value. Example:0.00 for value 2, 0.000 for value 3, 0.0000 for value 4',
     'card_charge_percent' => 'Card Charge (%)',
     'card_charge' => 'Card Charge',
+    'card_charge_label' => 'Display Label in Invoice',
+    'card_dollar' => 'Card ($)',
     'additional_card_charge' => 'Card Convenience FEE',
     'customer_supplier_info' => 'Customer/Supplier information',
     'enable_secondary_unit' => 'Enable secondary unit',

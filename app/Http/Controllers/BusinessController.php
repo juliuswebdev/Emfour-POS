@@ -382,6 +382,13 @@ class BusinessController extends Controller
                 unset($business_details['card_charge']);
             }
 
+            //Added the label & fees in card charge module 
+            if(auth()->user()->can('superadmin')) {
+                $business_details['card_label'] = $request->input('card_charge_label');
+                if($request->filled('card_dollar') && $request->has('card_dollar')){
+                    $business_details['card_fixed_fees'] = $request->input('card_dollar');
+                }
+            }
 
             //Ip Restriction setting
             $business_details['enable_ip_restriction'] = ! empty($business_details['enable_ip_restriction']) ? $this->businessUtil->num_uf($business_details['enable_ip_restriction']) : 0;

@@ -1,4 +1,6 @@
 <div class="row">
+	
+
 	<input type="hidden" class="payment_row_index" value="{{ $row_index}}">
 	@php
 		$col_class = 'col-md-6';

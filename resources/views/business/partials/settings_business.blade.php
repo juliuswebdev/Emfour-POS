@@ -138,19 +138,50 @@
                 {!! Form::select('quantity_precision', [0 =>0, 1=>1, 2=>2, 3=>3,4=>4], $business->quantity_precision, ['class' => 'form-control select2', 'required']); !!}
             </div>
         </div>
+
+        <div class="clearfix"></div>
+        
         <div class="col-sm-4">
             <div class="form-group">
-           
+        
+                {!! Form::label('card_charge_label', __('lang_v1.card_charge_label') . ':') !!}
+                @if(auth()->user()->can('superadmin'))
+                    {!! Form::text('card_charge_label', $business->card_label, ['class' => 'form-control']); !!}
+                @else
+                    {!! Form::text('card_charge_label', $business->card_label, ['class' => 'form-control', 'readonly' => 'true']); !!}
+                @endif
+
+            </div>
+        </div>
+
+        <div class="col-sm-4">
+            <div class="form-group">
+
                 {!! Form::label('card_charge', __('lang_v1.card_charge_percent') . ':') !!}
                 @if(auth()->user()->can('superadmin'))
-                {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control']); !!}
+                    {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control', 'oninput' => "this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"]); !!}
                 @else
-                {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control', 'readonly' => 'true']); !!}
+                    {!! Form::text('card_charge', $business->card_charge, ['class' => 'form-control', 'readonly' => 'true']); !!}
                 @endif
 
 
             </div>
         </div>
+
+
+        <div class="col-sm-4">
+            <div class="form-group">
+        
+                {!! Form::label('card_dollar', __('lang_v1.card_dollar') . ':') !!}
+                @if(auth()->user()->can('superadmin'))
+                    {!! Form::text('card_dollar', $business->card_fixed_fees, ['class' => 'form-control', 'oninput' => "this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"]); !!}
+                @else
+                    {!! Form::text('card_dollar', $business->card_fixed_fees, ['class' => 'form-control', 'readonly' => 'true']); !!}
+                @endif
+
+            </div>
+        </div>
+
         
     </div>
      {{-- code --}}

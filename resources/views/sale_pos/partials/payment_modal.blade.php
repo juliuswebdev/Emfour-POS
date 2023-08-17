@@ -114,7 +114,23 @@
 				            		<span class="lead text-bold total_payable_span">0</span>
 				            	</div>
 
-				            	<div class="col-md-12">
+				            	
+
+								<div class="col-md-12">
+									<hr>
+				            		<strong>
+				            			@if($business_details->card_fixed_fees > 0)
+											<span>{!! $business_details->card_label.' ('.$business_details->card_charge.'%) + ' !!}</span>
+											<span class="display_currency" data-currency_symbol="true">{{ $business_details->card_fixed_fees }}</span> 
+										@else
+											<span>{{ $business_details->card_label.' ('.$business_details->card_charge.'%)'}}</span>
+										@endif
+				            		</strong>
+				            		<br/>
+				            		<span class="lead text-bold additional_card_charge_split_payment">0</span>
+				            	</div>
+
+								<div class="col-md-12">
 				            		<hr>
 				            		<strong>
 				            			@lang('lang_v1.total_paying'):
@@ -122,15 +138,6 @@
 				            		<br/>
 				            		<span class="lead text-bold total_paying">0</span>
 				            		<input type="hidden" id="total_paying_input">
-				            	</div>
-
-								<div class="col-md-12">
-									<hr>
-				            		<strong>
-				            			@lang('lang_v1.additional_card_charge'):  {{ $business_details->card_charge }}%
-				            		</strong>
-				            		<br/>
-				            		<span class="lead text-bold additional_card_charge_split_payment">0</span>
 				            	</div>
 
 				            	<div class="col-md-12">
@@ -166,6 +173,11 @@
 					</div>
 				</div>
 			</div>
+			
+			<input type="hidden" name="is_split_payment" id="is_split_payment" value="0">
+			<input type="hidden" name="total_card_charges" id="total_card_charges" value="0">
+
+
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">@lang('messages.close')</button>
 				<button type="submit" class="btn btn-primary" id="pos-save">@lang('sale.finalize_payment')</button>
@@ -249,7 +261,7 @@
 	</div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="modal_cash_payment">
+<div class="modal fade" tabindex="-1" role="dialog" id="modal_cash_payment" style="display: none;">
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -269,7 +281,7 @@
 											<span class="input-group-addon">
 												<i class="fas fa-money-bill-alt"></i>
 											</span>
-											<input class="form-control payment-amount input_number valid" required="" id="amount_0" placeholder="Amount" name="payment[0][amount]" type="text" value="0.00" aria-required="true" aria-invalid="false">
+											<input class="form-control payment-amount input_number valid" required="" id="amount_0" placeholder="Amount" name="payment[0][amount]" type="text" value="0.00" aria-required="true" aria-invalid="false" disabled="disabled">
 										</div>
 									</div>
 								</div>
@@ -369,7 +381,12 @@
 								<div class="col-md-12">
 									<hr>
 				            		<strong>
-				            			@lang('lang_v1.additional_card_charge'):  {{ $business_details->card_charge }}%
+				            			@if($business_details->card_fixed_fees > 0)
+											<span>{!! $business_details->card_label.' ('.$business_details->card_charge.'%) + ' !!}</span>
+											<span class="display_currency" data-currency_symbol="true">{{ $business_details->card_fixed_fees }}</span> 
+										@else
+											<span>{{ $business_details->card_label.' ('.$business_details->card_charge.'%)'}}</span>
+										@endif
 				            		</strong>
 				            		<br/>
 				            		<span class="lead text-bold additional_card_charge_split_payment">0</span>

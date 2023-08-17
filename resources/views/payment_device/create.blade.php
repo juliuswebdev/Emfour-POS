@@ -82,6 +82,15 @@
                     {!! Form::text('settings1[register_id]', null, ['class' => 'form-control', 'required',
                     'placeholder' => __('payment_device.register_id')]); !!}
                 </div>
+                <div class="form-group">
+                  {!! Form::label('payment_device_model',__('payment_device.allow_to_print_receipt') . ':*') !!}
+                  <select name="settings1[allow_to_print_receipt]" class="form-control select2" required>
+                      <option value="">@lang('payment_device.allow_to_print_receipt')</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                  </select>
+               </div>
+
             </div>
         </div>
         <div class="col-sm-12">

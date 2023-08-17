@@ -386,36 +386,23 @@
 	<div class="col-xs-6">
 
 		<table class="table table-slim">
-			@php
-				$is_by_card = false;
-				$payment_collect_response = "";
-			@endphp
+			
+			
 			@if(!empty($receipt_details->payments))
 				@foreach($receipt_details->payments as $payment)
 					<tr>
 						<td>{{$payment['method']}}</td>
 						@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
-							<td class="text-right" >{{$payment['original_amount']}}</td>
+							<td class="text-right" >{{$payment['amount']}}</td>
 						@else
 							<td class="text-right" >{{$payment['amount']}}</td>
 						@endif
 						<td class="text-right">{{$payment['date']}}</td>
 					</tr>
-					@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
-						@php
-							$is_by_card = true;
-							$payment_collect_response = $payment['payment_collect_response'];
-						@endphp
-						<tr>
-							<td>@lang('lang_v1.card_charge') {{$payment['card_charge_percent']}}%</td>
-							<td class="text-right">(+) {{$payment['card_charge_amount']}}</td>
-							<td class="text-right">{{$payment['date']}}</td>
-						</tr>
-					@endif
 				@endforeach
 			@endif
 
-			
+
 			<!-- Total Paid-->
 			@if(!empty($receipt_details->total_paid))
 				<tr>
@@ -427,6 +414,7 @@
 					</td>
 				</tr>
 			@endif
+
 
 			<!-- Total Due-->
 			@if(!empty($receipt_details->total_due) && !empty($receipt_details->total_due_label))
@@ -545,6 +533,13 @@
 						</tr>
 					@endif
 
+
+					
+
+
+					
+
+
 					<!-- Discount -->
 					@if( !empty($receipt_details->discount) )
 						<tr>
@@ -585,7 +580,8 @@
 							</tr>
 						@endforeach
 					@endif
-
+					
+					
 					@if( !empty($receipt_details->reward_point_label) )
 						<tr>
 							<th>
@@ -609,6 +605,48 @@
 							</td>
 						</tr>
 					@endif
+					
+					
+					<!-- Card Payment Addition -->
+					@php
+						$is_by_card = false;
+						$payment_collect_response = "";
+					@endphp
+			
+			
+					@if(!empty($receipt_details->payments))
+						@foreach($receipt_details->payments as $payment)
+							{{-- 
+							<tr>
+								<td>{{$payment['method']}}</td>
+								@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
+									<td class="text-right" >{{$payment['original_amount']}}</td>
+								@else
+									<td class="text-right" >{{$payment['amount']}}</td>
+								@endif
+								<td class="text-right">{{$payment['date']}}</td>
+							</tr>
+							--}}
+							@if($payment['method'] == 'card' || $payment['method'] == 'Card' || $payment['method'] == 'CARD')
+								@php
+									$is_by_card = true;
+									$payment_collect_response = $payment['payment_collect_response'];
+								@endphp
+								<tr>
+									<th>
+										@if($payment['card_fixed_fees'] != 0)
+											{{ $payment['card_label'].' ('.$payment['card_charge_percent'].'%) + '.$payment['card_fixed_fees']}}
+										@else
+											{{ $payment['card_label'].' ('.$payment['card_charge_percent'].'%)'}}
+										@endif
+									</th>
+									<td class="text-right">(+) {{$payment['total_card_charge']}}</td>
+									{{-- <td class="text-right">{{$payment['date']}}</td> --}}
+								</tr>
+							@endif
+						@endforeach
+					@endif
+
 
 					@if( $receipt_details->round_off_amount > 0)
 						<tr>

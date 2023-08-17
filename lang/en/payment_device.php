@@ -44,5 +44,6 @@ return [
     'added_success' => 'Payment Device added success!',
     'update_success' => 'Payment Device update success!',
     'delete_success' => 'Payment Device delete success!',
-    'choose_device' => 'Choose Default Payment Device'
+    'choose_device' => 'Choose Default Payment Device',
+    'allow_to_print_receipt' => 'Allow to Print Receipt'
 ];
