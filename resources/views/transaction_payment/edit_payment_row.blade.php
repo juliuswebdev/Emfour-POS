@@ -64,6 +64,7 @@
             </div>
           </div>
         </div>
+        
         <div class="col-md-4">
           <div class="form-group">
             {!! Form::label("amount" , __('sale.amount') . ':*') !!}
