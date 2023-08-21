@@ -45,5 +45,12 @@ return [
     'update_success' => 'Payment Device update success!',
     'delete_success' => 'Payment Device delete success!',
     'choose_device' => 'Choose Default Payment Device',
-    'allow_to_print_receipt' => 'Allow to Print Receipt'
+    'allow_to_print_receipt' => 'Allow to Print Receipt',
+    'allow_to_customer_tip' => 'Allow to Customer Tip',
+    'tip_option_first' => 'Tip 1 Option(%)',
+    'tip_option_first_placeholder' => '15',
+    'tip_option_second' => 'Tip 2 Option(%)',
+    'tip_option_second_placeholder' => '20',
+    'tip_option_third' => 'Tip 3 Option(%)',
+    'tip_option_third_placeholder' => '25',
 ];

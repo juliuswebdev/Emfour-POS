@@ -377,7 +377,7 @@
 				            		<span class="lead text-bold total_paying">0</span>
 				            		<input type="hidden" id="total_paying_input">
 				            	</div>
-
+								{{-- 
 								<div class="col-md-12">
 									<hr>
 				            		<strong>
@@ -391,7 +391,7 @@
 				            		<br/>
 				            		<span class="lead text-bold additional_card_charge_split_payment">0</span>
 				            	</div>
-
+ 								--}}
 				            	<div class="col-md-12">
 				            		<hr>
 				            		<strong>
