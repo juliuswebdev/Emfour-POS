@@ -53,6 +53,15 @@
             .fade {
                 display: none!important;
             }
+            .tips_v2_radio_input #tips_v2_4a {
+            display: none;
+            }
+            .tips_v2_radio_input.active #tips_v2_4a {
+            display: block;
+            }
+            #tips_v2 .-footer{ 
+                display: none;
+            }
         </style>
     </head>
     <body>
@@ -107,11 +116,42 @@
                 <td><span id="amount_change"></span></td>
             </tr>
         </table>
+        <div id="tips_v2"></div>
+        <footer style="display: block; position: fixed; bottom: 0; width: 100%;">
+            Powered by <strong>Maxximu Software</strong>
+        </footer>
     </body>
     <script src="{{ asset('js/vendor.js?v=' . $asset_v) }}"></script>
     <script>
 
+        localStorage.setItem('tips_v2_show', false);
+
+        var reload = true;
         setInterval(function() {
+            var tips_v2_show = localStorage.getItem('tips_v2_show');
+            var tips_v2 = localStorage.getItem('tips_v2');
+            var tips_v2_item = localStorage.getItem('tips_v2_item');
+
+            if(reload && tips_v2_show === 'true') {
+                reload = false;
+                $('#tips_v2').html(tips_v2);
+            }
+
+            $('.tips_v2_radio').each(function(){
+                if($(this).attr('data-item') === tips_v2_item) {
+                    $(this).addClass('active').siblings().removeClass('active');
+                    $(this).find('label').trigger('click');
+                }
+            });
+
+            var custom_tip = localStorage.getItem('tips_v2_custom_tip');
+            $('.tips_v2_radio_input').find('input').val( custom_tip ?? 0 );
+
+            if(tips_v2_show === 'false') {
+                reload = true;
+                $('#tips_v2').html('');
+            }
+
             var pos_table = localStorage.getItem('pos_table');
             $('#public-pos-customer tbody').html(pos_table);
 
@@ -183,7 +223,19 @@
             let t = setTimeout(function(){ currentTime() }, 1000);
         }
 
-        
+        $(document).on('click', '.tips_v2_radio label', function(){
+            // $('.tips_v2_radio_input').find('input[type="text"]').addClass('hidden');
+            $(this).parent().addClass('active').siblings().removeClass('active');
+            var item = $(this).parent().attr('data-item');
+            localStorage.setItem('tips_v2_item', item);
+        });
+
+        $(document).on('keyup', '#tips_v2_4a', function(){
+            var tip = $(this).val();
+            $(this).parent().find('input[type="radio"]').val( tip ?? 0 );
+            localStorage.setItem('tips_v2_custom_tip', tip);
+        });
+
     </script>
              
 </html>
