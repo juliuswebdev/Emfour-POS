@@ -8,6 +8,7 @@ use App\Events\TransactionPaymentUpdated;
 use App\Exceptions\AdvanceBalanceNotAvailable;
 use App\Transaction;
 use App\TransactionPayment;
+use App\Business;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
 use Datatables;
@@ -62,6 +63,7 @@ class TransactionPaymentController extends Controller
     {
         try {
             $business_id = $request->session()->get('user.business_id');
+            $business = Business::find($business_id);
             $transaction_id = $request->input('transaction_id');
             $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
 
@@ -119,7 +121,48 @@ class TransactionPaymentController extends Controller
 
                 if (! empty($inputs['amount'])) {
 
-                    $tp = TransactionPayment::create($inputs);
+                    //Pay By Card
+                    if($inputs['method'] == "card"){
+                    
+                        $card_charge_percentage = $business->card_charge;
+                        $card_fixed_fees = $business->card_fixed_fees;
+                        $card_label = $business->card_label;
+                    
+                        $card_charge_amount = ($payment_amount * $card_charge_percentage / 100);
+                        $total_card_charges = $card_charge_amount + $card_fixed_fees;
+
+
+                        $final_amount_for_payment = $inputs['amount'] + $total_card_charges;
+                        $inputs['amount'] = $final_amount_for_payment;
+                        $inputs['card_charge_amount'] = $card_charge_amount;
+                        $inputs['card_fixed_fees'] = $card_fixed_fees;
+                        $inputs['card_charge_percent'] = $card_charge_percentage;
+                        $inputs['card_label'] = $card_label;
+                        $tp = TransactionPayment::create($inputs);
+                       
+                        $tips_amount = 0;
+                        $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
+                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
+                        
+                        if($response_of_payment['success'] == 0){
+                            //Payment Failed Rollback Transaction
+                            DB::rollback();
+                            $output = [
+                                'success' => false,
+                                'msg' => $response_of_payment['msg']
+                            ];
+                            return $output;
+                        }else{
+                            //Store Payment Response
+                            $payment_response_json = json_encode($response_of_payment['data'], true);
+                            TransactionPayment::where('id', $tp->id)
+                                                ->where('business_id', $business_id)
+                                                ->where('method', 'card')
+                                                ->update(['payment_collect_response' => $payment_response_json]);
+                        }
+                    }else{
+                        $tp = TransactionPayment::create($inputs);
+                    }
 
                     if (! empty($request->input('denominations'))) {
                         $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
@@ -128,6 +171,8 @@ class TransactionPaymentController extends Controller
                     $inputs['transaction_type'] = $transaction->type;
                     event(new TransactionPaymentAdded($tp, $inputs));
                 }
+
+                
 
                 //update payment status
                 $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
@@ -407,13 +452,14 @@ class TransactionPaymentController extends Controller
                 $amount_formated = $this->transactionUtil->num_f($amount);
 
                 $payment_line = new TransactionPayment();
-                $payment_line->amount = $amount;
+                $payment_line->amount = $amount_formated;
                 $payment_line->method = 'cash';
                 $payment_line->paid_on = \Carbon::now()->toDateTimeString();
 
                 //Accounts
                 $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true);
 
+               
                 $view = view('transaction_payment.payment_row')
                 ->with(compact('transaction', 'payment_types', 'payment_line', 'amount_formated', 'accounts'))->render();
 

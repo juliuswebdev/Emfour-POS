@@ -89,7 +89,44 @@
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
                   </select>
-               </div>
+                </div>
+
+                <div class="form-group">
+                  {!! Form::label('payment_device_model',__('payment_device.allow_to_customer_tip') . ':*') !!}
+                  <select name="settings1[allow_to_customer_tip]" class="form-control select2" id="allow_to_customer_tip" required>
+                      <option value="">@lang('payment_device.allow_to_customer_tip')</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                  </select>
+                </div>
+
+                <div class="customer-tip-wrapper" style="display: none;">
+                  <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                      <div class="form-group">
+                          {!! Form::label('tip_option_first', __('payment_device.tip_option_first') . ':*') !!}
+                          {!! Form::text('settings1[tip_option_first]', null, ['class' => 'form-control allow-decimal-only',
+                          'placeholder' => __('payment_device.tip_option_first_placeholder')]); !!}
+                      </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4">
+                      <div class="form-group">
+                        {!! Form::label('tip_option_second', __('payment_device.tip_option_second') . ':*') !!}
+                        {!! Form::text('settings1[tip_option_second]', null, ['class' => 'form-control allow-decimal-only',
+                        'placeholder' => __('payment_device.tip_option_second_placeholder')]); !!}
+                      </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4">
+                      <div class="form-group">
+                        {!! Form::label('tip_option_third', __('payment_device.tip_option_third') . ':*') !!}
+                        {!! Form::text('settings1[tip_option_third]', null, ['class' => 'form-control allow-decimal-only',
+                        'placeholder' => __('payment_device.tip_option_third_placeholder')]); !!}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
             </div>
         </div>
@@ -113,5 +150,41 @@
                 elem.find('h4').text($(this).find('option:selected').text());
             });
         });
+
+        $(".allow-decimal-only").keydown(function (event) {
+            
+            if (event.shiftKey == true) {
+                event.preventDefault();
+            }
+
+            if ((event.keyCode >= 48 && event.keyCode <= 57) || 
+                (event.keyCode >= 96 && event.keyCode <= 105) || 
+                event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 ||
+                event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190) {
+
+            } else {
+                event.preventDefault();
+            }
+
+            if($(this).val().indexOf('.') !== -1 && event.keyCode == 190)
+            event.preventDefault(); 
+            //if a decimal has been added, disable the "."-button
+        });
+
+        $('#allow_to_customer_tip').change(function(){
+          var allow_to_customer_tip = $(this).val();
+          show_customer_tips_options(allow_to_customer_tip);
+        })
+
+        function show_customer_tips_options(allow_to_customer_tip){
+          var wrapper = $('.customer-tip-wrapper');
+          if(allow_to_customer_tip == "Yes"){
+            wrapper.show()
+            wrapper.find('input').removeAttr('disabled');
+          }else{
+            wrapper.hide();
+            wrapper.find('input').attr('disabled', 'disabled');
+          }
+        }
     </script>
 @endsection

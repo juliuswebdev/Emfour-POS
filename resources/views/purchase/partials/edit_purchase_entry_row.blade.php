@@ -77,7 +77,7 @@
                         $max_quantity = $purchase_line->purchase_order_line->quantity - $purchase_line->purchase_order_line->po_quantity_purchased + $purchase_line->quantity;
                     }
                 @endphp
-
+dd
                 <input type="text" 
                 name="purchases[{{$loop->index}}][quantity]" 
                 value="{{@format_quantity($purchase_line->quantity)}}"
