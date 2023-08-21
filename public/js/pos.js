@@ -978,13 +978,16 @@ $(document).ready(function() {
     });
 
     $('.tips_v2_btn_update').click(function() {
-        // var tip = 0;
-        // $('.tips_v2_radio input:checked + label').each(function(){
-        //     tip = $(this).parent().find('input[type="radio"]').val();
-        // });
-        // $('#tips_text').text(tip);
-        // $('#tips_amount').val(tip);
-        // $('.btn-submit-tips').trigger('click');
+
+        // Populate the TIP Field
+        var tip = 0;
+        $('.tips_v2_radio input:checked + label').each(function(){
+            tip = $(this).parent().find('input[type="radio"]').val();
+        });
+        $('#tips_text').text(tip);
+        $('#tips_amount').val(tip);
+        $('.btn-submit-tips').trigger('click');
+
         $('div#tips-v2-modal').modal('hide');
         $('div#modal_cash_payment').modal('show');
         pos_form_obj.submit();
