@@ -84,6 +84,8 @@
 			<thead>
 			<tr>
 				<th>@lang('lang_v1.type')</th>
+				<th>@lang('lang_v1.actual_trx_qty')</th>
+				<th>@lang('lang_v1.uom_of_actual_trx_qty')</th>
 				<th>@lang('lang_v1.quantity_change')</th>
 				@if(!empty($common_settings['enable_secondary_unit']))
 					<th>@lang('lang_v1.quantity_change') (@lang('lang_v1.secondary_unit'))</th>
@@ -101,6 +103,8 @@
 			@forelse($stock_history as $history)
 				<tr>
 					<td>{{$history['type_label']}}</td>
+					{{-- <td>fff</td>
+					<td>dddd</td> --}}
 					@if($history['type'] == 'physical_count_adjustment')
 						<td class="text-primary"><span class="display_currency" data-is_quantity="true">{{$history['quantity_change']}}</span>
 						</td>

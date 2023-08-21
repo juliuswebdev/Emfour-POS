@@ -1612,12 +1612,12 @@ return [
     'essentials_settings' => 'Essentials settings',
     'hrm_settings' => 'HRIS settings',
     'enable_pin_protection_on_expense_button' => 'Enable Pin Protection on Expense Button',
-
     'title_security_pin' => 'Security Pin',
     'enter_security_pin' => 'Enter Security Pin',
     'dynamic_price' => 'Dynamic Pricing',
     'please_select_the_location' => 'Please select the business location.',
-    'selected_location_is_open_to_another_machine' => 'Selected Location is Open to another Machine.'
-    
+    'selected_location_is_open_to_another_machine' => 'Selected Location is Open to another Machine.',
+    'actual_trx_qty' => 'Actual Trx Qty',
+    'uom_of_actual_trx_qty' => 'UOM of Actual Trx Qty'
 
 ];

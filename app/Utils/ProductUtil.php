@@ -1986,6 +1986,7 @@ class ProductUtil extends Util
                                 ->get();
         
 
+        //dd($stock_history);
 
         $stock_history_array = [];
         $stock = 0;
