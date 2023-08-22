@@ -278,7 +278,7 @@ class SellPosController extends Controller
 
         //Check Payment Devices
         if(auth()->user()->default_payment_device != 0){
-            $payment_device = PaymentDevice::select('id', 'name')->where('id', auth()->user()->default_payment_device)->first();
+            $payment_device = PaymentDevice::select('id', 'name', 'settings')->where('id', auth()->user()->default_payment_device)->first();
         }else{
             $payment_device = null;
         }

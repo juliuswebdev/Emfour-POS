@@ -50,14 +50,20 @@
                 font-weight: 700;
                 font-size: 24px;
             }
+            #tips_v2{
+                display: block;
+                width: 50%;
+                padding:15px;
+                margin: auto;
+            }
             .fade {
                 display: none!important;
             }
             .tips_v2_radio_input #tips_v2_4a {
-            display: none;
+                display: none;
             }
             .tips_v2_radio_input.active #tips_v2_4a {
-            display: block;
+                display: block;
             }
             #tips_v2 .-footer{ 
                 display: none;
@@ -116,7 +122,30 @@
                 <td><span id="amount_change"></span></td>
             </tr>
         </table>
-        <div id="tips_v2"></div>
+        
+       
+
+        <div id="tips_v2" style="display: none;">
+
+            <div class="box-body" id="tips_v2_form">
+                <h2 id="tips_v2_total_amount"></h2>
+                <div class="row">
+                   <div class="wrapper-of-tips-box">
+                   </div>
+                   <div class="col-md-12 tips_v2_radio tips_v2_radio_input ct" data-item="4">
+                      <input type="radio" name="tips_v2" id="tips_v2_4" value="0" class="hidden">
+                      <label for="tips_v2_4">Custom Tip Amount</label>
+                      <input type="text" name="tips_v2" id="tips_v2_4a" value="0" class="form-control allow-decimal-number-only">
+                   </div>
+                   <div class="col-md-12 tips_v2_radio ct" attr-multiplier="0" data-item="5">
+                      <input type="radio" name="tips_v2" id="tips_v2_5" value="0" class="hidden">
+                      <label for="tips_v2_5">No Tip</label>
+                   </div>
+                </div>
+             </div>
+
+        </div>
+
         <footer style="display: block; position: fixed; bottom: 0; width: 100%;">
             Powered by <strong>Maxximu Software</strong>
         </footer>
@@ -124,34 +153,45 @@
     <script src="{{ asset('js/vendor.js?v=' . $asset_v) }}"></script>
     <script>
 
-        localStorage.setItem('tips_v2_show', false);
+        localStorage.setItem('is_visible_tips', 0);
+        function render_tips_percentage_box(){
+            var tips_popup_show = localStorage.getItem('tips_popup_show');
+            var is_visible_tips = localStorage.getItem('is_visible_tips');
+            
+            if(tips_popup_show == "true" && is_visible_tips == 0){
+                $('#tips_v2').css('display', 'block');
+                var tips_option = localStorage.getItem('tips_options');
+                tips_option = tips_option.split(',');
+                var final_total = $('#total_payable').text();
+                var html_box = "";
+                $.each(tips_option, function( index, value ) {
+                     if(value > 0){
+                        var computed_raw = (final_total * value / 100).toFixed(2);
+                        html_box += '<div class="col-md-4 tips_v2_radio" attr-multiplier='+value+' data-item='+index+'>';
+                        html_box += '<input type="radio" name="tips_v2" id="tips_v2_'+value+'" value='+computed_raw+' class="hidden">';
+                        html_box += '<label for="tips_v2_'+value+'">';
+                        html_box += '<p class="percent">'+value+'%</p>';
+                        html_box += '<p class="computed">'+computed_raw+'</p>';
+                        html_box += '</label>';
+                        html_box += '</div>'; 
+                     }
+                });
+                $('.wrapper-of-tips-box').html(html_box);
+                localStorage.setItem('is_visible_tips', 1);
+            }
+
+            if(tips_popup_show == "false"){
+                $('#tips_v2').css('display', 'none');
+                localStorage.setItem('is_visible_tips', 0);
+            }
+            
+        }
+
+        
 
         var reload = true;
         setInterval(function() {
-            var tips_v2_show = localStorage.getItem('tips_v2_show');
-            var tips_v2 = localStorage.getItem('tips_v2');
-            var tips_v2_item = localStorage.getItem('tips_v2_item');
-
-            if(reload && tips_v2_show === 'true') {
-                reload = false;
-                $('#tips_v2').html(tips_v2);
-            }
-
-            $('.tips_v2_radio').each(function(){
-                if($(this).attr('data-item') === tips_v2_item) {
-                    $(this).addClass('active').siblings().removeClass('active');
-                    $(this).find('label').trigger('click');
-                }
-            });
-
-            var custom_tip = localStorage.getItem('tips_v2_custom_tip');
-            $('.tips_v2_radio_input').find('input').val( custom_tip ?? 0 );
-
-            if(tips_v2_show === 'false') {
-                reload = true;
-                $('#tips_v2').html('');
-            }
-
+            
             var pos_table = localStorage.getItem('pos_table');
             $('#public-pos-customer tbody').html(pos_table);
 
@@ -194,6 +234,10 @@
                 var qty = total/price;
                 $(this).parents('.product_row').find('.input_quantity').val(qty);
             })
+
+            render_tips_percentage_box();
+            detect_the_cashier_tips_event();
+
         },1500);
 
         currentTime();
@@ -223,18 +267,49 @@
             let t = setTimeout(function(){ currentTime() }, 1000);
         }
 
-        $(document).on('click', '.tips_v2_radio label', function(){
-            // $('.tips_v2_radio_input').find('input[type="text"]').addClass('hidden');
-            $(this).parent().addClass('active').siblings().removeClass('active');
-            var item = $(this).parent().attr('data-item');
-            localStorage.setItem('tips_v2_item', item);
+
+        $(document).on('input', '#tips_v2_4a', function() {
+            var tips_amount = $(this).val();
+            localStorage.setItem('tips_text', tips_amount);
+            
+            localStorage.setItem('tips_update_by', 'Customer');
+            localStorage.setItem('manual_tip_input', tips_amount);
         });
 
-        $(document).on('keyup', '#tips_v2_4a', function(){
-            var tip = $(this).val();
-            $(this).parent().find('input[type="radio"]').val( tip ?? 0 );
-            localStorage.setItem('tips_v2_custom_tip', tip);
-        });
+        $(document).on('click', '.tips_v2_radio', function() {
+            $('input[name="tips_v2"]').removeAttr('checked');
+            $(this).find('input[type="radio"]').attr('checked', 'checked');
+
+            var is_it_manual_input = $(this).find('input[id="tips_v2_4a"]').length;
+            if(is_it_manual_input){
+                $('input[id="tips_v2_4a"]').css('display', 'block');
+            }else{
+                $('input[id="tips_v2_4a"]').css('display', 'none');
+            }
+            
+            var tips_amount = $(this).find('input').val();
+            
+            localStorage.setItem('tips_text', tips_amount);
+            localStorage.setItem('tips_update_by', 'Customer');
+            localStorage.setItem('tip_box_identifier', $(this).find('input[type="radio"]').attr('id'));
+            //localStorage.setItem('manual_tip_input', '');
+        })
+
+        function detect_the_cashier_tips_event(){
+            var tips_update_by =  localStorage.getItem('tips_update_by');
+            if(tips_update_by == "Cashier"){
+                var tip_box_identifier = localStorage.getItem('tip_box_identifier');
+                $('#'+tip_box_identifier).trigger('click');
+
+                if(tip_box_identifier == "tips_v2_4"){
+                    var manual_tip_input = localStorage.getItem('manual_tip_input');
+                    $('#tips_v2_4a').val(manual_tip_input);
+                }
+                localStorage.setItem('tips_update_by', '');
+            }
+        }
+
+
 
     </script>
              

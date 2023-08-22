@@ -970,3 +970,17 @@ padding-bottom: 10px;
 .inject-tables.edit-mode{
   padding-bottom: 25px;
 }
+#tips_v2_total_amount{
+  font-weight: bold;
+  margin-top: 5px;
+}
+#tips-v2-modal .modal-header{
+  border-bottom: none;
+}
+#tips-v2-modal  .wrapper-of-tips-box{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+align-items: center;
+align-content: center;
+}

@@ -215,7 +215,33 @@
         @endcan
 
         <button id="open_device_change_modal" type="button" class="btn btn-success btn-flat m-6 btn-xs m-5 btn-modal pull-right">
-          <span id="device_label">{{ ($payment_device == null) ? __('lang_v1.select_payment_device') : $payment_device->name }}</span> <strong><i class="fa fa-cog fa-lg"></i></strong>
+
+          @if($payment_device == null)
+            <span id="device_label" data-tips-allow="0"> __('lang_v1.select_payment_device')</span>
+          @else
+
+            @php
+              $setting_of_pd = json_decode($payment_device->settings);
+              $allow_to_customer_tip = $setting_of_pd->allow_to_customer_tip ?? '';
+              if($allow_to_customer_tip == "Yes"){
+                  $tip_option_first = $setting_of_pd->tip_option_first ?? '';
+                  $tip_option_second = $setting_of_pd->tip_option_second ?? '';
+                  $tip_option_third = $setting_of_pd->tip_option_third ?? '';
+              }else{
+                  $tip_option_first = $tip_option_second = $tip_option_third = "";
+              }
+            @endphp
+            <span id="device_label"  data-tips-allow="{{ ($allow_to_customer_tip == "Yes") ? 1 : 0 }}" 
+            data-tip-option-first="{{ $tip_option_first }}" 
+            data-tip-option-second="{{ $tip_option_second }}" 
+            data-tip-option-third="{{ $tip_option_third }}" >
+              {{ $payment_device->name }}
+            </span> 
+          @endif
+         
+          
+          
+          <strong><i class="fa fa-cog fa-lg"></i></strong>
         </button>
 
         <a 

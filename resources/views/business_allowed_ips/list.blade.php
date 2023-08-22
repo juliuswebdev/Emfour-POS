@@ -14,8 +14,10 @@
                             $checked = ($payment_device->id == auth()->user()->default_payment_device) ? 'checked' : '';
                         @endphp
                     @endif
-
-                    <input type="radio" id="d_{{ $payment_device->id }}" name="payment_device" value="{{ $payment_device->id }}" {{ $checked }}>&nbsp;&nbsp;&nbsp;
+                    <input type="radio" 
+                    id="d_{{ $payment_device->id }}" 
+                    name="payment_device"
+                    value="{{ $payment_device->id }}" {{ $checked }}>&nbsp;&nbsp;&nbsp;
                     <label for="d_{{ $payment_device->id }}">{{ $payment_device->name }}</label>
                 </div>
             @endforeach

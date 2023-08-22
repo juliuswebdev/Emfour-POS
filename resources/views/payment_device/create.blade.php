@@ -3,9 +3,6 @@
 
 @section('content')
 <style type="text/css">
-
-
-
 </style>
 <!-- Content Header (Page header) -->
 <section class="content-header">
