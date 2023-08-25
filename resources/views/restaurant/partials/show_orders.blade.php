@@ -15,7 +15,7 @@
 	}
 @endphp
 @forelse($orders as $order)
-	<div class="col-md-4 col-xs-12 order_div" data-service-staff="{{ $order->res_waiter_id }}">
+	<div class="col-md-4 col-xs-12 order_div" data-service-staff="{{ $order->res_waiter_id }}" id="{{$order->invoice_no}}">
 		<div class="small-box bg-gray">
             <div class="inner">
 				<div class="d-flex">
@@ -84,8 +84,14 @@
 								$build_tree =  buildTree($order->sell_lines->toArray());
 							}
 							$order_sell_lines = json_decode(json_encode($build_tree), FALSE);
+
+
+							$check_ready_count = 0;
+							$check_total_count = 0;
 						@endphp
 						
+
+
 						@foreach ($order_sell_lines as $k => $row)
 
 							@if($row->cook_start == NULL || $row->cook_end == NULL)
@@ -108,6 +114,7 @@
 							@endif
 							
 							@php
+								$check_total_count++;
 								$product = \App\Product::where('id', $row->product_id)->select('product_custom_field1', 'type', 'name', 'product_description', 'unit_id')->first();
 							@endphp
 							
@@ -149,7 +156,7 @@
 
 												@if($row->is_available == 1)
 													<div class="status-inline-block">
-
+												
 														@if($row->cook_start == null && $row->cook_end == null)
 															@php
 																$cooking_btn_bg = "bg-black";
@@ -215,6 +222,7 @@
 															@php
 																$ready_btn_bg = "bg-green";
 																$ready_clickable = false;
+																$check_ready_count++;
 															@endphp
 														@else
 															@php
@@ -320,11 +328,12 @@
 																$serve_clickable = true;
 																$stage = 'served_at_undo';
 															}
+															
 														@endphp
 
 
 														<a href="javascript:;" data-href="{{ ($serve_clickable) ? action([\App\Http\Controllers\Restaurant\OrderController::class, 'updateServed'], [$stage, $order->id, $row->product_id]) : '' }}" class="{{ ($serve_clickable) ? 'btn-served' : ''}}">
-															<span class="label kit-fix-w-label {{ $serve_btn_bg }}">
+															<span class="label kit-fix-w-label served-btn-sm {{ $serve_btn_bg }}">
 																@if(!$undo)
 																{{ __('lang_v1.served') }}
 																@else
@@ -347,14 +356,20 @@
 				</div>
 
             </div>
-			
+			@php 
+				if($check_ready_count == $check_total_count) {
+					$served_clickable = true;
+				}
+			@endphp
+
             @if($orders_for == 'kitchen')
 				@if(!$mark_disabled)
 				<a href="javascript:;" class="btn btn-flat small-box-footer bg-red" data-href=""><i class="fa fa-check-square-o"></i> {{ __('lang_v1.mark_as_completed') }}</a>
 				@else
             	<a href="#" class="btn btn-flat small-box-footer bg-red mark_as_cooked_btn" data-href="{{action([\App\Http\Controllers\Restaurant\KitchenController::class, 'markAsCooked'], [$order->id])}}"><i class="fa fa-check-square-o"></i> {{ __('lang_v1.mark_as_completed') }}</a>
-				@endif
-            @elseif( $orders_for == 'waiter' && ($order->res_order_status != 'served') )
+			@endif
+
+            @elseif( ($orders_for == 'waiter' && $order->res_order_status != 'served') || $check_ready_count == $check_total_count )
 				<a href="javascript:;" class="btn btn-flat small-box-footer {{ $served_btn_bg }} {{ ($served_clickable) ? 'mark_as_served_btn' : '' }} " data-href="{{ ($served_clickable) ? action([\App\Http\Controllers\Restaurant\OrderController::class, 'markAsServed'], [$order->id]) : '' }}"><i class="fa fa-check-square-o"></i>  {{ __('lang_v1.mark_as_completed') }} </a>
             @else
 				<a href="javascript:;" class="btn btn-flat small-box-footer bg-grey  " data-href=""><i class="fa fa-check-square-o"></i>{{ __('lang_v1.mark_as_completed') }}</a>

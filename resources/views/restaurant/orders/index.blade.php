@@ -99,7 +99,9 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
-
+<pre>
+    @php print_r($pos_settings); @endphp
+</pre>
 @endsection
 
 @section('javascript')
@@ -113,66 +115,101 @@
             $('form#select_service_staff_form').submit();
         });
         $(document).ready(function(){
-            $(document).on('click', 'a.mark_as_served_btn', function(e){
-                e.preventDefault();
-                var _this = $(this);
-                var href = _this.data('href');
-                $('#check_user_pin').attr('mark-as-serve-url', href);
+            @if(isset($pos_settings['enable_pin_protection_on_order_ui']))
+                $(document).on('click', 'a.mark_as_served_btn', function(e){
+                    e.preventDefault();
+                    var _this = $(this);
+                    var href = _this.data('href');
+                    $('#check_user_pin').attr('mark-as-serve-url', href);
+                    var id = $(this).parents('.order_div').attr('id');
+                    $('#check_user_pin').attr('invoice-id', id);
+                    var service_staff = $(this).parents('.order_div').attr('data-service-staff');
 
-                var service_staff = $(this).parents('.order_div').attr('data-service-staff');
-
-                $('#check_user_pin #user_id').val(service_staff);
-                $.ajax({
-                    context: this,
-                    method: "POST",
-                    url: '/user/check-has-pin',
-                    data: { user_id : service_staff },
-                    dataType: "json",
-                    success: function(result) {
-                        if(result.success == true) {
-                            $('#pin_server_modal').modal('show');
-                        } else {
-                            toastr.error(result.msg);
+                    $('#check_user_pin #user_id').val(service_staff);
+                    $.ajax({
+                        context: this,
+                        method: "POST",
+                        url: '/user/check-has-pin',
+                        data: { user_id : service_staff },
+                        dataType: "json",
+                        success: function(result) {
+                            if(result.success == true) {
+                                $('#pin_server_modal').modal('show');
+                            } else {
+                                toastr.error(result.msg);
+                            }
                         }
-                    }
+                    });
                 });
-            });
 
-            $('#check_user_pin').submit(function(e) {
-                e.preventDefault();
-                var data = $(this).serialize();
-                $.ajax({
-                    context: this,
-                    method: "POST",
-                    url: $(this).attr("action"),
-                    data: data,
-                    dataType: "json",
-                    success: function(result) {
-                        if(result.success == true) {
-                            toastr.success(result.msg);
-                            var href = $(this).attr('mark-as-serve-url');
-                            $.ajax({
-                                method: "GET",
-                                url: href,
-                                dataType: "json",
-                                success: function(result){
-                                    if(result.success == true){
-                                        refresh_orders();
-                                        toastr.success(result.msg);
-                                        $('#pin_server_modal').modal('hide');
-                                    } else {
-                                        toastr.error(result.msg);
+                $('#check_user_pin').submit(function(e) {
+                    e.preventDefault();
+                    var data = $(this).serialize();
+                    var id = $('#check_user_pin').attr('invoice-id');
+                    $.ajax({
+                        context: this,
+                        method: "POST",
+                        url: $(this).attr("action"),
+                        data: data,
+                        dataType: "json",
+                        success: function(result) {
+                            if(result.success == true) {
+                                toastr.success(result.msg);
+                                var href = $(this).attr('mark-as-serve-url');
+                                $.ajax({
+                                    method: "GET",
+                                    url: href,
+                                    dataType: "json",
+                                    success: function(result){
+                                        if(result.success == true){
+                                            refresh_orders();
+                                            toastr.success(result.msg);
+                                            setTimeout(function(){
+                                                $('#'+id+' .served-btn-sm').each(function(){
+                                                    $(this).text('Served');
+                                                });
+                                            },500)
+                                            $('#pin_server_modal').modal('hide');
+                                        } else {
+                                            toastr.error(result.msg);
+                                        }
                                     }
-                                }
-                            });
-                        } else {
-                            toastr.error(result.msg);
+                                });
+                            } else {
+                                toastr.error(result.msg);
+                            }
+                            $('#check_user_pin #pin').val('');
+                            $('#check_user_pin button').removeAttr('disabled');
                         }
-                        $('#check_user_pin #pin').val('');
-                        $('#check_user_pin button').removeAttr('disabled');
-                    }
+                    });
                 });
-            });
+            @else
+                $(document).on('click', 'a.mark_as_served_btn', function(e){
+                    e.preventDefault();
+                    var _this = $(this);
+                    var href = _this.data('href');
+                    var id = $(this).parents('.order_div').attr('id');
+                    $.ajax({
+                        context: this,
+                        method: "GET",
+                        url: href,
+                        dataType: "json",
+                        success: function(result) {
+                            if(result.success == true) {
+                                refresh_orders();
+                                toastr.success(result.msg);
+                                setTimeout(function(){
+                                    $('#'+id+' .served-btn-sm').each(function(){
+                                        $(this).text('Served');
+                                    });
+                                },500)
+                            } else {
+                                toastr.error(result.msg);
+                            }
+                        }
+                    });
+                });
+            @endif
 
             //Function used for update the is_served column
             $(document).on('click', 'a.btn-served', function(e){

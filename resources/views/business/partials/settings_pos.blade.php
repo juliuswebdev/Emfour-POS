@@ -341,6 +341,19 @@
             </div>
         </div>
 
+        <div class="col-sm-4">
+            <div class="form-group">
+                <div class="checkbox">
+                <br>
+                  <label>
+                    {!! Form::checkbox('pos_settings[enable_pin_protection_on_order_ui]', 1,  
+                        !empty($pos_settings['enable_pin_protection_on_order_ui']) , 
+                    [ 'class' => 'input-icheck']); !!} {{ __( 'lang_v1.enable_pin_protection_on_order_ui' ) }}
+                  </label>
+                </div>
+            </div>
+        </div>
+
 
     </div>    
     <hr>

@@ -78,7 +78,8 @@ class OrderController extends Controller
         if (! $is_service_staff) {
             $service_staff = $this->restUtil->service_staff_dropdown($business_id);
         }
-        return view('restaurant.orders.index', compact('orders', 'is_service_staff', 'service_staff', 'line_orders', 'business_details'));
+        $pos_settings = empty($business_details->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business_details->pos_settings, true);
+        return view('restaurant.orders.index', compact('pos_settings', 'orders', 'is_service_staff', 'service_staff', 'line_orders', 'business_details'));
     }
 
     /**
@@ -94,6 +95,7 @@ class OrderController extends Controller
         try {
             $business_id = request()->session()->get('user.business_id');
             $user_id = request()->session()->get('user.id');
+            $date = date('Y-m-d H:i:s');
 
             $query = TransactionSellLine::leftJoin('transactions as t', 't.id', '=', 'transaction_sell_lines.transaction_id')
                         ->where('t.business_id', $business_id)
@@ -103,7 +105,10 @@ class OrderController extends Controller
                 $query->where('res_waiter_id', $user_id);
             }
 
-            $query->update(['res_line_order_status' => 'served']);
+            $query->update([
+                'res_line_order_status' => 'served',
+                'served_at' => $date
+            ]);
             
             //Update the order status
             Transaction::where('id', $id)->where('business_id', $business_id)->update([
