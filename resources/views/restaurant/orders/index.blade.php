@@ -99,9 +99,7 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
-<pre>
-    @php print_r($pos_settings); @endphp
-</pre>
+
 @endsection
 
 @section('javascript')
