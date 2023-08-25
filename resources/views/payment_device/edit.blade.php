@@ -71,7 +71,7 @@
                     }else{
                       $tip_option_first = $tip_option_second = $tip_option_third = "";
                     }
-                    
+                    $allow_to_card_preauthorize = $settings->allow_to_card_preauthorize ?? '';
 
                 @endphp
                 <div class="form-group">
@@ -151,7 +151,14 @@
                   </div>
                 </div>
 
-
+                <div class="form-group">
+                  {!! Form::label('payment_device_model',__('payment_device.allow_to_card_preauthorize') . ':*') !!}
+                  <select name="settings1[allow_to_card_preauthorize]" class="form-control select2" required>
+                      <option value="">@lang('payment_device.allow_to_card_preauthorize')</option>
+                      <option value="Yes" @if($allow_to_card_preauthorize == 'Yes') selected @endif>Yes</option>
+                      <option value="No" @if($allow_to_card_preauthorize == 'No') selected @endif>No</option>
+                  </select>
+                </div>
 
 
             </div>

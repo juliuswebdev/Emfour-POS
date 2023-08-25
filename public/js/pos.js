@@ -935,6 +935,7 @@ $(document).ready(function() {
         pos_form_obj.submit();
         $('input#send_to_kitchen').val(0);
         $('input#is_suspend').val(0);
+        $('#is_preauthorize').val(0);
     });
 
     //fix select2 input issue on modal
@@ -1458,6 +1459,17 @@ Name: ${ name }`;
         if ($('input#location_id').val() == '') {
             toastr.warning(LANG.select_location);
         } else {
+
+            //Check validate service staff selection
+            var service_waiter_length = $('#res_waiter_id').length;
+            if(service_waiter_length != 0){
+                var service_waiter_val = $('#res_waiter_id').val();
+                if(service_waiter_val == ""){
+                    toastr.warning(LANG.validate_service_staff);
+                    return false;
+                }
+            }
+            
             pos_product_row($(this).data('variation_id'));
         }
     });
@@ -4049,7 +4061,7 @@ function check_allow_for_tips_on_card_transaction(){
     return (tips_flag == 1) ? true : false;
 }
 
-
+//Customer tip function start
 $(document).on('click', '.tips_v2_radio', function() {
     var payment_method = $('.pos-express-finalize.active').attr('data-pay_method');
   
@@ -4149,4 +4161,12 @@ function checkTipsByCustomerInput(){
         localStorage.setItem('tips_update_by', '');
     }
 }
+//Customer Tip function end
+
+
+// Use for Preauthorize flag send to pos create & edit request
+$(document).on('click', '#pos-preauthorize', function() {
+    $('#is_preauthorize').val(1);
+    $('button#pos-suspend').trigger('click');
+});
 

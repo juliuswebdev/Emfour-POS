@@ -53,4 +53,5 @@ return [
     'tip_option_second_placeholder' => '20',
     'tip_option_third' => 'Tip 3 Option(%)',
     'tip_option_third_placeholder' => '25',
+    'allow_to_card_preauthorize' => 'Allow to Card Preauthorize'
 ];
