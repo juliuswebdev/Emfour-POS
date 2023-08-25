@@ -125,6 +125,16 @@
                   </div>
                 </div>
 
+                <div class="form-group">
+                  {!! Form::label('payment_device_model',__('payment_device.allow_to_card_preauthorize') . ':*') !!}
+                  <select name="settings1[allow_to_card_preauthorize]" class="form-control select2" required>
+                      <option value="">@lang('payment_device.allow_to_card_preauthorize')</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                  </select>
+                </div>
+
+
             </div>
         </div>
         <div class="col-sm-12">

@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
-
 use Datatables;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -396,6 +394,183 @@ class PaymentDevicesController extends Controller
                             <SigCapture>Yes</SigCapture>
                         </request>';
                 
+                
+                $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
+
+                $response = Http::timeout(1000)->get($request_url);
+                $xml_data = $response->body();
+                $xml_response = simplexml_load_string($xml_data);
+                $json_response = json_encode($xml_response);
+                $array_response = json_decode($json_response,TRUE);
+                
+                /*
+                $json_response = '{"response":{"RefId":"1136","RegisterId":"116058002","TransNum":"23","ResultCode":"0","RespMSG":"APPROVAL%20DSC742","Message":"Approved","AuthCode":"DSC742","PNRef":"322316500718","PaymentType":"Credit","Voided":"false","TransType":"Sale","SN":"WP22331Q23201745","ExtData":"Amount=1.12,InvNum=23,CardType=DISCOVER,BatchNum=1,Tip=0.00,CashBack=0.00,Fee=0.00,AcntLast4=7449,BIN=601195,Name=PELEGRINO%2fGLEN%20%20%20%20%20%20%20%20%20%20%20%20,SVC=0.00,TotalAmt=1.12,DISC=0.00,Donation=0.00,SHFee=0.00,RwdPoints=0,RwdBalance=0,RwdIssued=,EBTFSLedgerBalance=,EBTFSAvailBalance=,EBTFSBeginBalance=,EBTCashLedgerBalance=,EBTCashAvailBalance=,EBTCashBeginBalance=,RewardCode=,AcqRefData=,ProcessData=,RefNo=,RewardQR=,Language=English,EntryType=CHIP,table_num=0,clerk_id=0,ticket_num=,ControlNum=,TaxCity=0.00,TaxState=0.00,TaxReducedState=0.00,Cust1=,Cust1Value=,Cust2=,Cust2Value=,Cust3=,Cust3Value=,AcntFirst4=6011,TaxAmount=0.00,AVSRsp=,CVVRsp=,TransactionID=123456789012345,ExtraHostData=00%2dAPPROVAL%2dApproved%20and%20Completed","EMVData":"AID=A0000001523010,AppName=Discover,TVR=8000008000,TSI=6800,IAD=0102030405060708,ARC=","Sign":"Qk0OAwAAAAAAAD4AAAAoAAAALAEAABIAAAABAAEAAAAAANACAADEDgAAxA4AAAAAAAAAAAAAAAAAAP\/\/\/wD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/4AA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AA\/\/\/\/\/\/\/\/\/\/\/\/\/+AAAA\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAP\/\/\/\/\/\/\/\/\/\/\/\/gAAAAAAP\/\/\/\/\/\/\/\/\/\/\/gAAAAA\/\/\/\/\/\/\/\/\/\/\/\/wAAD\/\/\/\/\/\/\/\/\/\/\/4AAAAAAAAAf\/\/\/\/\/\/\/\/\/8P8AAAAAP\/\/\/\/\/\/\/\/\/8AAA\/\/\/\/\/\/\/\/\/\/\/gAAAAP8AAAAD\/\/\/\/\/\/\/\/\/B\/\/8AAAAAD\/\/\/\/\/\/AAAAAB\/\/\/\/\/\/\/\/\/+AAH\/\/\/\/\/\/AAAD\/\/\/\/\/\/\/\/4f\/\/\/8AAAAAB\/\/\/AAAAAAAf\/\/\/\/\/\/\/\/wAB\/\/\/\/\/\/\/\/+AAAB\/\/\/\/\/\/\/D\/\/\/\/\/\/AAAAAAAAAAAAAAD\/\/\/\/\/\/\/4AAH\/\/\/\/\/\/\/\/\/\/wAAAH\/\/\/AAA\/\/\/\/\/\/\/\/wAAAAAAP\/AAAAf\/\/\/\/\/\/AAAf\/\/\/\/\/\/\/\/\/\/\/wAAAAAAAAAP\/\/\/\/\/\/\/\/\/4AAAP\/\/wAACH\/\/\/\/\/8AAD\/\/\/\/\/\/\/\/\/\/\/\/\/8YAAAAAAAH\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAAw\/\/\/\/\/wAB\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/gAAAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAMP\/\/\/+AAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAADj\/\/\/4AA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA4f\/\/AAD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAOH\/wAAf\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAADwAAAB\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA8AAAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAPgAD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAAA=","CVMResult":"2"}}';
+                $array_response = json_decode($json_response,TRUE);
+                */
+                
+                $payment_response_message = $array_response['response']['Message'];
+                if($payment_response_message == "Approved"){
+                    $output = [
+                        'success' => 1,
+                        'msg' => __('business.settings_updated_success'),
+                        'data' => $array_response
+                    ];    
+                }else{
+                    $output = [
+                        'success' => 0,
+                        'msg' => $payment_response_message,
+                        'data' => $array_response
+                    ];  
+                }
+            }else{
+                $output = [
+                    'success' => 0,
+                    'msg' => __('business.your_device_is_offline'),
+                    'data' => []
+                ];  
+            }
+
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $output = [
+                'success' => 0,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        return $output;
+    }
+
+
+    public function preAuthorize($payment_type, $trans_type, $amount, $invoice_num, $tips_amount=0){
+
+        try {
+            $active_payment_device = PaymentDevice::select('settings')->where('id', auth()->user()->default_payment_device)->first();
+            $payment_setting = json_decode($active_payment_device->settings, true);
+            
+            $register_id = $payment_setting['register_id'];
+            $auth_key = $payment_setting['auth_key'];
+            $allow_to_print_receipt = isset($payment_setting['allow_to_print_receipt']) ? $payment_setting['allow_to_print_receipt'] : 'No';
+            
+            if($allow_to_print_receipt == "Yes"){
+                $xml_print_receipt = "<PrintReceipt>Customer</PrintReceipt><GetReceipt>Customer</GetReceipt>";
+            }else{
+                $xml_print_receipt = "<PrintReceipt>No</PrintReceipt>";
+            }
+           
+            $check_terminal = $this->checkTerminalIsActive($register_id);
+            //$check_terminal = "Online";
+            if($check_terminal == "Online"){
+                
+                $xml = '<request>
+                            <PaymentType>'. $payment_type .'</PaymentType>
+                            <TransType>'. $trans_type .'</TransType>
+                            <Amount>'. $amount .'</Amount>
+                            <Tip>'.$tips_amount.'</Tip>
+                            <CustomFee>0</CustomFee>
+                            <Frequency>OneTime</Frequency>
+                            <InvNum>'.$invoice_num.'</InvNum>
+                            <RefId>'. $invoice_num .'</RefId>
+                            <RegisterId>'. $register_id .'</RegisterId>
+                            <AuthKey>'. $auth_key .'</AuthKey>
+                            '.$xml_print_receipt.'
+                            <SigCapture>Yes</SigCapture>
+                        </request>';
+                
+                
+                $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
+
+                $response = Http::timeout(1000)->get($request_url);
+                $xml_data = $response->body();
+                $xml_response = simplexml_load_string($xml_data);
+                $json_response = json_encode($xml_response);
+                $array_response = json_decode($json_response,TRUE);
+                
+                /*
+                $json_response = '{"response":{"RefId":"1136","RegisterId":"116058002","TransNum":"23","ResultCode":"0","RespMSG":"APPROVAL%20DSC742","Message":"Approved","AuthCode":"DSC742","PNRef":"322316500718","PaymentType":"Credit","Voided":"false","TransType":"Sale","SN":"WP22331Q23201745","ExtData":"Amount=1.12,InvNum=23,CardType=DISCOVER,BatchNum=1,Tip=0.00,CashBack=0.00,Fee=0.00,AcntLast4=7449,BIN=601195,Name=PELEGRINO%2fGLEN%20%20%20%20%20%20%20%20%20%20%20%20,SVC=0.00,TotalAmt=1.12,DISC=0.00,Donation=0.00,SHFee=0.00,RwdPoints=0,RwdBalance=0,RwdIssued=,EBTFSLedgerBalance=,EBTFSAvailBalance=,EBTFSBeginBalance=,EBTCashLedgerBalance=,EBTCashAvailBalance=,EBTCashBeginBalance=,RewardCode=,AcqRefData=,ProcessData=,RefNo=,RewardQR=,Language=English,EntryType=CHIP,table_num=0,clerk_id=0,ticket_num=,ControlNum=,TaxCity=0.00,TaxState=0.00,TaxReducedState=0.00,Cust1=,Cust1Value=,Cust2=,Cust2Value=,Cust3=,Cust3Value=,AcntFirst4=6011,TaxAmount=0.00,AVSRsp=,CVVRsp=,TransactionID=123456789012345,ExtraHostData=00%2dAPPROVAL%2dApproved%20and%20Completed","EMVData":"AID=A0000001523010,AppName=Discover,TVR=8000008000,TSI=6800,IAD=0102030405060708,ARC=","Sign":"Qk0OAwAAAAAAAD4AAAAoAAAALAEAABIAAAABAAEAAAAAANACAADEDgAAxA4AAAAAAAAAAAAAAAAAAP\/\/\/wD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/4AA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AA\/\/\/\/\/\/\/\/\/\/\/\/\/+AAAA\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAP\/\/\/\/\/\/\/\/\/\/\/\/gAAAAAAP\/\/\/\/\/\/\/\/\/\/\/gAAAAA\/\/\/\/\/\/\/\/\/\/\/\/wAAD\/\/\/\/\/\/\/\/\/\/\/4AAAAAAAAAf\/\/\/\/\/\/\/\/\/8P8AAAAAP\/\/\/\/\/\/\/\/\/8AAA\/\/\/\/\/\/\/\/\/\/\/gAAAAP8AAAAD\/\/\/\/\/\/\/\/\/B\/\/8AAAAAD\/\/\/\/\/\/AAAAAB\/\/\/\/\/\/\/\/\/+AAH\/\/\/\/\/\/AAAD\/\/\/\/\/\/\/\/4f\/\/\/8AAAAAB\/\/\/AAAAAAAf\/\/\/\/\/\/\/\/wAB\/\/\/\/\/\/\/\/+AAAB\/\/\/\/\/\/\/D\/\/\/\/\/\/AAAAAAAAAAAAAAD\/\/\/\/\/\/\/4AAH\/\/\/\/\/\/\/\/\/\/wAAAH\/\/\/AAA\/\/\/\/\/\/\/\/wAAAAAAP\/AAAAf\/\/\/\/\/\/AAAf\/\/\/\/\/\/\/\/\/\/\/wAAAAAAAAAP\/\/\/\/\/\/\/\/\/4AAAP\/\/wAACH\/\/\/\/\/8AAD\/\/\/\/\/\/\/\/\/\/\/\/\/8YAAAAAAAH\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAAw\/\/\/\/\/wAB\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/gAAAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAMP\/\/\/+AAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAADj\/\/\/4AA\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA4f\/\/AAD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAOH\/wAAf\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAADwAAAB\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/8AAA8AAAP\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/AAAPgAD\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/wAAA=","CVMResult":"2"}}';
+                $array_response = json_decode($json_response,TRUE);
+                */
+
+                $payment_response_message = $array_response['response']['Message'];
+                if($payment_response_message == "Approved"){
+                    $output = [
+                        'success' => 1,
+                        'msg' => __('business.settings_updated_success'),
+                        'data' => $array_response
+                    ];    
+                }else{
+                    $output = [
+                        'success' => 0,
+                        'msg' => $payment_response_message,
+                        'data' => $array_response
+                    ];  
+                }
+            }else{
+                $output = [
+                    'success' => 0,
+                    'msg' => __('business.your_device_is_offline'),
+                    'data' => []
+                ];  
+            }
+
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $output = [
+                'success' => 0,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        return $output;
+    }
+
+    public function capturePayment($payment_type, $trans_type, $amount, $transaction, $tips_amount=0){
+
+        try {
+            $active_payment_device = PaymentDevice::select('settings')->where('id', auth()->user()->default_payment_device)->first();
+            $payment_setting = json_decode($active_payment_device->settings, true);
+            
+            $register_id = $payment_setting['register_id'];
+            $auth_key = $payment_setting['auth_key'];
+            $allow_to_print_receipt = isset($payment_setting['allow_to_print_receipt']) ? $payment_setting['allow_to_print_receipt'] : 'No';
+            
+            if($allow_to_print_receipt == "Yes"){
+                $xml_print_receipt = "<PrintReceipt>Customer</PrintReceipt><GetReceipt>Customer</GetReceipt>";
+            }else{
+                $xml_print_receipt = "<PrintReceipt>No</PrintReceipt>";
+            }
+            $invoice_num = $transaction->id;
+            $payment_preauthorize_response = $transaction->payment_preauthorize_response;
+            $decode_json_data = json_decode($payment_preauthorize_response, true);
+            $auth_code = $decode_json_data['response']['AuthCode'];
+            
+            
+            $ext_data = explode(',', $decode_json_data['response']['ExtData']);
+            $ex_account_number = $ext_data[7];
+            $ex_x_account_number  = explode('=', $ex_account_number);
+            $account_last_digit  = end($ex_x_account_number);
+        
+            $check_terminal = $this->checkTerminalIsActive($register_id);
+            //$check_terminal = "Online";
+            if($check_terminal == "Online"){
+            
+                $xml = '<request>
+                            <PaymentType>'. $payment_type .'</PaymentType>
+                            <TransType>'. $trans_type .'</TransType>
+                            <Amount>'. $amount .'</Amount>
+                            <Tip>'.$tips_amount.'</Tip>
+                            <CustomFee>0</CustomFee>
+                            <AcntLast4>'.$account_last_digit.'</AcntLast4>
+                            <AuthCode>'.$auth_code.'</AuthCode>
+                            <Frequency>OneTime</Frequency>
+                            <InvNum>'.$invoice_num.'</InvNum>
+                            <RefId>'. $invoice_num .'</RefId>
+                            <RegisterId>'. $register_id .'</RegisterId>
+                            <AuthKey>'. $auth_key .'</AuthKey>
+                            '.$xml_print_receipt.'
+                            <SigCapture>Yes</SigCapture>
+                        </request>';
+                        
                 
                 $request_url = "HTTPS://spinpos.net:443/spin/cgi.html?TerminalTransaction=".$xml;
 

@@ -495,11 +495,10 @@ class SellPosController extends Controller
                     }
                 }
                 
-                
-              
-
                 //Modify Final amount with include tip, card charge & gratuity
                 $input['final_total'] = $invoice_total['final_total'];
+                
+                
                 
 
                 //dd($invoice_total);
@@ -733,19 +732,46 @@ class SellPosController extends Controller
                 $this->moduleUtil->getModuleData('after_sale_saved', ['transaction' => $transaction, 'input' => $input]);
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
-
                 $this->transactionUtil->activityLog($transaction, 'added');
                 
+
+                //Make Payment through card
+                if($request->is_split_payment == 1){
+                    $final_amount_for_payment = $transaction->payment_lines()->where('method', 'card')->sum('amount');
+                    $final_amount_for_payment = sprintf('%0.2f', $final_amount_for_payment);
+                }else{
+                    $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
+                }
+
+                //Preauthorize Request
+                if($request->has('is_preauthorize') && $request->filled('is_preauthorize')){
+                    
+                    if($request->is_preauthorize == 1 && $send_to_kitchen == 1){
+
+                        $preauthorize = new \App\Http\Controllers\PaymentDevicesController;
+                        $response_of_preauthorize = $preauthorize->preAuthorize('Credit', 'Auth', $final_amount_for_payment, $transaction->id, $tips_amount);
+                       
+                        if($response_of_preauthorize['success'] == 0){
+                            //Payment Failed Rollback Transaction
+                            DB::rollback();
+                            $output = [
+                                'success' => 0,
+                                'msg' => $response_of_preauthorize['msg']
+                            ];
+                            return $output;
+                        }else{
+                            //Store Payment Response
+                            $response_of_preauthorize_json = json_encode($response_of_preauthorize['data'], true);
+                            Transaction::where('id', $transaction->id)
+                                                ->where('business_id', $business_id)
+                                                ->update(['payment_preauthorize_response' => $response_of_preauthorize_json]);
+                        }
+
+                    }
+                }
+
                 $card_payment_count = $transaction->payment_lines()->where('method', 'card')->where('payment_collect_response', NULL)->count();
                 if( ($card_payment_count != 0) && $send_to_kitchen == 0){
-                    
-                    //Make Payment through card
-                    if($request->is_split_payment == 1){
-                        $final_amount_for_payment = $transaction->payment_lines()->where('method', 'card')->sum('amount');
-                        $final_amount_for_payment = sprintf('%0.2f', $final_amount_for_payment);
-                    }else{
-                        $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
-                    }
                     
                     $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
                     $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
@@ -1691,7 +1717,7 @@ class SellPosController extends Controller
 
                 $new_sales_order_ids = $transaction->sales_order_ids ?? [];
                 $sales_order_ids = array_unique(array_merge($sales_order_ids, $new_sales_order_ids));
-
+                
                 if (! empty($sales_order_ids)) {
                     $this->transactionUtil->updateSalesOrderStatus($sales_order_ids);
                 }
@@ -1765,21 +1791,52 @@ class SellPosController extends Controller
 
                 $this->transactionUtil->activityLog($transaction, 'edited', $transaction_before);
                 
+
+                //Make Payment through card
+                if($request->is_split_payment == 1){
+                    $final_amount_for_payment = $transaction->payment_lines()->where('method', 'card')->sum('amount');
+                    $final_amount_for_payment = sprintf('%0.2f', $final_amount_for_payment);
+                }else{
+                    $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
+                }
+
+                //Preauthorize Request
+                if($request->has('is_preauthorize') && $request->filled('is_preauthorize')){
+                    if($request->is_preauthorize == 1){
+                        $preauthorize = new \App\Http\Controllers\PaymentDevicesController;
+                        $response_of_preauthorize = $preauthorize->preAuthorize('Credit', 'Auth', $final_amount_for_payment, $transaction->id, $tips_amount);
+                       
+                        if($response_of_preauthorize['success'] == 0){
+                            //Payment Failed Rollback Transaction
+                            DB::rollback();
+                            $output = [
+                                'success' => 0,
+                                'msg' => $response_of_preauthorize['msg']
+                            ];
+                            return $output;
+                        }else{
+                            //Store Payment Response
+                            $response_of_preauthorize_json = json_encode($response_of_preauthorize['data'], true);
+                            Transaction::where('id', $transaction->id)
+                                                ->where('business_id', $business_id)
+                                                ->update(['payment_preauthorize_response' => $response_of_preauthorize_json]);
+                        }
+                    }
+                }
+
+
                 //Card Payment Initial
                 $card_payment_count = $transaction->payment_lines()->where('method', 'card')->where('payment_collect_response', NULL)->count();
 
                 if($card_payment_count != 0){
                     
-                    //Make Payment through card
-                    if($request->is_split_payment == 1){
-                        $final_amount_for_payment = $transaction->payment_lines()->where('method', 'card')->sum('amount');
-                        $final_amount_for_payment = sprintf('%0.2f', $final_amount_for_payment);
-                    }else{
-                        $final_amount_for_payment = sprintf('%0.2f', $input['final_total']);
-                    }
-
                     $payment_device_init = new \App\Http\Controllers\PaymentDevicesController;
-                    $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
+                    if($transaction->payment_preauthorize_response == NULL){
+                        $response_of_payment = $payment_device_init->paymentInit('Credit', 'Sale', $final_amount_for_payment, $transaction->id, $tips_amount);
+                    }else{
+                        $response_of_payment = $payment_device_init->capturePayment('Credit', 'Capture', $final_amount_for_payment, $transaction, $tips_amount);
+                    }
+                    
                     if($response_of_payment['success'] == 0){
                         //Payment Failed Rollback Transaction
                         DB::rollback();

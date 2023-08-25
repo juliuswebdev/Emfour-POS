@@ -9507,6 +9507,16 @@ padding-bottom: 10px;
 align-items: center;
 align-content: center;
 }
+.d-flex-wrapper{
+  display: flex;
+}
+.accept-order-action{
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.accept-order-action div{
+  margin-left: 10px;;
+}
 /*!
  * FullCalendar v3.10.2
  * Docs & License: https://fullcalendar.io/

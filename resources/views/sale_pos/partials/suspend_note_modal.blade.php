@@ -13,13 +13,21 @@
 				            {!! Form::textarea('additional_notes', !empty($transaction->additional_notes) ? $transaction->additional_notes : null, ['class' => 'form-control','rows' => '4']); !!}
 				            {!! Form::hidden('is_suspend', 0, ['id' => 'is_suspend']); !!}
 							{!! Form::hidden('send_to_kitchen', 0, ['id' => 'send_to_kitchen']); !!}
+							{!! Form::hidden('is_preauthorize', 0, ['id' => 'is_preauthorize']); !!}
 				        </div>
 				    </div>
 				</div>
 			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" id="pos-suspend">@lang('messages.save')</button>
-			    <button type="button" class="btn btn-default" data-dismiss="modal">@lang('messages.close')</button>
+			<div class="modal-footer d-flex-wrapper accept-order-action">
+				<div>
+					<button type="button" class="btn btn-primary" id="pos-preauthorize">@lang('messages.preauthorize')</button>
+				</div>
+				<div>
+					<button type="button" class="btn btn-primary" id="pos-suspend">@lang('messages.submit')</button>
+				</div>
+				<div>
+					<button type="button" class="btn btn-default" data-dismiss="modal">@lang('messages.close')</button>
+				</div>
 			</div>
 		</div><!-- /.modal-content -->
 	</div><!-- /.modal-dialog -->
