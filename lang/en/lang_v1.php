@@ -1614,6 +1614,7 @@ return [
     'essentials_settings' => 'Essentials settings',
     'hrm_settings' => 'HRIS settings',
     'enable_pin_protection_on_expense_button' => 'Enable Pin Protection on Expense Button',
+    'enable_pin_protection_on_order_ui' => 'Enable Pin Protection on Order UI',
     'title_security_pin' => 'Security Pin',
     'enter_security_pin' => 'Enter Security Pin',
     'dynamic_price' => 'Dynamic Pricing',
