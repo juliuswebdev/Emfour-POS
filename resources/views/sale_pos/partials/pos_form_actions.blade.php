@@ -91,17 +91,18 @@
 
 			@if($business_details->business_type_id == 1)
 				<!-- restaurant only -->
-				
-				<button type="button" 
-				class="@if($is_mobile) col-xs-6 @endif btn bg-red btn-default btn-flat no-print pos-express-finalize" 
-				data-pay_method="suspend"
-				data-modal-title="@lang('lang_v1.modal_title_send_to_kitchen')"
-				data-modal-placeholder="@lang('lang_v1.form_label_send_to_kitchen')"
-				title="@lang('lang_v1.tooltip_send_to_kitchen')" @if(!empty($only_payment)) disabled @endif>
-				<i class="fa fas fa-fire" aria-hidden="true"></i>
-				@lang('lang_v1.btn_send_to_kitchen')
-				</button>
-				
+
+				@if($default_location->display_accept_order_button)
+					<button type="button" 
+					class="@if($is_mobile) col-xs-6 @endif btn bg-red btn-default btn-flat no-print pos-express-finalize" 
+					data-pay_method="suspend"
+					data-modal-title="@lang('lang_v1.modal_title_send_to_kitchen')"
+					data-modal-placeholder="@lang('lang_v1.form_label_send_to_kitchen')"
+					title="@lang('lang_v1.tooltip_send_to_kitchen')" @if(!empty($only_payment)) disabled @endif>
+					<i class="fa fas fa-fire" aria-hidden="true"></i>
+					@lang('lang_v1.btn_send_to_kitchen')
+					</button>
+				@endif
 			@else
 				@if(empty($pos_settings['disable_suspend']))
 					<button type="button" 

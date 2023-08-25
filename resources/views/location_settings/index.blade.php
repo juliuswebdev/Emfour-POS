@@ -114,6 +114,28 @@
                             </div>
                         </div>
 
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    {!! Form::checkbox('display_accept_order_button', 1,  
+                                        empty(!$location->display_accept_order_button) ? 1: 0, 
+                                    [ 'class' => 'input-icheck']); !!} {{ __( 'lang_v1.display_accept_order_button' ) }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>
+                                    {!! Form::checkbox('send_to_kitcken_upon_finalize_payment', 1,  
+                                        empty(!$location->send_to_kitcken_upon_finalize_payment) ? 1: 0, 
+                                    [ 'class' => 'input-icheck']); !!} {{ __( 'lang_v1.send_to_kitcken_upon_finalize_payment' ) }}
+                                </label>
+                            </div>
+                        </div>
+
+                        
+
                         
 
                         <div class="row">

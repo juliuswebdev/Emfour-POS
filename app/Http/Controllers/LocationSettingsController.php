@@ -77,7 +77,7 @@ class LocationSettingsController extends Controller
                 abort(403, 'Unauthorized action.');
             }
 
-            $input = $request->only(['print_receipt_on_invoice', 'receipt_printer_type', 'printer_id', 'invoice_layout_id', 'invoice_scheme_id', 'wpc_reservation_site_link']);
+            $input = $request->only(['print_receipt_on_invoice', 'receipt_printer_type', 'printer_id', 'invoice_layout_id', 'invoice_scheme_id', 'wpc_reservation_site_link', 'display_accept_order_button', 'send_to_kitcken_upon_finalize_payment']);
 
             //Auto set to browser in demo.
             if (config('app.env') == 'demo') {
@@ -88,6 +88,9 @@ class LocationSettingsController extends Controller
 
             $location = BusinessLocation::where('business_id', $business_id)
                             ->findorfail($location_id);
+
+            $input['display_accept_order_button'] = ($request->input('display_accept_order_button')) ? 1 : 0;
+            $input['send_to_kitcken_upon_finalize_payment'] = ($request->input('send_to_kitcken_upon_finalize_payment')) ? 1 : 0;
 
             $location->fill($input);
             $location->update();

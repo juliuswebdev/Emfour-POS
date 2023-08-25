@@ -614,6 +614,13 @@ class SellPosController extends Controller
 
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
                 
+                $location = BusinessLocation::find($request->input('location_id'));
+                if($location->send_to_kitcken_upon_finalize_payment == 1) {
+                    $transac = Transaction::find($transaction->id);   
+                    $transac->is_suspend = 1;
+                    $transac->update();
+                }
+
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
 
