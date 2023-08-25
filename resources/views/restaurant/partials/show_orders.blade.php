@@ -15,6 +15,7 @@
 	}
 @endphp
 @forelse($orders as $order)
+@if($order->is_suspend)
 	<div class="col-md-4 col-xs-12 order_div" data-service-staff="{{ $order->res_waiter_id }}" id="{{$order->invoice_no}}">
 		<div class="small-box bg-gray">
             <div class="inner">
@@ -377,18 +378,12 @@
             	<a href="#" class="d-none btn btn-flat small-box-footer bg-info btn-modal" data-href="{{ action([\App\Http\Controllers\SellController::class, 'show'], [$order->id])}}" data-container=".view_modal">@lang('restaurant.order_details') <i class="fa fa-arrow-circle-right"></i></a>
          </div>
 	</div>
-	@if($loop->iteration % 3 == 0)
-		<div class="hidden-xs">
-			<div class="clearfix"></div>
-		</div>
-	@endif
-	@if($loop->iteration % 2 == 0)
-		<div class="visible-xs">
-			<div class="clearfix"></div>
-		</div>
-	@endif
+
+		
+@endif
 @empty
 <div class="col-md-12">
 	<h4 class="text-center">@lang('restaurant.no_orders_found')</h4>
 </div>
+
 @endforelse
